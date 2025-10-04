@@ -1,8 +1,8 @@
-# 🚀 API Projects Hub
+# 🚀 Technetics IT Services
 
 A comprehensive collection of **35+ web applications** showcasing various APIs and modern web development techniques. This repository serves as a central hub for exploring projects ranging from data visualization to AI implementations.
 
-![API Projects Hub](https://img.shields.io/badge/Projects-35+-blue?style=for-the-badge)
+![Technetics IT Services](https://img.shields.io/badge/Projects-35+-blue?style=for-the-badge)
 ![Categories](https://img.shields.io/badge/Categories-7+-green?style=for-the-badge)
 ![Open Source](https://img.shields.io/badge/Open%20Source-100%25-orange?style=for-the-badge)
 
@@ -156,7 +156,7 @@ Each project folder contains:
 
 ## 📊 Project Statistics
 
-- **Total Projects**: 39+
+- **Total Projects**: 35+
 - **Categories**: 7
 - **Technologies**: 15+
 - **APIs Integrated**: 35+
@@ -228,4 +228,4 @@ This project is actively maintained. Check the [releases](https://github.com/Ile
 
 ⭐ **Star this repository if you find it helpful!**
 
-Made with ❤️ by [IleshDevX](https://github.com/IleshDevX)
+Made with ❤️ by [IleshDevX](https://github.com/IleshDevX) for **Technetics IT Services**
