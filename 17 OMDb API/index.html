@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinematic Spotlight</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Reset and Basic Setup */
+        :root {
+            --bg-color: #000000;
+            --text-color: #bfc0d1;
+            --primary-glow: #60519b;
+            --secondary-glow: #31323e;
+            --gradient: linear-gradient(90deg, var(--primary-glow), #1e202c);
+            
+            /* Variables for cursor spotlight effect */
+            --cursor-x: 50vw;
+            --cursor-y: 50vh;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Cursor Spotlight Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(
+                circle 400px at var(--cursor-x) var(--cursor-y),
+                rgba(96, 81, 155, 0.15),
+                transparent 80%
+            );
+            pointer-events: none;
+            z-index: -1;
+            transition: background 0.1s linear;
+        }
+
+        /* Utility Classes */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navbar Styles */
+        .site-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem 0;
+            z-index: 999;
+            background-color: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--secondary-glow);
+            transition: background-color 0.3s ease;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+
+        /* Header and Hero Section */
+        .hero-header {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            position: relative;
+            padding-top: 100px; /* Offset for fixed navbar */
+        }
+
+        .hero-content {
+            max-width: 700px;
+        }
+
+        .hero-header h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #fff, var(--text-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-header p {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            margin-bottom: 2.5rem;
+            color: var(--text-color);
+        }
+        
+        /* Search Bar Styling */
+        .search-form {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 3.5rem 1rem 1.5rem;
+            border-radius: 50px;
+            border: 2px solid var(--secondary-glow);
+            background-color: #1e202c;
+            color: #fff;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 15px rgba(96, 81, 155, 0.5);
+        }
+        
+        .search-input::placeholder {
+            color: #7a7b8a;
+        }
+
+        .search-button {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--gradient);
+            border: none;
+            color: white;
+            padding: 0.7rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .search-button:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        
+        .search-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Movie Results Section */
+        #results-container {
+            padding: 2rem 0;
+            min-height: 300px;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 1.2rem;
+            padding: 4rem 0;
+        }
+        
+        /* Movie Card Styling */
+        .movie-card {
+            background-color: #1e202c;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            border: 2px solid transparent;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            
+            /* Initial state for Intersection Observer animation */
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateY(20px);
+        }
+
+        .movie-card.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        .movie-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background: radial-gradient(circle at 50% 0%, var(--primary-glow), transparent 70%) no-repeat;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .movie-card:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 25px rgba(96, 81, 155, 0.6);
+        }
+        
+        .movie-card:hover::before {
+            opacity: 0.5;
+        }
+        
+        .movie-card:hover .poster-img {
+            filter: brightness(1.1);
+        }
+
+        .poster-wrapper {
+            width: 100%;
+            height: 375px;
+            overflow: hidden;
+        }
+
+        .poster-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .card-info {
+            padding: 1rem;
+        }
+
+        .card-info h3 {
+            font-size: 1.2rem;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-info p {
+            font-size: 0.9rem;
+            text-transform: capitalize;
+        }
+
+        /* Loading State Animation */
+        .shimmer-card {
+            background-color: #1e202c;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .shimmer-poster {
+            width: 100%;
+            height: 375px;
+            background-color: var(--secondary-glow);
+        }
+        
+        .shimmer-info {
+            padding: 1rem;
+        }
+        
+        .shimmer-line {
+            background-color: var(--secondary-glow);
+            height: 20px;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .shimmer-line.short {
+            width: 50%;
+        }
+
+        .shimmer-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            animation: shimmer 1.5s infinite linear;
+            background: linear-gradient(90deg, transparent 20%, rgba(255, 255, 255, 0.05) 50%, transparent 80%);
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Movie Detail Modal */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #1e202c;
+            color: var(--text-color);
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            animation: slideIn 0.4s ease-out;
+            max-height: 90vh;
+            border: 1px solid var(--secondary-glow);
+        }
+        
+        .modal-header {
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--secondary-glow);
+        }
+        
+        .modal-title {
+             color: #fff;
+             font-size: 1.5rem;
+        }
+        
+        .close-button {
+            font-size: 2rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .close-button:hover {
+            color: #fff;
+        }
+
+        .modal-body {
+            display: flex;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .modal-poster img {
+            max-width: 250px;
+            width: 100%;
+            border-radius: 8px;
+        }
+        
+        .modal-details h3 {
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .modal-details .meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+        
+        .modal-details .meta span {
+            background-color: var(--secondary-glow);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+        
+        .ratings {
+            margin-top: 1rem;
+        }
+        
+        .ratings ul {
+            list-style-type: none;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* About Section */
+        #about-section {
+            padding: 6rem 0;
+            text-align: center;
+            background-color: #0a0a0a;
+            margin-top: 2rem;
+            
+            /* Initial animation state */
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
+
+        #about-section .container {
+             max-width: 900px;
+        }
+        
+        #about-section.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+        
+        #about-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        #about-section .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            text-align: left;
+        }
+
+        .feature-item h3 {
+            font-size: 1.25rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+
+        /* New Footer Styles */
+        .site-footer {
+            background-color: #050505;
+            color: var(--text-color);
+            padding: 4rem 0 2rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-column h4 {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-column p {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-column a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-column a:hover {
+            color: var(--primary-glow);
+        }
+
+        .social-icons a {
+            margin-right: 1rem;
+            display: inline-block;
+        }
+
+        .social-icons svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-color);
+            transition: fill 0.3s ease;
+        }
+
+        .social-icons a:hover svg {
+            fill: var(--primary-glow);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            border-top: 1px solid var(--secondary-glow);
+            padding-top: 2rem;
+            font-size: 0.85rem;
+        }
+
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-body {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .modal-details .meta {
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero-header {
+                min-height: 50vh;
+            }
+            .nav-brand {
+                font-size: 1.2rem;
+            }
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="site-nav">
+        <div class="container nav-container">
+            <a href="#" class="nav-brand">Cinematic Spotlight</a>
+            <ul class="nav-links">
+                <li><a href="#">Home</a></li>
+                <li><a href="#about-section">About</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Spotlight effect follows cursor, styled in CSS -->
+    
+    <!-- Hero Header -->
+    <header class="hero-header">
+        <div class="hero-content container">
+            <h1>Cinematic Spotlight</h1>
+            <p>Your Universe of Film. Discover, explore, and get lost in the world of cinema.</p>
+            <form class="search-form" id="search-form">
+                <input type="text" id="search-input" class="search-input" placeholder="Search for a movie title..." autocomplete="off">
+                <button type="submit" class="search-button" aria-label="Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Main Content: Movie Results -->
+    <main id="results-container" class="container">
+        <div id="results-grid" class="movie-grid">
+             <!-- Movie cards will be inserted here by JavaScript -->
+        </div>
+        <p id="message-area" class="message">Start by searching for a movie.</p>
+    </main>
+    
+    <!-- About Section -->
+    <section id="about-section">
+        <div class="container">
+            <h2>Discover More with Cinematic Spotlight</h2>
+            <p>Dive deeper into the world of film with a powerful, fast, and intuitive search experience. Built with cutting-edge web technologies to bring the entire OMDb database to your fingertips.</p>
+            <div class="about-grid">
+                <div class="feature-item">
+                    <h3>Blazing Fast Search</h3>
+                    <p>Our real-time search engine delivers results instantly as you type, helping you find any movie with ease.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Comprehensive Details</h3>
+                    <p>Access in-depth information, including full plot summaries, ratings, cast, and crew for every title.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Modern, Responsive UI</h3>
+                    <p>Enjoy a seamless experience on any device, from desktop to mobile, thanks to a fully responsive design.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Footer -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h4>Cinematic Spotlight</h4>
+                    <p>An educational project to explore the OMDb API and demonstrate modern front-end development with vanilla JavaScript.</p>
+                    <div class="social-icons">
+                        <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.26.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.3 24 12 24 5.373 18.627 0 12 0z"/></svg></a>
+                        <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24"><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.21 0-.42-.015-.63.961-.689 1.799-1.56 2.46-2.548l-.047-.02z"/></svg></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#about-section">About</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Technologies</h4>
+                    <ul>
+                        <li><a href="#">HTML5</a></li>
+                        <li><a href="#">CSS3</a></li>
+                        <li><a href="#">JavaScript (ES6+)</a></li>
+                        <li><a href="#">OMDb API</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <p>Built with ❤️ using the OMDb API.</p>
+                    <p>Data provided by OMDb.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2025 Cinematic Spotlight. A personal, non-commercial project.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Movie Detail Modal -->
+    <div id="movie-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title" class="modal-title">Movie Title</h2>
+                <span id="close-button" class="close-button">&times;</span>
+            </div>
+            <div id="modal-body" class="modal-body">
+                <!-- Detailed movie info will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const resultsGrid = document.getElementById('results-grid');
+            const messageArea = document.getElementById('message-area');
+            const modal = document.getElementById('movie-modal');
+            const closeModalButton = document.getElementById('close-button');
+            
+            // --- API Configuration ---
+            const API_KEY = 'fb7fa20f'; // IMPORTANT: Replace with your actual OMDb API key
+            const API_URL = `https://www.omdbapi.com/?apikey=${API_KEY}`;
+
+            if (API_KEY === 'YOUR_API_KEY' || API_KEY === '') {
+                showMessage('Please add your OMDb API key to the script section.', true);
+            }
+
+            // --- Event Listeners ---
+
+            // Handle search form submission
+            searchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm) {
+                    await fetchAndDisplayMovies(searchTerm);
+                }
+            });
+            
+            // Close modal functionality
+            closeModalButton.addEventListener('click', () => modal.classList.remove('show'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+
+            // --- Core Functions ---
+
+            /**
+             * Fetches movies based on a search term and displays them.
+             * @param {string} searchTerm - The movie title to search for.
+             */
+            async function fetchAndDisplayMovies(searchTerm) {
+                clearResults();
+                showLoadingState();
+                try {
+                    const response = await fetch(`${API_URL}&s=${searchTerm}`);
+                    const data = await response.json();
+
+                    clearResults();
+                    if (data.Response === "True") {
+                        displayMovies(data.Search);
+                    } else {
+                        showMessage(data.Error);
+                    }
+                } catch (error) {
+                    clearResults();
+                    showMessage("An error occurred. Please check your connection or API key.", true);
+                    console.error("Fetch error:", error);
+                }
+            }
+            
+            /**
+             * Displays an array of movies in the grid.
+             * @param {Array} movies - The array of movie objects to display.
+             */
+            function displayMovies(movies) {
+                movies.forEach(movie => {
+                    const movieCard = document.createElement('div');
+                    movieCard.className = 'movie-card';
+                    movieCard.dataset.imdbid = movie.imdbID;
+
+                    const poster = movie.Poster !== "N/A" ? movie.Poster : 'https://placehold.co/300x445/1e202c/bfc0d1?text=No+Image';
+
+                    movieCard.innerHTML = `
+                        <div class="poster-wrapper">
+                            <img src="${poster}" alt="${movie.Title} Poster" class="poster-img" onerror="this.onerror=null;this.src='https://placehold.co/300x445/1e202c/bfc0d1?text=No+Image';">
+                        </div>
+                        <div class="card-info">
+                            <h3>${movie.Title}</h3>
+                            <p>${movie.Year} &bull; ${movie.Type}</p>
+                        </div>
+                    `;
+                    
+                    movieCard.addEventListener('click', () => showMovieDetails(movie.imdbID));
+                    resultsGrid.appendChild(movieCard);
+                });
+                
+                // After adding cards to the DOM, observe them for animations
+                observeElements('.movie-card');
+            }
+            
+            /**
+             * Fetches detailed information for a specific movie and displays it in a modal.
+             * @param {string} imdbID - The IMDb ID of the movie.
+             */
+            async function showMovieDetails(imdbID) {
+                try {
+                    const response = await fetch(`${API_URL}&i=${imdbID}&plot=full`);
+                    const movie = await response.json();
+
+                    if (movie.Response === "True") {
+                        document.getElementById('modal-title').textContent = movie.Title;
+                        const modalBody = document.getElementById('modal-body');
+                        
+                        modalBody.innerHTML = `
+                            <div class="modal-poster">
+                                <img src="${movie.Poster !== "N/A" ? movie.Poster : 'https://placehold.co/300x445/1e202c/bfc0d1?text=No+Image'}" alt="${movie.Title} Poster" onerror="this.onerror=null;this.src='https://placehold.co/300x445/1e202c/bfc0d1?text=No+Image';">
+                            </div>
+                            <div class="modal-details">
+                                <div class="meta">
+                                    <span>${movie.Rated}</span>
+                                    <span>${movie.Runtime}</span>
+                                    <span>${movie.Genre}</span>
+                                </div>
+                                <h3>Plot</h3>
+                                <p>${movie.Plot}</p>
+                                <br>
+                                <p><strong>Director:</strong> ${movie.Director}</p>
+                                <p><strong>Actors:</strong> ${movie.Actors}</p>
+                                <div class="ratings">
+                                    <h3>Ratings</h3>
+                                    <ul>
+                                        ${movie.Ratings.map(rating => `<li><strong>${rating.Source}:</strong> ${rating.Value}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                        modal.classList.add('show');
+                    } else {
+                        alert("Could not fetch movie details.");
+                    }
+                } catch (error) {
+                    alert("An error occurred while fetching details.");
+                    console.error("Detail fetch error:", error);
+                }
+            }
+
+            // --- UI Helper Functions ---
+            
+            /** Clears the results grid and any messages. */
+            function clearResults() {
+                resultsGrid.innerHTML = '';
+                messageArea.textContent = '';
+                messageArea.style.display = 'none';
+            }
+            
+            /**
+             * Shows a message in the message area.
+             * @param {string} msg - The message to display.
+             * @param {boolean} isError - If true, styles the message as an error.
+             */
+            function showMessage(msg, isError = false) {
+                messageArea.textContent = msg;
+                messageArea.style.color = isError ? '#ff5555' : 'var(--text-color)';
+                messageArea.style.display = 'block';
+            }
+
+            /** Displays placeholder cards with a shimmer animation. */
+            function showLoadingState() {
+                const shimmerCount = 8; // Number of placeholder cards
+                for (let i = 0; i < shimmerCount; i++) {
+                    const shimmerCard = document.createElement('div');
+                    shimmerCard.className = 'shimmer-card';
+                    shimmerCard.innerHTML = `
+                        <div class="shimmer-poster"></div>
+                        <div class="shimmer-info">
+                            <div class="shimmer-line"></div>
+                            <div class="shimmer-line short"></div>
+                        </div>
+                        <div class="shimmer-wrapper"></div>
+                    `;
+                    resultsGrid.appendChild(shimmerCard);
+                }
+            }
+
+            // --- Advanced Effects ---
+            
+            /** Cursor spotlight effect */
+            document.addEventListener('mousemove', (e) => {
+                document.body.style.setProperty('--cursor-x', e.clientX + 'px');
+                document.body.style.setProperty('--cursor-y', e.clientY + 'px');
+            });
+            
+            /** Intersection Observer for scroll animations */
+            function observeElements(selector) {
+                const elements = document.querySelectorAll(selector);
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            observer.unobserve(entry.target); // Stop observing after animation
+                        }
+                    });
+                }, {
+                    threshold: 0.1 // Trigger when 10% of the element is visible
+                });
+
+                elements.forEach(el => observer.observe(el));
+            }
+            
+            // Initial observation for elements present on page load
+            observeElements('#about-section');
+        });
+    </script>
+</body>
+</html>
+

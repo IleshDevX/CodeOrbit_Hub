@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>US Census Data Explorer | Discover America's Demographics</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="description" content="Explore comprehensive US Census data including demographics, economics, and geographic insights through interactive visualizations and real-time API integration.">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner">
+            <div class="spinner-ring"></div>
+            <div class="loading-text">Loading Census Data Explorer...</div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="8" fill="url(#logoGradient)"/>
+                        <path d="M8 12h16v2H8v-2zm0 4h16v2H8v-2zm0 4h12v2H8v-2z" fill="white" opacity="0.9"/>
+                        <circle cx="24" cy="8" r="3" fill="#B3D6F9"/>
+                        <rect x="6" y="6" width="4" height="4" rx="1" fill="#D1DDED"/>
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#3684DB"/>
+                                <stop offset="100%" stop-color="#223A59"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span>Census Explorer</span>
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <a href="#hero" class="nav-link">Home</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#search" class="nav-link">Search</a>
+                <a href="#visualizations" class="nav-link">Data</a>
+                <a href="#compare" class="nav-link">Compare</a>
+            </div>
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-background">
+            <div class="saas-grid-pattern"></div>
+            <div class="saas-gradient-orbs"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-sparkles"></i>
+                    <span>Trusted by 10,000+ Researchers</span>
+                </div>
+                <h1 class="hero-title">
+                    <span class="title-main">Transform Census Data</span>
+                    <span class="title-sub">Into Actionable Insights</span>
+                </h1>
+                <p class="hero-subtitle">
+                    The most comprehensive platform for exploring US demographics, economics, and population trends. 
+                    Get instant access to real-time census data with powerful visualization tools.
+                </p>
+                
+                <div class="hero-features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Real-time API Integration</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Interactive Visualizations</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Export & Share Data</span>
+                    </div>
+                </div>
+
+                <div class="hero-search">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="hero-search" placeholder="Try 'California' or 'Chicago, Illinois'..." class="search-input">
+                    </div>
+                </div>
+                
+                <div class="hero-actions">
+                    <button class="cta-btn primary" id="hero-search-btn" onclick="performHeroSearchAction()">
+                        <i class="fas fa-rocket"></i>
+                        Start Exploring
+                    </button>
+                    <button class="cta-btn secondary" onclick="scrollToSection('about')">
+                        <i class="fas fa-play"></i>
+                        Watch Demo
+                    </button>
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="saas-dashboard-mockup">
+                    <div class="dashboard-header">
+                        <div class="dashboard-nav">
+                            <div class="nav-dot"></div>
+                            <div class="nav-dot"></div>
+                            <div class="nav-dot"></div>
+                        </div>
+                        <div class="dashboard-title">Census Analytics Dashboard</div>
+                    </div>
+                    
+                    <div class="dashboard-content">
+                        <div class="dashboard-stats">
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <span class="stat-title">Population</span>
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-number">331.9M</div>
+                                <div class="stat-change positive">+0.4%</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <span class="stat-title">Median Income</span>
+                                    <i class="fas fa-dollar-sign"></i>
+                                </div>
+                                <div class="stat-number">$70,784</div>
+                                <div class="stat-change positive">+2.9%</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-header">
+                                    <span class="stat-title">States Analyzed</span>
+                                    <i class="fas fa-map-marked-alt"></i>
+                                </div>
+                                <div class="stat-number">50</div>
+                                <div class="stat-change neutral">100%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-chart">
+                            <div class="chart-header">Population Growth Trends</div>
+                            <div class="chart-visual">
+                                <div class="chart-bars">
+                                    <div class="chart-bar" style="height: 40%"></div>
+                                    <div class="chart-bar" style="height: 65%"></div>
+                                    <div class="chart-bar" style="height: 80%"></div>
+                                    <div class="chart-bar" style="height: 75%"></div>
+                                    <div class="chart-bar" style="height: 90%"></div>
+                                    <div class="chart-bar" style="height: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator">
+            <div class="scroll-arrow">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search & Filter Section -->
+    <section id="search" class="search-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Search Census Data</h2>
+                <p class="section-subtitle">Find demographic insights for any location in the United States</p>
+            </div>
+            
+            <div class="search-interface">
+                <div class="search-controls">
+                    <div class="search-row">
+                        <div class="search-group">
+                            <label for="location-type">Location Type</label>
+                            <select id="location-type" class="search-select">
+                                <option value="state">State</option>
+                                <option value="place">City/Place</option>
+                                <option value="county">County</option>
+                            </select>
+                        </div>
+                        <div class="search-group">
+                            <label for="location-search">Location Name</label>
+                            <input type="text" id="location-search" placeholder="e.g., Texas or Miami, Florida" class="search-input">
+                        </div>
+                        <div class="search-group">
+                            <label for="data-year">Year</label>
+                            <select id="data-year" class="search-select">
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3>Data Categories</h3>
+                        <div class="filter-grid">
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="population" checked>
+                                <span class="checkmark"></span>
+                                Population
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="income" checked>
+                                <span class="checkmark"></span>
+                                Income & Poverty
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="education" disabled>
+                                <span class="checkmark"></span>
+                                Education (coming soon)
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="housing" checked>
+                                <span class="checkmark"></span>
+                                Housing
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="employment" checked>
+                                <span class="checkmark"></span>
+                                Employment
+                            </label>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" value="demographics" checked>
+                                <span class="checkmark"></span>
+                                Demographics
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="search-actions">
+                        <button id="search-data-btn" class="btn-primary">
+                            <i class="fas fa-search"></i>
+                            Search Data
+                        </button>
+                        <button id="clear-filters-btn" class="btn-secondary">
+                            <i class="fas fa-times"></i>
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="search-suggestions" id="search-suggestions">
+                    <h4>Popular Searches</h4>
+                    <div class="suggestion-tags">
+                        <span class="suggestion-tag" data-location="California" data-type="state">California</span>
+                        <span class="suggestion-tag" data-location="Los Angeles, California" data-type="place">Los Angeles, CA</span>
+                        <span class="suggestion-tag" data-location="Chicago, Illinois" data-type="place">Chicago, IL</span>
+                        <span class="suggestion-tag" data-location="Miami, Florida" data-type="place">Miami, FL</span>
+                        <span class="suggestion-tag" data-location="New York" data-type="state">New York</span>
+                        <span class="suggestion-tag" data-location="Texas" data-type="state">Texas</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Data Visualizations Section -->
+    <section id="visualizations" class="visualizations">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Data Visualizations</h2>
+                <p class="section-subtitle">Interactive charts and insights from your search results</p>
+            </div>
+            
+            <div class="visualization-tabs">
+                <button class="tab-btn active" data-tab="overview">Overview</button>
+                <button class="tab-btn" data-tab="demographics">Demographics</button>
+                <button class="tab-btn" data-tab="economics">Economics</button>
+                <button class="tab-btn" data-tab="housing">Housing</button>
+            </div>
+            
+            <div class="tab-content active" id="overview-tab">
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Total Population</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('population-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="population-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Age Distribution</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('age-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="age-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table-container">
+                    <div class="table-header">
+                        <h3>Detailed Statistics</h3>
+                        <div class="table-controls">
+                            <button class="btn-secondary" onclick="exportTable()">
+                                <i class="fas fa-file-csv"></i>
+                                Export CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table id="data-table" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Value</th>
+                                    <th>Margin of Error</th>
+                                    <th>Percent</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table-body">
+                                <tr class="loading-row">
+                                    <td colspan="4">
+                                        <div class="table-loading">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                            Search for a location to view data
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="demographics-tab">
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Gender Distribution</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('gender-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="gender-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Race & Ethnicity</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('race-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="race-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="economics-tab">
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Median Household Income</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('income-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="income-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Employment Status</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('employment-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="employment-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="housing-tab">
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Housing Tenure</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('tenure-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="tenure-chart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Median Housing Value</h3>
+                            <div class="chart-controls">
+                                <button class="chart-btn" onclick="exportChart('values-chart')">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="values-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compare Section -->
+    <section id="compare" class="compare-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Compare Locations</h2>
+                <p class="section-subtitle">Side-by-side comparison of demographic data</p>
+            </div>
+            
+            <div class="compare-interface">
+                <div class="compare-controls">
+                    <div class="location-selector">
+                        <h4>Location A</h4>
+                        <input type="text" id="compare-location-a" placeholder="e.g., California or Chicago, IL" class="compare-input">
+                        <button id="add-location-a" class="btn-secondary">Add</button>
+                    </div>
+                    <div class="vs-separator">
+                        <span>VS</span>
+                    </div>
+                    <div class="location-selector">
+                        <h4>Location B</h4>
+                        <input type="text" id="compare-location-b" placeholder="e.g., New York or Miami, FL" class="compare-input">
+                        <button id="add-location-b" class="btn-secondary">Add</button>
+                    </div>
+                </div>
+                
+                <div class="comparison-results" id="comparison-results" style="display: none;">
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h3 id="location-a-name">Location A</h3>
+                            <div class="comparison-stats" id="location-a-stats">
+                                <!-- Stats will be populated here -->
+                            </div>
+                        </div>
+                        <div class="comparison-card">
+                            <h3 id="location-b-name">Location B</h3>
+                            <div class="comparison-stats" id="location-b-stats">
+                                <!-- Stats will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-chart">
+                        <canvas id="comparison-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">About Census Data Explorer</h2>
+                <p class="section-subtitle">Unlock the power of comprehensive demographic insights</p>
+            </div>
+            <div class="about-content">
+                <p>
+                    The US Census Data Explorer is an interactive web application designed to make data from the U.S. Census Bureau accessible and easy to understand. This tool leverages the American Community Survey (ACS) 5-Year Data Profile, which provides a rich, detailed snapshot of communities across the United States. Whether you're a researcher, student, business owner, or simply curious, you can use this explorer to search for states, cities, and counties to instantly visualize key demographic, economic, and housing statistics. Our goal is to transform vast tables of data into clear, actionable insights through intuitive charts and side-by-side comparisons.
+                </p>
+            </div>
+            <div class="about-grid">
+                <div class="about-card" data-animation="fade-up">
+                    <div class="card-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Comprehensive Data</h3>
+                    <p>Access population, income, education, housing, and employment statistics from the American Community Survey and Decennial Census.</p>
+                </div>
+                <div class="about-card" data-animation="fade-up" data-delay="100">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Interactive Visualizations</h3>
+                    <p>Explore data through dynamic charts, graphs, and maps that make complex demographic information easy to understand.</p>
+                </div>
+                <div class="about-card" data-animation="fade-up" data-delay="200">
+                    <div class="card-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h3>Real-time Updates</h3>
+                    <p>Get the latest census data directly from the US Census Bureau API with real-time updates and historical comparisons.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Census Data Explorer</h3>
+                    <p>Explore America's demographic landscape through comprehensive census data and interactive visualizations.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#hero">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#search">Search Data</a></li>
+                        <li><a href="#visualizations">Visualizations</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Data Sources</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://www.census.gov/data/developers/data-sets/acs-1year.html" target="_blank">American Community Survey</a></li>
+                        <li><a href="https://www.census.gov/data/developers/data-sets/decennial-census.html" target="_blank">Decennial Census</a></li>
+                        <li><a href="https://www.census.gov/data/developers/guidance.html" target="_blank">Census API Documentation</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Built with ❤️ using the US Census Bureau API</p>
+                    <p class="disclaimer">Data provided by the U.S. Census Bureau</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Census Data Explorer. Educational project using public domain data.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Error</h3>
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="error-message">An error occurred while fetching data.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

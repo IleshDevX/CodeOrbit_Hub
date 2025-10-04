@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detectron2: Advanced Object Detection Showcase</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e7eb;
+            overflow-x: hidden;
+        }
+
+        /* --- Custom Gradient & Glow Effects --- */
+        .spotlight {
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), #14789033 0%, transparent 40%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            pointer-events: none;
+            transition: transform 0.2s ease-out;
+        }
+        
+        .glow-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .glow-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200%;
+            padding-bottom: 200%;
+            border-radius: 50%;
+            background: radial-gradient(circle, #20c39880, transparent 60%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.5s ease;
+            z-index: 0;
+        }
+        .glow-button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .glow-button > span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .feature-card {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: #20C398;
+            box-shadow: 0 10px 30px -10px #20C39840;
+        }
+
+        /* --- Floating Bounding Boxes Animation --- */
+        .bounding-box {
+            position: absolute;
+            border: 2px solid;
+            border-radius: 8px;
+            animation: float 15s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) translateX(20px) rotate(10deg); }
+            100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+        }
+
+        /* --- Scroll-triggered Animations --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Background Spotlight Effect -->
+    <div class="spotlight"></div>
+
+    <div class="relative z-10">
+
+        <!-- Header Navigation -->
+        <header class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md border-b border-gray-800">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <span class="text-2xl font-bold text-white tracking-wider">Detectron<span class="text-[#20C398]">2</span></span>
+                    </div>
+                    <div class="hidden md:flex items-center space-x-8">
+                        <a href="#about" class="text-gray-300 hover:text-[#20C398] transition">About</a>
+                        <a href="#features" class="text-gray-300 hover:text-[#20C398] transition">Features</a>
+                        <a href="#demo" class="text-gray-300 hover:text-[#20C398] transition">Demo</a>
+                        <a href="#docs" class="text-gray-300 hover:text-[#20C398] transition">Docs</a>
+                        <a href="#references" class="text-gray-300 hover:text-[#20C398] transition">References</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <!-- Hero Section -->
+            <section class="relative h-screen flex items-center justify-center overflow-hidden text-center">
+                <!-- Floating elements -->
+                <div class="bounding-box" style="top: 15%; left: 10%; width: 100px; height: 150px; border-color: #147890; animation-delay: -2s;"></div>
+                <div class="bounding-box" style="top: 65%; left: 20%; width: 180px; height: 120px; border-color: #20C398;"></div>
+                <div class="bounding-box" style="top: 20%; right: 15%; width: 120px; height: 120px; border-color: #249779; animation-delay: -5s;"></div>
+                <div class="bounding-box" style="top: 70%; right: 25%; width: 150px; height: 80px; border-color: #152234; animation-delay: -8s;"></div>
+
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <h1 class="text-4xl sm:text-5xl md:text-7xl font-extrabold text-white tracking-tight reveal">
+                        Detectron2: <span class="block text-transparent bg-clip-text bg-gradient-to-r from-[#20C398] to-[#147890]">Advanced Object Detection</span> Made Simple.
+                    </h1>
+                    <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-gray-300 reveal" style="transition-delay: 0.2s;">
+                        A next-generation library that provides cutting-edge detection and segmentation algorithms, from research to production.
+                    </p>
+                    <div class="mt-10 flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 reveal" style="transition-delay: 0.4s;">
+                        <a href="#features" class="glow-button bg-[#20C398] text-black font-bold py-3 px-8 rounded-full shadow-lg shadow-[#20C398]/30">
+                            <span>View Features</span>
+                        </a>
+                        <a href="#demo" class="glow-button bg-gray-800/50 border border-gray-700 text-white font-medium py-3 px-8 rounded-full hover:bg-gray-700/70">
+                            <span>Try Demo</span>
+                        </a>
+                         <a href="https://github.com/facebookresearch/detectron2" target="_blank" class="glow-button bg-gray-800/50 border border-gray-700 text-white font-medium py-3 px-8 rounded-full hover:bg-gray-700/70">
+                            <span>GitHub Repo</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- About Section -->
+            <section id="about" class="py-20 sm:py-32">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight reveal">What is Detectron2?</h2>
+                        <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-400 reveal" style="transition-delay: 0.2s;">
+                            Detectron2 is Facebook AI Research's next-generation library that provides state-of-the-art detection and segmentation algorithms. It is a ground-up rewrite of the original Detectron, designed to be more flexible, extensible, and faster.
+                        </p>
+                    </div>
+                    <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                        <!-- Application 1 -->
+                        <div class="reveal" style="transition-delay: 0.4s;">
+                            <div class="flex justify-center items-center h-16 w-16 mx-auto bg-gradient-to-br from-[#147890] to-[#20C398] rounded-xl shadow-lg">
+                                <i data-lucide="car-front" class="h-8 w-8 text-white"></i>
+                            </div>
+                            <h3 class="mt-4 text-xl font-semibold text-white">Self-Driving Cars</h3>
+                            <p class="mt-2 text-gray-400">Powering perception systems for autonomous vehicles.</p>
+                        </div>
+                        <!-- Application 2 -->
+                        <div class="reveal" style="transition-delay: 0.6s;">
+                             <div class="flex justify-center items-center h-16 w-16 mx-auto bg-gradient-to-br from-[#147890] to-[#20C398] rounded-xl shadow-lg">
+                                <i data-lucide="heart-pulse" class="h-8 w-8 text-white"></i>
+                            </div>
+                            <h3 class="mt-4 text-xl font-semibold text-white">Medical Imaging</h3>
+                            <p class="mt-2 text-gray-400">Assisting in the diagnosis of diseases from scans.</p>
+                        </div>
+                        <!-- Application 3 -->
+                        <div class="reveal" style="transition-delay: 0.8s;">
+                             <div class="flex justify-center items-center h-16 w-16 mx-auto bg-gradient-to-br from-[#147890] to-[#20C398] rounded-xl shadow-lg">
+                                <i data-lucide="shield-check" class="h-8 w-8 text-white"></i>
+                            </div>
+                            <h3 class="mt-4 text-xl font-semibold text-white">Security</h3>
+                            <p class="mt-2 text-gray-400">Enhancing surveillance and threat detection systems.</p>
+                        </div>
+                        <!-- Application 4 -->
+                        <div class="reveal" style="transition-delay: 1s;">
+                             <div class="flex justify-center items-center h-16 w-16 mx-auto bg-gradient-to-br from-[#147890] to-[#20C398] rounded-xl shadow-lg">
+                                <i data-lucide="scan-face" class="h-8 w-8 text-white"></i>
+                            </div>
+                            <h3 class="mt-4 text-xl font-semibold text-white">AR / VR</h3>
+                            <p class="mt-2 text-gray-400">Creating immersive and interactive virtual experiences.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Feature Highlights Section -->
+            <section id="features" class="py-20 sm:py-32 bg-black/20">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight reveal">Core Capabilities</h2>
+                        <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-400 reveal" style="transition-delay: 0.2s;">
+                            Detectron2 is packed with powerful features to tackle a wide range of computer vision tasks.
+                        </p>
+                    </div>
+                    <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Feature Card 1 -->
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal">
+                            <h3 class="text-xl font-bold text-white">Object Detection</h3>
+                            <p class="mt-2 text-gray-400">Identify and locate objects within an image with bounding boxes.</p>
+                        </div>
+                        <!-- Feature Card 2 -->
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 0.2s;">
+                            <h3 class="text-xl font-bold text-white">Instance Segmentation</h3>
+                            <p class="mt-2 text-gray-400">Detect objects and precisely segment their boundaries at the pixel level.</p>
+                        </div>
+                        <!-- Feature Card 3 -->
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 0.4s;">
+                            <h3 class="text-xl font-bold text-white">Keypoint Detection</h3>
+                            <p class="mt-2 text-gray-400">Detect specific points of interest on objects, like human joints.</p>
+                        </div>
+                        <!-- Feature Card 4 -->
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 0.6s;">
+                            <h3 class="text-xl font-bold text-white">Panoptic Segmentation</h3>
+                            <p class="mt-2 text-gray-400">Combines instance and semantic segmentation for a complete scene understanding.</p>
+                        </div>
+                        <!-- Feature Card 5 -->
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 0.8s;">
+                            <h3 class="text-xl font-bold text-white">DensePose</h3>
+                            <p class="mt-2 text-gray-400">Map all human pixels of an RGB image to the 3D surface of the human body.</p>
+                        </div>
+                        <!-- Feature Card 6 -->
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 1s;">
+                            <h3 class="text-xl font-bold text-white">Custom Training Support</h3>
+                            <p class="mt-2 text-gray-400">Easily train models on your own custom datasets with minimal effort.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Interactive Demo Section -->
+            <section id="demo" class="py-20 sm:py-32">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight reveal">Interactive Demo</h2>
+                        <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-400 reveal" style="transition-delay: 0.2s;">
+                            Upload an image or select a sample to see a simulated output. This is a frontend mock-up for demonstration purposes.
+                        </p>
+                    </div>
+                    <div class="mt-16 max-w-4xl mx-auto reveal" style="transition-delay: 0.4s;">
+                        <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-8">
+                            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                                <div class="w-full">
+                                    <label for="imageUpload" class="cursor-pointer glow-button w-full flex justify-center items-center bg-[#20C398] text-black font-bold py-3 px-8 rounded-full shadow-lg shadow-[#20C398]/30">
+                                        <i data-lucide="upload" class="h-5 w-5 mr-2"></i>
+                                        <span>Upload Image</span>
+                                    </label>
+                                    <input type="file" id="imageUpload" class="hidden" accept="image/*">
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-gray-400">Detection Type:</span>
+                                    <select id="detectionType" class="bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2">
+                                        <option value="detection">Object Detection</option>
+                                        <option value="segmentation">Instance Segmentation</option>
+                                        <option value="keypoints">Keypoint Detection</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <p class="text-sm text-center text-gray-400 mb-4">Or try a sample image:</p>
+                                <div class="flex justify-center items-center gap-4">
+                                    <img src="https://images.unsplash.com/photo-1519010470956-6d877008eaa4?q=80&w=200&h=150&auto=format&fit=crop" alt="Sample City" class="sample-image cursor-pointer rounded-lg border-2 border-transparent hover:border-[#20C398] transition duration-300" data-sample="city" data-src="https://images.unsplash.com/photo-1519010470956-6d877008eaa4?q=80&w=1920&auto=format&fit=crop">
+                                    <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=200&h=150&auto=format&fit=crop" alt="Sample Pets" class="sample-image cursor-pointer rounded-lg border-2 border-transparent hover:border-[#20C398] transition duration-300" data-sample="pets" data-src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1920&auto=format&fit=crop">
+                                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200&h=150&auto=format&fit=crop" alt="Sample People" class="sample-image cursor-pointer rounded-lg border-2 border-transparent hover:border-[#20C398] transition duration-300" data-sample="person" data-src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1920&auto=format&fit=crop">
+                                </div>
+                            </div>
+
+                            <div id="image-container" class="mt-8 w-full min-h-[300px] border-2 border-dashed border-gray-700 rounded-lg flex items-center justify-center bg-gray-900 relative transition-all duration-300 overflow-hidden">
+                                <div id="upload-placeholder" class="text-gray-500 flex flex-col items-center justify-center p-4">
+                                    <i data-lucide="image-plus" class="h-16 w-16 mb-4 text-gray-600"></i>
+                                    <p class="font-semibold text-center">Upload an image or select a sample</p>
+                                    <p class="text-sm text-center">to see the simulated detection</p>
+                                </div>
+                                <img id="uploaded-image" class="hidden max-w-full max-h-[500px] rounded-md object-contain" alt="Uploaded content">
+                                <canvas id="overlay-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none"></canvas>
+                                <div id="loader" class="hidden absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center rounded-lg">
+                                    <div class="w-16 h-16 border-4 border-t-[#20C398] border-gray-700 rounded-full animate-spin"></div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-center text-gray-500 mt-4">
+                                Note: Results are simulated for demonstration purposes and do not use a live AI model.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Documentation Section -->
+            <section id="docs" class="py-20 sm:py-32 bg-black/20">
+                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight reveal">Learning & Documentation</h2>
+                        <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-400 reveal" style="transition-delay: 0.2s;">
+                            Get started with comprehensive tutorials, research papers, and the official repository.
+                        </p>
+                    </div>
+                    <div class="mt-16 max-w-3xl mx-auto reveal" style="transition-delay: 0.4s;">
+                        <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 space-y-6">
+                           <a href="https://detectron2.readthedocs.io/en/latest/tutorials/getting_started.html" target="_blank" class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/70 transition-colors">
+                                <div class="flex items-center">
+                                    <i data-lucide="book-open" class="h-6 w-6 text-[#20C398] mr-4"></i>
+                                    <span class="font-semibold text-white">Getting Started Guide</span>
+                                </div>
+                                <i data-lucide="arrow-right" class="h-5 w-5 text-gray-400"></i>
+                           </a>
+                           <a href="https://github.com/facebookresearch/detectron2/tree/main/projects" target="_blank" class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/70 transition-colors">
+                                <div class="flex items-center">
+                                    <i data-lucide="layout-grid" class="h-6 w-6 text-[#20C398] mr-4"></i>
+                                    <span class="font-semibold text-white">Model Zoo & Baselines</span>
+                                </div>
+                                <i data-lucide="arrow-right" class="h-5 w-5 text-gray-400"></i>
+                           </a>
+                           <a href="https://github.com/facebookresearch/detectron2" target="_blank" class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/70 transition-colors">
+                                <div class="flex items-center">
+                                    <i data-lucide="github" class="h-6 w-6 text-[#20C398] mr-4"></i>
+                                    <span class="font-semibold text-white">GitHub Repository</span>
+                                </div>
+                                <i data-lucide="arrow-right" class="h-5 w-5 text-gray-400"></i>
+                           </a>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
+            <!-- References Section -->
+            <section id="references" class="py-20 sm:py-32">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight reveal">References & Citation</h2>
+                        <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-400 reveal" style="transition-delay: 0.2s;">
+                            If you use Detectron2 in your research, please use the following BibTeX entry.
+                        </p>
+                    </div>
+                    <div class="mt-16 max-w-3xl mx-auto reveal" style="transition-delay: 0.4s;">
+                        <div class="bg-gray-900/50 border border-gray-800 rounded-2xl p-8 space-y-6">
+                            <pre class="bg-gray-800/50 p-4 rounded-lg text-gray-300 text-sm whitespace-pre-wrap overflow-x-auto"><code>@misc{wu2019detectron2,
+  author =       {Yuxin Wu and Alexander Kirillov and Francisco Massa and
+                  Wan-Yen Lo and Ross Girshick},
+  title =        {Detectron2},
+  howpublished = {\url{https://github.com/facebookresearch/detectron2}},
+  year =         {2019}
+}</code></pre>
+                            <a href="https://github.com/facebookresearch/detectron2" target="_blank" class="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/70 transition-colors">
+                                <div class="flex items-center">
+                                    <i data-lucide="github" class="h-6 w-6 text-[#20C398] mr-4"></i>
+                                    <span class="font-semibold text-white">Official GitHub Repository</span>
+                                </div>
+                                <i data-lucide="arrow-right" class="h-5 w-5 text-gray-400"></i>
+                           </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Community Section -->
+            <section class="py-20 sm:py-32 bg-black/20">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl sm:text-4xl font-bold text-white tracking-tight reveal">Community Driven</h2>
+                        <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-400 reveal" style="transition-delay: 0.2s;">
+                            Detectron2 is an open-source project thriving on community contributions and collaboration.
+                        </p>
+                    </div>
+                    <div class="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center max-w-4xl mx-auto">
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 0.4s;">
+                            <i data-lucide="star" class="h-10 w-10 text-[#20C398] mx-auto"></i>
+                            <p class="mt-4 text-4xl font-bold text-white">28k+</p>
+                            <p class="text-gray-400">GitHub Stars</p>
+                        </div>
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 0.6s;">
+                            <i data-lucide="git-fork" class="h-10 w-10 text-[#20C398] mx-auto"></i>
+                            <p class="mt-4 text-4xl font-bold text-white">8.9k+</p>
+                            <p class="text-gray-400">GitHub Forks</p>
+                        </div>
+                        <div class="feature-card bg-gray-900/50 p-8 rounded-2xl reveal" style="transition-delay: 0.8s;">
+                            <i data-lucide="users" class="h-10 w-10 text-[#20C398] mx-auto"></i>
+                            <p class="mt-4 text-4xl font-bold text-white">400+</p>
+                            <p class="text-gray-400">Contributors</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-black/40 border-t border-gray-800">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <p class="text-gray-400">&copy; 2024 Facebook AI Research. All Rights Reserved.</p>
+                     <div class="flex items-center">
+                        <span class="text-xl font-bold text-white tracking-wider">Detectron<span class="text-[#20C398]">2</span></span>
+                    </div>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-[#20C398]"><i data-lucide="twitter"></i></a>
+                        <a href="https://github.com/facebookresearch/detectron2" target="_blank" class="text-gray-400 hover:text-[#20C398]"><i data-lucide="github"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-[#20C398]"><i data-lucide="linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // --- Spotlight Effect ---
+        const spotlight = document.querySelector('.spotlight');
+        document.addEventListener('mousemove', e => {
+            spotlight.style.setProperty('--x', `${e.clientX}px`);
+            spotlight.style.setProperty('--y', `${e.clientY}px`);
+        });
+
+        // --- Scroll-triggered Animations ---
+        const revealElements = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+        revealElements.forEach(el => observer.observe(el));
+
+        // --- Interactive Demo Logic ---
+        const imageUpload = document.getElementById('imageUpload');
+        const imageContainer = document.getElementById('image-container');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const overlayCanvas = document.getElementById('overlay-canvas');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
+        const loader = document.getElementById('loader');
+        const detectionTypeSelect = document.getElementById('detectionType');
+        const ctx = overlayCanvas.getContext('2d');
+        let currentSampleId = 'default';
+
+        imageUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                currentSampleId = 'default'; // Reset to default for uploads
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    uploadedImage.crossOrigin = "anonymous";
+                    uploadedImage.src = event.target.result;
+                    uploadedImage.classList.remove('hidden');
+                    uploadPlaceholder.classList.add('hidden');
+                    
+                    uploadedImage.onload = () => {
+                        runDemo();
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        detectionTypeSelect.addEventListener('change', runDemo);
+
+        const sampleImages = document.querySelectorAll('.sample-image');
+        sampleImages.forEach(img => {
+            img.addEventListener('click', () => {
+                // Visual feedback for selected sample
+                sampleImages.forEach(s => s.classList.remove('border-[#20C398]'));
+                img.classList.add('border-[#20C398]');
+
+                currentSampleId = img.dataset.sample;
+                uploadedImage.crossOrigin = "anonymous";
+                uploadedImage.src = img.dataset.src;
+                uploadedImage.classList.remove('hidden');
+                uploadPlaceholder.classList.add('hidden');
+
+                uploadedImage.onload = () => {
+                    runDemo();
+                }
+            })
+        });
+
+        function runDemo() {
+            if (!uploadedImage.src) return;
+
+            loader.classList.remove('hidden');
+            
+            // Simulate processing time
+            setTimeout(() => {
+                drawOverlay();
+                loader.classList.add('hidden');
+            }, 1500);
+        }
+
+        function drawOverlay() {
+            // Match canvas size to image display size
+            const rect = uploadedImage.getBoundingClientRect();
+            overlayCanvas.width = rect.width;
+            overlayCanvas.height = rect.height;
+
+            ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+            
+            const detectionType = detectionTypeSelect.value;
+
+            // Mock data - coordinates are relative (0 to 1)
+            const mockData = {
+                default: {
+                     detection: [
+                        { label: 'object', box: [0.1, 0.2, 0.3, 0.6], color: '#34d399' },
+                        { label: 'object', box: [0.5, 0.5, 0.4, 0.35], color: '#60a5fa' },
+                    ],
+                    segmentation: [
+                        { label: 'object', path: [[0.1, 0.2], [0.4, 0.2], [0.35, 0.8], [0.15, 0.8]], color: 'rgba(52, 211, 153, 0.4)' },
+                    ],
+                    keypoints: [
+                        { label: 'object', points: [[0.2, 0.25], [0.22, 0.35], [0.18, 0.35], [0.25, 0.45], [0.15, 0.45]], color: '#fbbf24' },
+                    ]
+                },
+                city: {
+                    detection: [
+                        { label: 'building', box: [0.05, 0.1, 0.9, 0.85], color: '#60a5fa' },
+                        { label: 'light', box: [0.45, 0.55, 0.05, 0.05], color: '#f87171' },
+                        { label: 'light', box: [0.7, 0.65, 0.05, 0.05], color: '#f87171' },
+                    ],
+                    segmentation: [
+                         { label: 'sky', path: [[0,0], [1,0], [1,0.2], [0, 0.2]], color: 'rgba(96, 165, 250, 0.3)' },
+                         { label: 'buildings', path: [[0,0.2], [1,0.2], [1,1], [0,1]], color: 'rgba(248, 113, 113, 0.3)' },
+                    ],
+                    keypoints: []
+                },
+                pets: {
+                    detection: [
+                        { label: 'dog', box: [0.15, 0.1, 0.7, 0.88], color: '#34d399' },
+                        { label: 'nose', box: [0.45, 0.5, 0.12, 0.1], color: '#60a5fa' },
+                        { label: 'ear', box: [0.18, 0.18, 0.2, 0.2], color: '#f87171' },
+                        { label: 'ear', box: [0.62, 0.18, 0.2, 0.2], color: '#f87171' },
+                    ],
+                    segmentation: [
+                        { label: 'dog', path: [[0.5,0.05],[0.85,0.15],[0.9,0.9],[0.1,0.9],[0.15,0.15]], color: 'rgba(52, 211, 153, 0.4)' },
+                    ],
+                    keypoints: []
+                },
+                person: {
+                    detection: [
+                        { label: 'person', box: [0.2, 0.05, 0.6, 0.9], color: '#34d399' },
+                        { label: 'face', box: [0.38, 0.1, 0.24, 0.3], color: '#60a5fa' },
+                    ],
+                    segmentation: [
+                        { label: 'person', path: [[0.5,0],[0.8,0.05],[0.95,0.4],[0.8,0.95],[0.2,0.95],[0.05,0.4]], color: 'rgba(52, 211, 153, 0.4)' },
+                    ],
+                    keypoints: [
+                        { label: 'face', points: [
+                            [0.44, 0.2], [0.56, 0.2], // eyes
+                            [0.5, 0.28], // nose
+                            [0.46, 0.35], [0.54, 0.35] // mouth corners
+                        ], color: '#fbbf24' },
+                    ]
+                }
+            };
+
+            const dataToUse = (mockData[currentSampleId] || mockData.default)[detectionType] || [];
+            
+            if (detectionType === 'detection') {
+                dataToUse.forEach(item => {
+                    const [x, y, w, h] = item.box;
+                    const realX = x * overlayCanvas.width;
+                    const realY = y * overlayCanvas.height;
+                    const realW = w * overlayCanvas.width;
+                    const realH = h * overlayCanvas.height;
+                    
+                    // Glow effect for the box
+                    ctx.shadowColor = item.color;
+                    ctx.shadowBlur = 15;
+
+                    ctx.strokeStyle = item.color;
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(realX, realY, realW, realH);
+                    
+                    // Reset shadow for text drawing
+                    ctx.shadowBlur = 0;
+
+                    // Draw text label with background
+                    ctx.font = 'bold 14px Inter';
+                    const text = item.label;
+                    const textMetrics = ctx.measureText(text);
+                    const textWidth = textMetrics.width;
+                    const textHeight = 14; 
+                    
+                    const labelX = realX;
+                    const labelY = realY - 5 > 0 ? realY - 5 : realY + textHeight + 5;
+
+                    ctx.fillStyle = item.color;
+                    ctx.fillRect(labelX - 1, labelY - textHeight, textWidth + 8, textHeight + 4);
+                    
+                    ctx.fillStyle = '#0a0a0a';
+                    ctx.fillText(text, labelX + 3, labelY);
+                });
+            } else if (detectionType === 'segmentation') {
+                dataToUse.forEach(item => {
+                    // Glow effect for the mask
+                    ctx.shadowColor = item.color;
+                    ctx.shadowBlur = 20;
+
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    item.path.forEach(([x, y], index) => {
+                        const realX = x * overlayCanvas.width;
+                        const realY = y * overlayCanvas.height;
+                        if (index === 0) {
+                            ctx.moveTo(realX, realY);
+                        } else {
+                            ctx.lineTo(realX, realY);
+                        }
+                    });
+                    ctx.closePath();
+                    ctx.fill();
+
+                     // Reset shadow
+                    ctx.shadowBlur = 0;
+                });
+            } else if (detectionType === 'keypoints') {
+                dataToUse.forEach(item => {
+                    item.points.forEach(([x, y], index) => {
+                        const realX = x * overlayCanvas.width;
+                        const realY = y * overlayCanvas.height;
+
+                        // Glow effect for keypoints
+                        ctx.shadowColor = item.color;
+                        ctx.shadowBlur = 10;
+
+                        ctx.fillStyle = item.color;
+                        ctx.beginPath();
+                        ctx.arc(realX, realY, 5, 0, 2 * Math.PI);
+                        ctx.fill();
+
+                        // Reset shadow
+                        ctx.shadowBlur = 0;
+                    });
+                });
+            }
+        }
+        
+        // Redraw canvas on window resize to keep it aligned
+        window.addEventListener('resize', drawOverlay);
+
+    </script>
+</body>
+</html>
+
+
+

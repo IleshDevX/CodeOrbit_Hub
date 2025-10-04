@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mistral 7B - Open-Source LLM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the dark theme, fonts, and animations */
+        body {
+            background-color: #000000;
+            color: #E5E7EB; /* Light gray text */
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Spotlight gradient effect */
+        .spotlight {
+            background-image: radial-gradient(circle at 25% 30%, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0) 30%),
+                              radial-gradient(circle at 75% 70%, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 30%);
+        }
+
+        .green-gradient-text {
+            background: linear-gradient(45deg, #34D399, #A7F3D0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .green-gradient-bg {
+             background: linear-gradient(45deg, #10B981, #34D399);
+        }
+
+        .green-gradient-border {
+            border-image-slice: 1;
+            border-image-source: linear-gradient(to right, #34D399, #10B981);
+        }
+        
+        /* Entrance animation elements start in this state */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s cubic-bezier(0.6, 0.04, 0.98, 0.335), transform 0.8s cubic-bezier(0.6, 0.04, 0.98, 0.335);
+        }
+
+        /* Scroll-triggered animation elements start in this state */
+        .scroll-reveal {
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateY(2rem);
+            transition: opacity 0.7s ease-out, filter 0.7s ease-out, transform 0.7s ease-out;
+            will-change: opacity, filter, transform;
+        }
+
+        /* Animation becomes active when this class is added */
+        .scroll-reveal.visible, .fade-in-up.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #10B981;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #34D399;
+        }
+        
+        /* Chat bubble styles */
+        .chat-bubble {
+            animation: fade-in 0.5s ease-in-out;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .typing-indicator span {
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen w-full flex items-center justify-center overflow-hidden spotlight p-4">
+        <div class="text-center z-10">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter fade-in-up" style="transition-delay: 100ms;">
+                Mistral <span class="green-gradient-text">7B</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-gray-300 fade-in-up" style="transition-delay: 300ms;">
+                An open-source, self-hosted, and efficient small-scale LLM for rapid prototyping and production.
+            </p>
+            <a href="#features" class="inline-block mt-8 px-8 py-3 rounded-lg text-white font-semibold green-gradient-bg hover:shadow-lg hover:shadow-green-500/20 transition-all duration-300 transform hover:scale-105 fade-in-up" style="transition-delay: 500ms;">
+                Get Started
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <!-- About Section -->
+        <section id="about" class="py-20 md:py-32 container mx-auto px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="scroll-reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold tracking-tight">What is Mistral 7B?</h2>
+                    <div class="w-24 h-1 my-4 bg-green-500 rounded-full"></div>
+                    <p class="text-gray-300 mt-4 text-lg leading-relaxed">
+                        Mistral 7B is a powerful, compact large language model. Unlike massive, proprietary models, it's designed to be lightweight and efficient, making it perfect for self-hosting. 
+                    </p>
+                    <p class="text-gray-300 mt-4 text-lg leading-relaxed">
+                        This allows developers and businesses to run their own AI instances for prototyping new ideas or integrating into production environments without relying on third-party APIs. It balances high performance with a small footprint, democratizing access to capable AI.
+                    </p>
+                </div>
+                <div class="scroll-reveal" style="transition-delay: 200ms;">
+                    <div class="bg-gray-900/50 p-6 rounded-2xl border border-gray-800 shadow-2xl shadow-green-500/10">
+                         <!-- Placeholder for an illustration -->
+                        <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 text-green-500" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 12h1" /><path d="M12 4v1" /><path d="M19 12h1" /><path d="M12 20v-1" /><path d="M17.657 6.343l.707 -.707" /><path d="M6.343 17.657l.707 -.707" /><path d="M17.657 17.657l-.707 -.707" /><path d="M6.343 6.343l-.707 -.707" /><path d="M12 16a4 4 0 1 1 0 -8a4 4 0 0 1 0 8z" /></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="py-20 md:py-32 bg-black spotlight">
+            <div class="container mx-auto px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight scroll-reveal">Core Advantages</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-400 scroll-reveal" style="transition-delay: 150ms;">Why developers are choosing Mistral 7B for their projects.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-16">
+                    <!-- Feature Card 1 -->
+                    <div class="bg-gray-900/50 p-8 rounded-2xl border border-gray-800 hover:border-green-500/50 transition-all duration-300 transform hover:-translate-y-2 scroll-reveal">
+                        <h3 class="text-xl font-bold text-white">Open-Source</h3>
+                        <p class="mt-2 text-gray-400">Full transparency and community-driven development. Modify and distribute it as you see fit.</p>
+                    </div>
+                    <!-- Feature Card 2 -->
+                    <div class="bg-gray-900/50 p-8 rounded-2xl border border-gray-800 hover:border-green-500/50 transition-all duration-300 transform hover:-translate-y-2 scroll-reveal" style="transition-delay: 100ms;">
+                        <h3 class="text-xl font-bold text-white">Self-Hosted</h3>
+                        <p class="mt-2 text-gray-400">Maintain complete control over your data and infrastructure. No third-party dependencies.</p>
+                    </div>
+                    <!-- Feature Card 3 -->
+                    <div class="bg-gray-900/50 p-8 rounded-2xl border border-gray-800 hover:border-green-500/50 transition-all duration-300 transform hover:-translate-y-2 scroll-reveal" style="transition-delay: 200ms;">
+                        <h3 class="text-xl font-bold text-white">Efficient & Lightweight</h3>
+                        <p class="mt-2 text-gray-400">Optimized for performance on consumer hardware, reducing operational costs.</p>
+                    </div>
+                    <!-- Feature Card 4 -->
+                    <div class="bg-gray-900/50 p-8 rounded-2xl border border-gray-800 hover:border-green-500/50 transition-all duration-300 transform hover:-translate-y-2 scroll-reveal" style="transition-delay: 300ms;">
+                        <h3 class="text-xl font-bold text-white">Production Ready</h3>
+                        <p class="mt-2 text-gray-400">Robust enough for real-world applications, from chatbots to content generation.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="py-20 md:py-32">
+            <div class="container mx-auto px-6 lg:px-8 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold tracking-tight scroll-reveal">Live Demo</h2>
+                <p class="mt-3 max-w-2xl mx-auto text-lg text-gray-400 scroll-reveal" style="transition-delay: 150ms;">
+                    This is a simulation of how a chat interface powered by Mistral 7B could look and feel.
+                </p>
+                <div class="mt-12 max-w-2xl mx-auto scroll-reveal" style="transition-delay: 300ms;">
+                    <div class="bg-gray-900/50 border border-gray-800 rounded-2xl shadow-2xl shadow-green-500/10 h-[500px] flex flex-col p-4">
+                        <div id="chat-window" class="flex-1 overflow-y-auto pr-2 space-y-4">
+                            <!-- Chat messages will be appended here -->
+                        </div>
+                        <div id="typing-indicator-container" class="py-2 hidden">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-10 h-10 rounded-full flex-shrink-0 bg-gray-700 flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v2H5a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1h-2V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v2H9V7z"/></svg>
+                                </div>
+                                <div class="bg-gray-700 rounded-lg p-3 text-left typing-indicator">
+                                    <span class="inline-block w-2 h-2 bg-gray-400 rounded-full"></span>
+                                    <span class="inline-block w-2 h-2 bg-gray-400 rounded-full"></span>
+                                    <span class="inline-block w-2 h-2 bg-gray-400 rounded-full"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center border-t border-gray-700 pt-4">
+                            <input type="text" id="chat-input" placeholder="Ask Mistral 7B something..." class="flex-1 bg-transparent border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                            <button id="send-btn" class="ml-3 px-6 py-2 rounded-lg text-white font-semibold green-gradient-bg hover:shadow-md hover:shadow-green-500/20 transition-all transform hover:scale-105">
+                                Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900/50 border-t border-gray-800 py-12">
+        <div class="container mx-auto px-6 lg:px-8 text-center text-gray-400">
+            <h3 class="text-2xl font-bold text-white">Get Started with Mistral 7B</h3>
+            <p class="mt-2 max-w-md mx-auto">Explore the documentation, contribute on GitHub, or visit the official website.</p>
+            <div class="flex justify-center space-x-6 mt-6">
+                <a href="#" class="hover:text-green-400 transition-colors">Documentation</a>
+                <a href="#" class="hover:text-green-400 transition-colors">GitHub</a>
+                <a href="#" class="hover:text-green-400 transition-colors">Official Page</a>
+            </div>
+            <p class="mt-8 text-sm">&copy; 2025 Mistral AI. All rights reserved. (Demo website)</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Entrance Animations ---
+            const heroElements = document.querySelectorAll('.fade-in-up');
+            heroElements.forEach(el => {
+                setTimeout(() => {
+                    el.classList.add('visible');
+                }, parseInt(el.style.transitionDelay) || 0);
+            });
+
+            // --- Scroll-Triggered Animations ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Add a delay based on the CSS transition-delay property
+                        const delay = parseInt(entry.target.style.transitionDelay) || 0;
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, delay);
+                        // Optional: unobserve after revealing to save resources
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            });
+
+            const scrollElements = document.querySelectorAll('.scroll-reveal');
+            scrollElements.forEach(el => observer.observe(el));
+
+            // --- Chat Demo Logic ---
+            const chatWindow = document.getElementById('chat-window');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('send-btn');
+            const typingIndicator = document.getElementById('typing-indicator-container');
+
+            const getDynamicResponse = async (userMessage) => {
+                // System instruction to make the model act like Mistral 7B
+                const systemPrompt = "You are Mistral 7B, an open-source, self-hosted, and efficient small-scale LLM. Respond concisely and helpfully as an AI assistant with these characteristics, keeping your answers relatively short for this chat interface.";
+                const apiKey = "AIzaSyC7JOrowI-EH4_1M51O0A6q_IvbgC22M6w"; // Replace with your actual API key from https://aistudio.google.com/apikey
+                
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userMessage }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                };
+                
+                // Basic exponential backoff for retries
+                let response;
+                let delay = 1000;
+                for (let i = 0; i < 5; i++) {
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) break;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                
+                if (!text) {
+                    throw new Error("No text found in API response.");
+                }
+
+                return text;
+            };
+
+            const createChatBubble = (message, sender) => {
+                const bubble = document.createElement('div');
+                bubble.classList.add('chat-bubble', 'max-w-md', 'md:max-w-lg');
+                if (sender === 'user') {
+                    bubble.classList.add('ml-auto');
+                    bubble.innerHTML = `<div class="bg-green-600 rounded-lg p-3 text-white text-left">${message}</div>`;
+                } else {
+                    bubble.classList.add('mr-auto');
+                    bubble.innerHTML = `
+                        <div class="flex items-start space-x-2">
+                            <div class="w-10 h-10 rounded-full flex-shrink-0 bg-gray-700 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 0 0-5 5v2H5a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1h-2V7a5 5 0 0 0-5-5zm-3 5a3 3 0 0 1 6 0v2H9V7z"/></svg>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-3 text-white text-left">${message}</div>
+                        </div>`;
+                }
+                return bubble;
+            };
+
+            const handleSendMessage = async () => {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // Add user message and disable input
+                chatWindow.appendChild(createChatBubble(message, 'user'));
+                chatInput.value = '';
+                chatInput.disabled = true;
+                sendBtn.disabled = true;
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                // Show typing indicator and get bot response
+                typingIndicator.classList.remove('hidden');
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                try {
+                    const botMessage = await getDynamicResponse(message);
+                    chatWindow.appendChild(createChatBubble(botMessage, 'bot'));
+                } catch (error) {
+                    console.error("Error fetching dynamic response:", error);
+                    chatWindow.appendChild(createChatBubble("Sorry, I'm having trouble connecting right now. Please try again later.", 'bot'));
+                } finally {
+                     // Hide typing indicator and re-enable input
+                    typingIndicator.classList.add('hidden');
+                    chatInput.disabled = false;
+                    sendBtn.disabled = false;
+                    chatInput.focus();
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                }
+            };
+
+            sendBtn.addEventListener('click', handleSendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleSendMessage();
+                }
+            });
+            
+            // Initial bot message
+            setTimeout(() => {
+                chatWindow.appendChild(createChatBubble("Hello! I'm a simulated version of Mistral 7B. How can I help you today?", 'bot'));
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+

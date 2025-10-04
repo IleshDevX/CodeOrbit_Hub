@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Currency Converter</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- General Setup --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #1A1A1D;
+            color: #f0f0f0;
+        }
+
+        /* --- Main Converter Box --- */
+        .soft-box {
+            border-radius: 2rem;
+            background: rgba(26, 26, 29, 0.7);
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(166, 77, 121, 0.25);
+            transition: box-shadow 0.4s, border-color 0.4s;
+        }
+        .soft-box:hover {
+            box-shadow: 0 12px 40px 0 rgba(166,77,121,0.2);
+            border-color: rgba(166, 77, 121, 0.4);
+        }
+
+        /* --- Currency Input/Output Component Styling --- */
+        .currency-input-container {
+            position: relative;
+            background-color: #2D3039;
+            border: 2px solid #3d4049;
+            border-radius: 1.25rem;
+            padding: 0.75rem 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .currency-input-container:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            border-color: #A64D79;
+        }
+        .currency-input-container label {
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+        .currency-input-container .input-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .currency-input-container input,
+        .currency-input-container .result-display-value {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.75rem;
+            font-weight: 600;
+            width: 100%;
+            outline: none;
+            padding: 0;
+            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+        .currency-input-container input::-webkit-outer-spin-button,
+        .currency-input-container input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Custom Dropdown Styling */
+        .currency-select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .currency-input-container select {
+            background: linear-gradient(135deg, rgba(166, 77, 121, 0.1), rgba(106, 30, 85, 0.05));
+            border: 2px solid rgba(166, 77, 121, 0.3);
+            border-radius: 0.75rem;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23A64D79' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .currency-input-container select:hover {
+            background: linear-gradient(135deg, rgba(166, 77, 121, 0.2), rgba(106, 30, 85, 0.1));
+            border-color: #A64D79;
+            box-shadow: 0 4px 12px rgba(166, 77, 121, 0.3);
+            transform: translateY(-1px);
+        }
+        
+        .currency-input-container select:focus {
+            background: linear-gradient(135deg, rgba(166, 77, 121, 0.15), rgba(106, 30, 85, 0.08));
+            border-color: #A64D79;
+            box-shadow: 0 0 0 3px rgba(166, 77, 121, 0.2), 0 4px 12px rgba(166, 77, 121, 0.3);
+        }
+        
+        .currency-input-container select option {
+            background: #1a1a1d;
+            color: #ffffff;
+            padding: 14px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-bottom: 1px solid rgba(166, 77, 121, 0.15);
+            transition: all 0.2s;
+        }
+        
+        .currency-input-container select option:hover {
+            background: linear-gradient(90deg, rgba(106, 30, 85, 0.4), rgba(166, 77, 121, 0.3));
+            color: #ffffff;
+        }
+        
+        .currency-input-container select option:checked {
+            background: linear-gradient(90deg, #6A1E55, #A64D79);
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* --- Swap Button --- */
+        #swap-button {
+            background: #252528;
+            border: 2px solid #3d4049;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #swap-button:hover {
+            background: #A64D79;
+            border-color: #A64D79;
+            transform: scale(1.1) rotate(180deg);
+        }
+        #swap-button svg {
+            transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        /* --- Animations & Effects --- */
+        .spotlight {
+            background-image: radial-gradient(circle at 25% 25%, rgba(166, 77, 121, 0.1), transparent 30%),
+                              radial-gradient(circle at 75% 75%, rgba(59, 28, 50, 0.1), transparent 30%);
+        }
+        .animate-entry { animation: fadeInBlur 1.5s cubic-bezier(0.4,0,0.2,1) forwards; }
+        .animate-entry-delay { animation: fadeInBlur 1.5s cubic-bezier(0.4,0,0.2,1) 0.3s forwards; }
+        @keyframes fadeInBlur {
+            from { opacity: 0; filter: blur(12px); transform: translateY(24px); }
+            to { opacity: 1; filter: blur(0); transform: translateY(0); }
+        }
+        .fade-in-section {
+            opacity: 0;
+            filter: blur(6px);
+            transform: translateY(24px);
+            transition: opacity 0.8s ease-out, filter 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .fade-in-section.visible { opacity: 1; filter: blur(0); transform: translateY(0); }
+
+        /* --- Text & Gradients --- */
+        .gradient-text {
+            background: linear-gradient(90deg, #A64D79, #f0f0f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-border { border: 2.5px solid; border-image-slice: 1; border-image-source: linear-gradient(90deg, #6A1E55, #A64D79); }
+        .gradient-bg { background-image: linear-gradient(90deg, #6A1E55, #A64D79); }
+        
+        /* --- Skeleton Loader --- */
+        .skeleton { background-color: #333; border-radius: 1rem; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 50% { opacity: .5; } }
+
+        /* --- Other Component Styling --- */
+        .popular-card { border-radius: 2rem; background: rgba(36,36,40,0.7); box-shadow: 0 4px 16px rgba(0,0,0,0.2); transition: all 0.4s; border: 2px solid rgba(166,77,121,0.13); }
+        .popular-card:hover { transform: scale(1.04) translateY(-4px); box-shadow: 0 8px 32px rgba(166,77,121,0.22); border-color: #A64D79; }
+        footer a:hover { color: #fff; text-shadow: 0 0 8px #A64D7999; }
+        #about > div { border-radius: 2rem; }
+        #error-message { border-radius: 1.2rem; }
+    </style>
+</head>
+<body class="bg-[#1A1A1D] overflow-x-hidden">
+
+    <header class="h-screen w-full flex items-center justify-center text-center relative overflow-hidden spotlight">
+        <div class="z-10 px-4">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold text-white animate-entry">
+                Global Currency Converter
+            </h1>
+            <p class="mt-4 text-lg md:text-xl lg:text-2xl text-gray-300 animate-entry-delay">
+                Real-time exchange rates at your fingertips
+            </p>
+        </div>
+    </header>
+
+    <main class="relative z-10">
+        <section id="converter" class="fade-in-section min-h-[60vh] py-20 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+            <div class="max-w-4xl w-full mx-auto soft-box p-8">
+                <h2 class="text-3xl font-bold text-center mb-8 gradient-text">Live Exchange</h2>
+                <div id="converter-ui">
+                    <div class="flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
+
+                        <div class="w-full lg:w-5/12">
+                            <div class="currency-input-container">
+                                <label for="amount">You send</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="amount" name="amount" value="100" placeholder="100">
+                                    <select id="from-currency" name="from-currency"></select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="w-auto">
+                             <button id="swap-button" class="p-4 rounded-full text-white focus:outline-none transform lg:-mt-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="w-full lg:w-5/12">
+                             <div class="currency-input-container">
+                                <label for="to-currency">They receive</label>
+                                <div class="input-wrapper">
+                                    <div id="result-display" class="result-display-value">
+                                       </div>
+                                    <select id="to-currency" name="to-currency"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="rate-info" class="mt-8 text-center transition-opacity duration-500 opacity-0">
+                        <p class="text-gray-300 text-lg" id="rate-display"></p>
+                    </div>
+                </div>
+                 <div id="error-message" class="hidden mt-6 text-center text-red-400 bg-red-900/50 p-4 rounded-lg"></div>
+            </div>
+        </section>
+
+        <section id="popular-rates" class="fade-in-section py-20 px-4 sm:px-6 lg:px-8 spotlight">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-3xl font-bold text-center mb-12 gradient-text">Popular Exchange Rates</h2>
+                <div id="popular-rates-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="skeleton h-36"></div><div class="skeleton h-36"></div><div class="skeleton h-36"></div>
+                    <div class="skeleton h-36 sm:hidden lg:block"></div><div class="skeleton h-36 sm:hidden lg:block"></div><div class="skeleton h-36 sm:hidden lg:block"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="fade-in-section py-20 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto text-center bg-[#252528]/30 backdrop-blur-sm p-10 rounded-3xl shadow-xl transition-transform duration-300 hover:-translate-y-1">
+                <h2 class="text-3xl font-bold mb-6 gradient-text">About This Project</h2>
+                <p class="text-lg text-gray-300 leading-relaxed">
+                    This is a sleek, real-time currency converter built with modern web technologies including HTML, CSS (Tailwind), and vanilla JavaScript. It leverages the reliable <a href="https://www.frankfurter.app/" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#A64D79] hover:underline">Frankfurter API</a> to provide accurate and up-to-date financial data. The project showcases dynamic UI elements, scroll-triggered animations, and a fully responsive design for a seamless user experience.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="fade-in-section bg-black/30 py-8 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center text-gray-400">
+            <div class="flex justify-center space-x-6 mb-4">
+                <a href="#" class="hover:text-[#A64D79] transition-all duration-300 transform hover:-translate-y-1 inline-block"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg></a>
+                <a href="#" class="hover:text-[#A64D79] transition-all duration-300 transform hover:-translate-y-1 inline-block"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg></a>
+            </div>
+            <p class="mb-2">Powered by <a href="https://www.frankfurter.app/" target="_blank" rel="noopener noreferrer" class="font-semibold text-[#A64D79] hover:underline">Frankfurter API</a></p>
+            <p>&copy; 2025 Your Name. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_BASE_URL = 'https://api.frankfurter.app';
+
+            // DOM Elements
+            const amountInput = document.getElementById('amount');
+            const fromCurrencySelect = document.getElementById('from-currency');
+            const toCurrencySelect = document.getElementById('to-currency');
+            const swapButton = document.getElementById('swap-button');
+            const resultDisplay = document.getElementById('result-display');
+            const rateDisplay = document.getElementById('rate-display');
+            const errorMessageDiv = document.getElementById('error-message');
+            const popularRatesGrid = document.getElementById('popular-rates-grid');
+            const rateInfo = document.getElementById('rate-info');
+            
+            async function fetchWithHandling(url) {
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error?.info || 'An unknown API error occurred.');
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('API Fetch Error:', error);
+                    showError(error.message);
+                    return null;
+                }
+            }
+            
+            async function populateCurrencies() {
+                const data = await fetchWithHandling(`${API_BASE_URL}/currencies`);
+                if (!data) {
+                    showError('Could not load currency symbols.');
+                    return;
+                }
+
+                const currencies = Object.keys(data);
+                const fragment = document.createDocumentFragment();
+                
+                currencies.forEach(currency => {
+                    const option = document.createElement('option');
+                    option.value = currency;
+                    option.textContent = currency;
+                    fragment.appendChild(option);
+                });
+
+                fromCurrencySelect.appendChild(fragment.cloneNode(true));
+                toCurrencySelect.appendChild(fragment);
+
+                fromCurrencySelect.value = 'USD';
+                toCurrencySelect.value = 'EUR';
+
+                convertCurrency();
+            }
+
+            async function convertCurrency() {
+                const amount = parseFloat(amountInput.value);
+                const from = fromCurrencySelect.value;
+                const to = toCurrencySelect.value;
+
+                if (isNaN(amount) || !from || !to) {
+                    return;
+                }
+                
+                resultDisplay.innerHTML = '<div class="skeleton h-6 w-24 rounded-md"></div>';
+                rateInfo.classList.remove('opacity-100');
+                rateInfo.classList.add('opacity-0');
+
+                if (from === to) {
+                    hideError();
+                    const finalAmount = isNaN(amount) ? 0 : amount;
+                    resultDisplay.innerHTML = `<span>${finalAmount.toFixed(2)}</span>`;
+                    rateDisplay.textContent = `1 ${from} = 1.0000 ${to}`;
+                    rateInfo.classList.remove('opacity-0');
+                    rateInfo.classList.add('opacity-100');
+                    return;
+                }
+
+                const data = await fetchWithHandling(`${API_BASE_URL}/latest?from=${from}&to=${to}&amount=${amount}`);
+                
+                if (data && data.rates && data.rates[to] !== undefined) {
+                    hideError();
+                    resultDisplay.innerHTML = `<span>${data.rates[to].toFixed(2)}</span>`;
+                    
+                    const rate = amount !== 0 ? (data.rates[to] / amount) : 0;
+                    if (isFinite(rate) && rate > 0) {
+                         rateDisplay.textContent = `1 ${from} = ${rate.toFixed(4)} ${to}`;
+                    } else {
+                        const rateData = await fetchWithHandling(`${API_BASE_URL}/latest?from=${from}&to=${to}`);
+                        if(rateData && rateData.rates[to]) {
+                           rateDisplay.textContent = `1 ${from} = ${rateData.rates[to].toFixed(4)} ${to}`;
+                        }
+                    }
+                   
+                    rateInfo.classList.remove('opacity-0');
+                    rateInfo.classList.add('opacity-100');
+                } else {
+                     resultDisplay.innerHTML = `<span class="text-gray-500">-</span>`;
+                     rateDisplay.textContent = 'Could not fetch rate';
+                     rateInfo.classList.remove('opacity-0');
+                     rateInfo.classList.add('opacity-100');
+                }
+            }
+            
+            async function displayPopularRates() {
+                const popularPairs = ['USD-EUR', 'USD-JPY', 'EUR-GBP', 'USD-CAD', 'AUD-USD', 'GBP-JPY'];
+                const promises = popularPairs.map(pair => {
+                    const [from, to] = pair.split('-');
+                    return fetchWithHandling(`${API_BASE_URL}/latest?from=${from}&to=${to}`);
+                });
+
+                const results = await Promise.all(promises);
+                popularRatesGrid.innerHTML = ''; 
+
+                results.forEach((data, index) => {
+                    if (data && data.rates) {
+                        const [from, to] = popularPairs[index].split('-');
+                        const rate = Object.values(data.rates)[0];
+                        const card = document.createElement('div');
+                        card.className = "popular-card p-6";
+                        card.innerHTML = `
+                            <div class="flex justify-between items-center">
+                                <span class="text-xl font-bold text-white">${from} / ${to}</span>
+                                <span class="px-3 py-1 text-sm font-semibold rounded-full gradient-bg text-white">${from}</span>
+                            </div>
+                            <p class="text-3xl font-bold mt-4 text-white">${rate.toFixed(4)}</p>
+                            <p class="text-gray-400 mt-1">1 ${from} = ${rate.toFixed(4)} ${to}</p>
+                        `;
+                        popularRatesGrid.appendChild(card);
+                    }
+                });
+            }
+            
+            function showError(message) {
+                errorMessageDiv.textContent = `Error: ${message}`;
+                errorMessageDiv.classList.remove('hidden');
+            }
+
+            function hideError() {
+                errorMessageDiv.classList.add('hidden');
+            }
+
+            function handleSwap() {
+                const temp = fromCurrencySelect.value;
+                fromCurrencySelect.value = toCurrencySelect.value;
+                toCurrencySelect.value = temp;
+                convertCurrency();
+            }
+            
+            amountInput.addEventListener('input', convertCurrency);
+            fromCurrencySelect.addEventListener('change', convertCurrency);
+            toCurrencySelect.addEventListener('change', convertCurrency);
+            swapButton.addEventListener('click', handleSwap);
+
+            const animatedSections = document.querySelectorAll('.fade-in-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '0px', threshold: 0.15 });
+
+            animatedSections.forEach(section => { observer.observe(section); });
+
+            populateCurrencies();
+            displayPopularRates();
+        });
+    </script>
+</body>
+</html>

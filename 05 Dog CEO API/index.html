@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doggo Finder 🐶 - Discover Amazing Dogs</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="loading-spinner hidden">
+        <div class="spinner"></div>
+        <p>Fetching your doggo...</p>
+    </div>
+
+    <!-- Sticky Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">🐕 Doggo Finder</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html" class="nav-link back-to-hub">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Hub
+                </a></li>
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#breeds" class="nav-link">Breeds</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+            </ul>
+
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">🐕 Doggo Finder</h1>
+            <p class="hero-tagline">Discover random dogs and explore breeds instantly!</p>
+            <button id="random-dog-btn" class="cta-button">Show Me a Dog</button>
+        </div>
+        <div class="gradient-overlay"></div>
+    </section>
+
+    <!-- Breed Selector Section -->
+    <section id="breeds" class="breed-section">
+        <div class="container">
+            <h2 class="section-title">Explore Dog Breeds</h2>
+            <p class="section-subtitle">Choose from over 100 different dog breeds and discover their unique characteristics</p>
+            <div class="breed-controls">
+                <div class="control-group">
+                    <label for="breed-selector" class="control-label">🐕 Select a Breed</label>
+                    <select id="breed-selector" class="breed-dropdown">
+                        <option value="">Loading breeds...</option>
+                    </select>
+                </div>
+                <div class="button-group">
+                    <button id="fetch-breed-btn" class="fetch-btn" disabled>Get Breed Image</button>
+                    <button id="surprise-btn" class="surprise-btn">Surprise Me! (6 Random)</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Display Section -->
+    <section id="gallery" class="gallery-section">
+        <div class="container">
+            <!-- Single Image Display -->
+            <div id="single-image-container" class="single-image-container hidden">
+                <div class="image-card">
+                    <img id="dog-image" src="" alt="Dog Image" class="dog-image">
+                    <div class="image-actions">
+                        <button id="download-btn" class="action-btn">
+                            <span>📥 Download</span>
+                        </button>
+                        <button id="share-btn" class="action-btn">
+                            <span>🔗 Share</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="gallery-grid" class="gallery-grid hidden"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2 class="section-title">About Doggo Finder</h2>
+            <div class="about-content">
+                <div class="about-hero">
+                    <div class="about-text">
+                        <h3 class="about-subtitle">Discover the World of Dogs</h3>
+                        <p class="about-description">
+                            Welcome to Doggo Finder, where every click brings you closer to your next furry friend! 
+                            Our platform harnesses the power of the Dog CEO API to deliver an endless stream of 
+                            adorable canine companions right to your screen.
+                        </p>
+                        <p class="about-mission">
+                            Whether you're a dog lover, breed enthusiast, or just need a daily dose of cuteness, 
+                            we've got you covered with instant access to hundreds of dog breeds from around the globe.
+                        </p>
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">100+</div>
+                            <div class="stat-label">Dog Breeds</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">∞</div>
+                            <div class="stat-label">Random Photos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Cuteness Delivery</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="features-showcase">
+                    <h3 class="features-title">What Makes Us Special</h3>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🎲</div>
+                            <h4>Random Discovery</h4>
+                            <p>Surprise yourself with random dog photos that will brighten your day instantly</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔍</div>
+                            <h4>Breed Explorer</h4>
+                            <p>Dive deep into specific breeds and learn through beautiful, high-quality images</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <h4>Lightning Fast</h4>
+                            <p>Optimized performance ensures smooth browsing and instant image loading</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📱</div>
+                            <h4>Mobile First</h4>
+                            <p>Perfect experience across all devices - desktop, tablet, and mobile</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🌙</div>
+                            <h4>Dark Mode</h4>
+                            <p>Eye-friendly dark interface with beautiful gradient accents for comfortable viewing</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎨</div>
+                            <h4>Modern Design</h4>
+                            <p>Sleek animations and transitions that make every interaction feel magical</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="api-credit">
+                    <div class="api-info">
+                        <h3>Powered by Dog CEO API</h3>
+                        <p>
+                            This project is made possible by the amazing <a href="https://dog.ceo/dog-api/" target="_blank" rel="noopener">Dog CEO API</a>, 
+                            a free public API that provides access to thousands of dog images across hundreds of breeds. 
+                            Special thanks to the maintainers for keeping this wonderful resource available to developers worldwide!
+                        </p>
+                        <div class="tech-stack">
+                            <span class="tech-item">HTML5</span>
+                            <span class="tech-item">CSS3</span>
+                            <span class="tech-item">JavaScript</span>
+                            <span class="tech-item">Dog CEO API</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Oops! Something went wrong</h3>
+            <p id="error-message">Unable to fetch dog images. Please try again later.</p>
+            <button id="close-error-btn" class="close-btn">Close</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Powered by <a href="https://dog.ceo/dog-api/" target="_blank" rel="noopener">Dog CEO API 🐕</a></p>
+            <p>Built with ❤️ for dog lovers everywhere</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Air Quality Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Gradient Spotlight Effects */
+        .gradient-bg {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 150, 255, 0.1) 0%, rgba(0, 255, 255, 0.05) 30%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            background: linear-gradient(135deg, #000 0%, #001122 50%, #000 100%);
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00aaff, #00ffff, #0088ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 170, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.8)); }
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            color: #aaa;
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .suggestion-item:hover {
+            background: rgba(0, 170, 255, 0.2);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-flag {
+            font-size: 1.2rem;
+        }
+
+        .suggestion-text {
+            flex: 1;
+        }
+
+        .suggestion-country {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 50px;
+            color: #fff;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #00aaff;
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.3);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #00aaff, #00ffff);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.5);
+        }
+
+        .sample-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-size: 0.9rem;
+        }
+
+        .sample-btn:hover {
+            background: rgba(0, 170, 255, 0.2);
+            border-color: #00aaff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 170, 255, 0.3);
+        }
+
+        /* Section Styling */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #00aaff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* About Section */
+        .about-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .about-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 170, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .about-card:hover {
+            transform: translateY(-10px);
+            border-color: #00aaff;
+            box-shadow: 0 20px 40px rgba(0, 170, 255, 0.2);
+        }
+
+        .about-card i {
+            font-size: 3rem;
+            color: #00aaff;
+            margin-bottom: 1rem;
+        }
+
+        /* AQI Display Section */
+        .aqi-display {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .aqi-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 30px;
+            text-align: center;
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease;
+            min-width: 400px;
+        }
+
+        .aqi-card.loaded {
+            border-color: #00aaff;
+            box-shadow: 0 0 50px rgba(0, 170, 255, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 50px rgba(0, 170, 255, 0.3); }
+            50% { box-shadow: 0 0 80px rgba(0, 255, 255, 0.5); }
+        }
+
+        .aqi-value {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .aqi-status {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .pollutants {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .pollutant {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .pollutant-name {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 0.5rem;
+        }
+
+        .pollutant-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00aaff;
+        }
+
+
+        /* Map Section */
+        #map {
+            height: 500px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 170, 255, 0.3);
+            overflow: hidden;
+        }
+
+        /* City Comparison */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .comparison-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            border-color: #00aaff;
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 170, 255, 0.2);
+        }
+
+        .comparison-input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1rem;
+        }
+
+        .comparison-input:focus {
+            outline: none;
+            border-color: #00aaff;
+            box-shadow: 0 0 10px rgba(0, 170, 255, 0.3);
+        }
+
+        .compare-btn {
+            background: linear-gradient(45deg, #00aaff, #00ffff);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            color: #000;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .compare-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 170, 255, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(0, 170, 255, 0.2);
+        }
+
+        .footer a {
+            color: #00aaff;
+            text-decoration: none;
+            margin: 0 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 170, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00aaff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* AQI Color Classes */
+        .aqi-good { color: #00ff00; }
+        .aqi-moderate { color: #ffff00; }
+        .aqi-unhealthy-sensitive { color: #ff8000; }
+        .aqi-unhealthy { color: #ff0000; }
+        .aqi-very-unhealthy { color: #8000ff; }
+        .aqi-hazardous { color: #800000; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.2rem; }
+            .section { padding: 3rem 1rem; }
+            .section h2 { font-size: 2rem; }
+            .pollutants { grid-template-columns: repeat(2, 1fr); }
+            .aqi-card { min-width: auto; padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero gradient-bg">
+        <h1>Global Air Quality Dashboard</h1>
+        <p>Track real-time AQI data worldwide</p>
+        <div class="search-container">
+            <input type="text" class="search-input" id="locationSearch" placeholder="Enter city name, coordinates, or station..." autocomplete="off">
+            <button class="search-btn" onclick="searchLocation()">
+                <i class="fas fa-search"></i>
+            </button>
+            <div class="suggestions-dropdown" id="suggestionsDropdown"></div>
+        </div>
+        
+        <!-- Sample City Buttons - Global Coverage -->
+        <div style="margin-top: 2rem;">
+            <p style="color: #aaa; margin-bottom: 1rem; font-size: 0.9rem;">Try these cities from around the world:</p>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <!-- Asia -->
+                <button onclick="searchSampleCity('Beijing')" class="sample-btn">🇨🇳 Beijing</button>
+                <button onclick="searchSampleCity('Tokyo')" class="sample-btn">🇯🇵 Tokyo</button>
+                <button onclick="searchSampleCity('Delhi')" class="sample-btn">🇮🇳 Delhi</button>
+                <button onclick="searchSampleCity('Seoul')" class="sample-btn">🇰🇷 Seoul</button>
+                <button onclick="searchSampleCity('Bangkok')" class="sample-btn">🇹🇭 Bangkok</button>
+                <button onclick="searchSampleCity('Singapore')" class="sample-btn">🇸🇬 Singapore</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <!-- Europe -->
+                <button onclick="searchSampleCity('London')" class="sample-btn">🇬🇧 London</button>
+                <button onclick="searchSampleCity('Paris')" class="sample-btn">🇫🇷 Paris</button>
+                <button onclick="searchSampleCity('Berlin')" class="sample-btn">🇩🇪 Berlin</button>
+                <button onclick="searchSampleCity('Rome')" class="sample-btn">🇮🇹 Rome</button>
+                <button onclick="searchSampleCity('Madrid')" class="sample-btn">🇪🇸 Madrid</button>
+                <button onclick="searchSampleCity('Amsterdam')" class="sample-btn">🇳🇱 Amsterdam</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <!-- Americas -->
+                <button onclick="searchSampleCity('New York')" class="sample-btn">🇺🇸 New York</button>
+                <button onclick="searchSampleCity('Los Angeles')" class="sample-btn">🇺🇸 Los Angeles</button>
+                <button onclick="searchSampleCity('Toronto')" class="sample-btn">🇨🇦 Toronto</button>
+                <button onclick="searchSampleCity('Mexico City')" class="sample-btn">🇲🇽 Mexico City</button>
+                <button onclick="searchSampleCity('São Paulo')" class="sample-btn">🇧🇷 São Paulo</button>
+                <button onclick="searchSampleCity('Buenos Aires')" class="sample-btn">🇦🇷 Buenos Aires</button>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem;">
+                <!-- Africa & Oceania -->
+                <button onclick="searchSampleCity('Cairo')" class="sample-btn">🇪🇬 Cairo</button>
+                <button onclick="searchSampleCity('Cape Town')" class="sample-btn">🇿🇦 Cape Town</button>
+                <button onclick="searchSampleCity('Lagos')" class="sample-btn">🇳🇬 Lagos</button>
+                <button onclick="searchSampleCity('Sydney')" class="sample-btn">🇦🇺 Sydney</button>
+                <button onclick="searchSampleCity('Melbourne')" class="sample-btn">🇦🇺 Melbourne</button>
+                <button onclick="searchSampleCity('Auckland')" class="sample-btn">🇳🇿 Auckland</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section about gradient-bg">
+        <h2>Why Monitor Air Quality?</h2>
+        <div class="about-content">
+            <div class="about-card">
+                <i class="fas fa-lungs"></i>
+                <h3>Health Impact</h3>
+                <p>Air pollution affects respiratory health, cardiovascular system, and overall well-being. Real-time monitoring helps you make informed decisions.</p>
+            </div>
+            <div class="about-card">
+                <i class="fas fa-globe"></i>
+                <h3>Global Coverage</h3>
+                <p>Access air quality data from thousands of monitoring stations worldwide, powered by the World Air Quality Index project.</p>
+            </div>
+            <div class="about-card">
+                <i class="fas fa-chart-line"></i>
+                <h3>Real-time Data</h3>
+                <p>Get up-to-date information on PM2.5, PM10, O₃, NO₂, CO, and SO₂ levels with historical trends and forecasts.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-time AQI Display -->
+    <section class="section aqi-section">
+        <h2>Current Air Quality</h2>
+        <div class="aqi-display">
+            <div class="aqi-card" id="aqiCard">
+                <div id="aqiContent">
+                    <p>Search for a location to view air quality data</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Interactive Map Section -->
+    <section class="section map-section">
+        <h2>Global Air Quality Map</h2>
+        <div id="map"></div>
+    </section>
+
+    <!-- City Comparison Section -->
+    <section class="section comparison gradient-bg">
+        <h2>Compare Cities</h2>
+        <div class="comparison-container">
+            <div class="comparison-card">
+                <h3>City 1</h3>
+                <input type="text" class="comparison-input" id="city1" placeholder="Enter first city...">
+                <div id="city1Result" class="comparison-result"></div>
+            </div>
+            <div class="comparison-card">
+                <h3>City 2</h3>
+                <input type="text" class="comparison-input" id="city2" placeholder="Enter second city...">
+                <div id="city2Result" class="comparison-result"></div>
+            </div>
+        </div>
+        <button class="compare-btn" onclick="compareCities()" style="margin-top: 2rem; max-width: 300px; margin-left: auto; margin-right: auto; display: block;">
+            Compare Air Quality
+        </button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Global Air Quality Dashboard</p>
+        <div style="margin-top: 1rem;">
+            <a href="https://aqicn.org/" target="_blank">World Air Quality Index</a>
+            <a href="https://aqicn.org/api/" target="_blank">API Documentation</a>
+            <a href="#" onclick="showCredits()">Credits</a>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // API Configuration
+        const API_TOKEN = '06688be5033e85156cba44d73700af972fc77fa5';
+        const API_BASE_URL = 'https://api.waqi.info';
+
+        // Global variables
+        let map;
+        let currentLocationData = null;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeScrollAnimations();
+            initializeMap();
+            
+            // Add enter key support for search
+            document.getElementById('locationSearch').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchLocation();
+                }
+            });
+        });
+
+        // Scroll animations
+        function initializeScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.section').forEach(section => {
+                observer.observe(section);
+            });
+        }
+
+        // Search location function with improved error handling and multiple search strategies
+        async function searchLocation() {
+            const location = document.getElementById('locationSearch').value.trim();
+            if (!location) {
+                alert('Please enter a location');
+                return;
+            }
+
+            const aqiCard = document.getElementById('aqiCard');
+            const aqiContent = document.getElementById('aqiContent');
+            
+            // Show loading
+            aqiContent.innerHTML = '<div class="loading"></div><p>Searching for air quality data...</p>';
+            
+            try {
+                // Try multiple search strategies
+                let data = await tryMultipleSearchMethods(location);
+                
+                if (data && data.status === 'ok' && data.data) {
+                    currentLocationData = data.data;
+                    displayAQIData(data.data);
+                    aqiCard.classList.add('loaded');
+                    
+                    // Update map center
+                    if (data.data.city && data.data.city.geo) {
+                        map.setView([data.data.city.geo[0], data.data.city.geo[1]], 10);
+                    }
+                    
+                } else {
+                    // Show more helpful error message
+                    aqiContent.innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff8000; margin-bottom: 1rem;"></i>
+                            <h3>Location Not Found</h3>
+                            <p>We couldn't find air quality data for "${location}".</p>
+                            <div style="margin-top: 1rem; font-size: 0.9rem; color: #aaa;">
+                                <p><strong>Try these suggestions:</strong></p>
+                                <ul style="text-align: left; display: inline-block;">
+                                    <li>Use major city names (e.g., "New York", "London", "Tokyo")</li>
+                                    <li>Try different spellings or abbreviations</li>
+                                    <li>Use coordinates (e.g., "40.7128,-74.0060")</li>
+                                    <li>Include country name (e.g., "Paris, France")</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    aqiCard.classList.remove('loaded');
+                }
+            } catch (error) {
+                console.error('Error fetching AQI data:', error);
+                aqiContent.innerHTML = `
+                    <div style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-wifi" style="font-size: 2rem; color: #ff0000; margin-bottom: 1rem;"></i>
+                        <h3>Connection Error</h3>
+                        <p>Unable to fetch air quality data. Please check your internet connection and try again.</p>
+                        <button onclick="searchLocation()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #00aaff; border: none; border-radius: 5px; color: #000; cursor: pointer;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+                aqiCard.classList.remove('loaded');
+            }
+        }
+
+        // Comprehensive global search system for all world cities and countries
+        async function tryMultipleSearchMethods(location) {
+            console.log(`🔍 Starting comprehensive search for: "${location}"`);
+            
+            // Prepare location variations for better matching
+            const locationVariations = generateLocationVariations(location);
+            console.log(`📍 Generated ${locationVariations.length} location variations`);
+            
+            // Try direct feed endpoints first
+            for (const variation of locationVariations) {
+                try {
+                    const url = `${API_BASE_URL}/feed/${encodeURIComponent(variation)}/?token=${API_TOKEN}`;
+                    console.log(`🌐 Trying direct feed: ${variation}`);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' },
+                        mode: 'cors'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.status === 'ok' && data.data) {
+                            console.log(`✅ Success with direct feed: ${variation}`);
+                            return data;
+                        }
+                    }
+                } catch (error) {
+                    console.log(`❌ Direct feed failed for ${variation}:`, error.message);
+                }
+            }
+            
+            // Try search endpoint for fuzzy matching
+            try {
+                console.log(`🔎 Trying search endpoint for: ${location}`);
+                const searchUrl = `${API_BASE_URL}/search/?token=${API_TOKEN}&keyword=${encodeURIComponent(location)}`;
+                const response = await fetch(searchUrl);
+                const searchData = await response.json();
+                
+                if (searchData.status === 'ok' && searchData.data && searchData.data.length > 0) {
+                    console.log(`📋 Found ${searchData.data.length} search results`);
+                    
+                    // Try to get data from the best matching result
+                    for (const result of searchData.data.slice(0, 3)) { // Try top 3 results
+                        try {
+                            const feedUrl = `${API_BASE_URL}/feed/@${result.uid}/?token=${API_TOKEN}`;
+                            console.log(`🎯 Trying search result: ${result.station.name}`);
+                            
+                            const feedResponse = await fetch(feedUrl);
+                            const feedData = await feedResponse.json();
+                            
+                            if (feedData.status === 'ok' && feedData.data) {
+                                console.log(`✅ Success with search result: ${result.station.name}`);
+                                return feedData;
+                            }
+                        } catch (error) {
+                            console.log(`❌ Search result failed: ${result.station.name}`, error.message);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('❌ Search endpoint failed:', error.message);
+            }
+            
+            // Try coordinate-based search if input looks like coordinates
+            if (isCoordinates(location)) {
+                try {
+                    const coords = parseCoordinates(location);
+                    const geoUrl = `${API_BASE_URL}/feed/geo:${coords.lat};${coords.lon}/?token=${API_TOKEN}`;
+                    console.log(`🌍 Trying geo search: ${coords.lat}, ${coords.lon}`);
+                    
+                    const response = await fetch(geoUrl);
+                    const data = await response.json();
+                    
+                    if (data.status === 'ok' && data.data) {
+                        console.log(`✅ Success with geo search`);
+                        return data;
+                    }
+                } catch (error) {
+                    console.log('❌ Geo search failed:', error.message);
+                }
+            }
+            
+            // Try nearby major cities if nothing else works
+            const nearbyResults = await tryNearbyMajorCities(location);
+            if (nearbyResults) {
+                console.log(`✅ Success with nearby city search`);
+                return nearbyResults;
+            }
+            
+            console.log(`❌ All search methods exhausted for: ${location}`);
+            return null;
+        }
+
+        // Generate comprehensive location variations for global coverage
+        function generateLocationVariations(location) {
+            const variations = new Set();
+            const original = location.trim();
+            
+            // Add original
+            variations.add(original);
+            variations.add(original.toLowerCase());
+            variations.add(original.toUpperCase());
+            
+            // Add with common country suffixes
+            const countries = [
+                'US', 'USA', 'United States',
+                'UK', 'United Kingdom', 'England',
+                'China', 'India', 'Japan', 'Germany', 'France', 'Italy', 'Spain',
+                'Canada', 'Australia', 'Brazil', 'Russia', 'Mexico', 'South Korea',
+                'Netherlands', 'Belgium', 'Switzerland', 'Austria', 'Sweden',
+                'Norway', 'Denmark', 'Finland', 'Poland', 'Czech Republic',
+                'Hungary', 'Romania', 'Bulgaria', 'Greece', 'Turkey', 'Egypt',
+                'South Africa', 'Nigeria', 'Kenya', 'Morocco', 'Algeria',
+                'Argentina', 'Chile', 'Colombia', 'Peru', 'Venezuela',
+                'Thailand', 'Vietnam', 'Malaysia', 'Singapore', 'Indonesia',
+                'Philippines', 'Taiwan', 'Hong Kong', 'New Zealand'
+            ];
+            
+            // Add variations with country names
+            countries.forEach(country => {
+                variations.add(`${original}, ${country}`);
+                variations.add(`${original.toLowerCase()}, ${country.toLowerCase()}`);
+            });
+            
+            // Add common city name variations
+            const cityVariations = generateCityVariations(original);
+            cityVariations.forEach(variation => variations.add(variation));
+            
+            // Remove empty strings and convert to array
+            return Array.from(variations).filter(v => v && v.length > 0);
+        }
+
+        // Generate city-specific variations (handle common abbreviations and alternate names)
+        function generateCityVariations(city) {
+            const variations = [];
+            const lower = city.toLowerCase();
+            
+            // Common city abbreviations and alternate names
+            const cityMappings = {
+                'nyc': ['New York', 'New York City', 'NYC'],
+                'new york': ['New York', 'New York City', 'NYC'],
+                'la': ['Los Angeles', 'LA'],
+                'los angeles': ['Los Angeles', 'LA'],
+                'sf': ['San Francisco', 'SF'],
+                'san francisco': ['San Francisco', 'SF'],
+                'chicago': ['Chicago', 'Chi'],
+                'miami': ['Miami', 'Miami Beach'],
+                'vegas': ['Las Vegas', 'Vegas'],
+                'las vegas': ['Las Vegas', 'Vegas'],
+                'dc': ['Washington', 'Washington DC', 'DC'],
+                'washington': ['Washington', 'Washington DC', 'DC'],
+                'london': ['London', 'Greater London'],
+                'paris': ['Paris', 'Île-de-France'],
+                'tokyo': ['Tokyo', 'Tōkyō'],
+                'beijing': ['Beijing', 'Peking'],
+                'mumbai': ['Mumbai', 'Bombay'],
+                'delhi': ['Delhi', 'New Delhi'],
+                'bangalore': ['Bangalore', 'Bengaluru'],
+                'chennai': ['Chennai', 'Madras'],
+                'kolkata': ['Kolkata', 'Calcutta'],
+                'st petersburg': ['Saint Petersburg', 'St Petersburg', 'Sankt-Peterburg'],
+                'mexico city': ['Mexico City', 'Ciudad de México', 'CDMX'],
+                'rio': ['Rio de Janeiro', 'Rio'],
+                'sao paulo': ['São Paulo', 'Sao Paulo'],
+                'buenos aires': ['Buenos Aires', 'BA'],
+                'cape town': ['Cape Town', 'Kaapstad']
+            };
+            
+            // Add mapped variations
+            if (cityMappings[lower]) {
+                variations.push(...cityMappings[lower]);
+            }
+            
+            // Add variations with common prefixes/suffixes
+            variations.push(`${city} City`);
+            variations.push(`Greater ${city}`);
+            variations.push(`${city} Metro`);
+            variations.push(`${city} Metropolitan`);
+            
+            return variations;
+        }
+
+        // Parse coordinates from string
+        function parseCoordinates(coordString) {
+            const cleaned = coordString.replace(/\s/g, '');
+            const parts = cleaned.split(',');
+            return {
+                lat: parseFloat(parts[0]),
+                lon: parseFloat(parts[1])
+            };
+        }
+
+        // Try to find nearby major cities if direct search fails
+        async function tryNearbyMajorCities(location) {
+            console.log(`🌆 Trying nearby major cities for: ${location}`);
+            
+            // Major world cities that are likely to have data
+            const majorCities = [
+                'Beijing', 'Shanghai', 'Guangzhou', 'Shenzhen', 'Chengdu', 'Wuhan', 'Hangzhou',
+                'Tokyo', 'Osaka', 'Kyoto', 'Yokohama', 'Nagoya', 'Sapporo', 'Fukuoka',
+                'Seoul', 'Busan', 'Incheon', 'Daegu', 'Daejeon',
+                'Mumbai', 'Delhi', 'Bangalore', 'Hyderabad', 'Chennai', 'Kolkata', 'Pune', 'Ahmedabad',
+                'London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool', 'Edinburgh',
+                'Paris', 'Lyon', 'Marseille', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg',
+                'Berlin', 'Hamburg', 'Munich', 'Cologne', 'Frankfurt', 'Stuttgart', 'Düsseldorf',
+                'Madrid', 'Barcelona', 'Valencia', 'Seville', 'Bilbao', 'Málaga',
+                'Rome', 'Milan', 'Naples', 'Turin', 'Palermo', 'Genoa', 'Bologna',
+                'Amsterdam', 'Rotterdam', 'The Hague', 'Utrecht', 'Eindhoven',
+                'Brussels', 'Antwerp', 'Ghent', 'Charleroi', 'Liège',
+                'Zurich', 'Geneva', 'Basel', 'Lausanne', 'Bern',
+                'Vienna', 'Graz', 'Linz', 'Salzburg', 'Innsbruck',
+                'Stockholm', 'Gothenburg', 'Malmö', 'Uppsala',
+                'Oslo', 'Bergen', 'Trondheim', 'Stavanger',
+                'Copenhagen', 'Aarhus', 'Odense', 'Aalborg',
+                'Helsinki', 'Espoo', 'Tampere', 'Vantaa',
+                'Warsaw', 'Krakow', 'Łódź', 'Wrocław', 'Poznań',
+                'Prague', 'Brno', 'Ostrava', 'Plzen',
+                'Budapest', 'Debrecen', 'Szeged', 'Miskolc',
+                'Bucharest', 'Cluj-Napoca', 'Timișoara', 'Iași',
+                'Sofia', 'Plovdiv', 'Varna', 'Burgas',
+                'Athens', 'Thessaloniki', 'Patras', 'Heraklion',
+                'Istanbul', 'Ankara', 'Izmir', 'Bursa', 'Adana',
+                'Cairo', 'Alexandria', 'Giza', 'Shubra El Kheima',
+                'Cape Town', 'Johannesburg', 'Durban', 'Pretoria',
+                'Lagos', 'Kano', 'Ibadan', 'Abuja',
+                'Nairobi', 'Mombasa', 'Nakuru', 'Eldoret',
+                'Casablanca', 'Rabat', 'Fez', 'Marrakech',
+                'Algiers', 'Oran', 'Constantine', 'Annaba',
+                'Buenos Aires', 'Córdoba', 'Rosario', 'Mendoza',
+                'Santiago', 'Valparaíso', 'Concepción', 'La Serena',
+                'Bogotá', 'Medellín', 'Cali', 'Barranquilla',
+                'Lima', 'Arequipa', 'Trujillo', 'Chiclayo',
+                'Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto',
+                'Bangkok', 'Chiang Mai', 'Pattaya', 'Hat Yai',
+                'Ho Chi Minh City', 'Hanoi', 'Da Nang', 'Can Tho',
+                'Kuala Lumpur', 'George Town', 'Ipoh', 'Shah Alam',
+                'Singapore',
+                'Jakarta', 'Surabaya', 'Bandung', 'Bekasi',
+                'Manila', 'Quezon City', 'Davao', 'Cebu City',
+                'Taipei', 'Kaohsiung', 'Taichung', 'Tainan',
+                'Hong Kong',
+                'Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide',
+                'Auckland', 'Wellington', 'Christchurch', 'Hamilton',
+                'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia',
+                'San Antonio', 'San Diego', 'Dallas', 'San Jose', 'Austin', 'Jacksonville',
+                'Fort Worth', 'Columbus', 'Charlotte', 'San Francisco', 'Indianapolis', 'Seattle',
+                'Denver', 'Washington', 'Boston', 'El Paso', 'Nashville', 'Detroit', 'Oklahoma City',
+                'Portland', 'Las Vegas', 'Memphis', 'Louisville', 'Baltimore', 'Milwaukee',
+                'Albuquerque', 'Tucson', 'Fresno', 'Sacramento', 'Kansas City', 'Mesa',
+                'Atlanta', 'Omaha', 'Colorado Springs', 'Raleigh', 'Miami', 'Oakland',
+                'Minneapolis', 'Tulsa', 'Cleveland', 'Wichita', 'Arlington',
+                'Toronto', 'Montreal', 'Calgary', 'Ottawa', 'Edmonton', 'Mississauga',
+                'Winnipeg', 'Vancouver', 'Brampton', 'Hamilton', 'Quebec City', 'Surrey',
+                'Laval', 'Halifax', 'London', 'Markham', 'Vaughan', 'Gatineau',
+                'Mexico City', 'Guadalajara', 'Monterrey', 'Puebla', 'Tijuana', 'León',
+                'Juárez', 'Zapopan', 'Nezahualcóyotl', 'Chihuahua', 'Naucalpan', 'Mérida',
+                'São Paulo', 'Rio de Janeiro', 'Salvador', 'Brasília', 'Fortaleza', 'Belo Horizonte',
+                'Manaus', 'Curitiba', 'Recife', 'Goiânia', 'Belém', 'Porto Alegre',
+                'Moscow', 'Saint Petersburg', 'Novosibirsk', 'Yekaterinburg', 'Nizhny Novgorod',
+                'Kazan', 'Chelyabinsk', 'Omsk', 'Samara', 'Rostov-on-Don', 'Ufa', 'Krasnoyarsk'
+            ];
+            
+            // Check if the search term is similar to any major city
+            const searchLower = location.toLowerCase();
+            for (const city of majorCities) {
+                if (city.toLowerCase().includes(searchLower) || searchLower.includes(city.toLowerCase())) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/feed/${encodeURIComponent(city)}/?token=${API_TOKEN}`);
+                        const data = await response.json();
+                        if (data.status === 'ok' && data.data) {
+                            console.log(`✅ Found nearby city match: ${city}`);
+                            return data;
+                        }
+                    } catch (error) {
+                        continue;
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        // Check if input looks like coordinates
+        function isCoordinates(input) {
+            const coordPattern = /^-?\d+\.?\d*,-?\d+\.?\d*$/;
+            return coordPattern.test(input.replace(/\s/g, ''));
+        }
+
+        // Display AQI data
+        function displayAQIData(data) {
+            const aqiContent = document.getElementById('aqiContent');
+            const aqi = data.aqi;
+            const city = data.city.name;
+            const time = new Date(data.time.s).toLocaleString();
+            
+            const aqiClass = getAQIClass(aqi);
+            const aqiStatus = getAQIStatus(aqi);
+            const healthRecommendation = getHealthRecommendation(aqi);
+            
+            let pollutantsHTML = '';
+            if (data.iaqi) {
+                const pollutants = ['pm25', 'pm10', 'o3', 'no2', 'co', 'so2'];
+                pollutantsHTML = pollutants.map(pollutant => {
+                    const value = data.iaqi[pollutant] ? data.iaqi[pollutant].v : 'N/A';
+                    return `
+                        <div class="pollutant">
+                            <div class="pollutant-name">${pollutant.toUpperCase()}</div>
+                            <div class="pollutant-value">${value}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            aqiContent.innerHTML = `
+                <div class="aqi-value ${aqiClass}">${aqi}</div>
+                <div class="aqi-status ${aqiClass}">${aqiStatus}</div>
+                <h3>${city}</h3>
+                <p style="color: #aaa; margin-bottom: 1rem;">Last updated: ${time}</p>
+                <div class="health-recommendation" style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <strong>Health Recommendation:</strong><br>
+                    ${healthRecommendation}
+                </div>
+                ${pollutantsHTML ? `<div class="pollutants">${pollutantsHTML}</div>` : ''}
+            `;
+        }
+
+        // Get AQI color class
+        function getAQIClass(aqi) {
+            if (aqi <= 50) return 'aqi-good';
+            if (aqi <= 100) return 'aqi-moderate';
+            if (aqi <= 150) return 'aqi-unhealthy-sensitive';
+            if (aqi <= 200) return 'aqi-unhealthy';
+            if (aqi <= 300) return 'aqi-very-unhealthy';
+            return 'aqi-hazardous';
+        }
+
+        // Get AQI status text
+        function getAQIStatus(aqi) {
+            if (aqi <= 50) return 'Good';
+            if (aqi <= 100) return 'Moderate';
+            if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
+            if (aqi <= 200) return 'Unhealthy';
+            if (aqi <= 300) return 'Very Unhealthy';
+            return 'Hazardous';
+        }
+
+        // Get health recommendation
+        function getHealthRecommendation(aqi) {
+            if (aqi <= 50) return 'Air quality is satisfactory. Enjoy outdoor activities!';
+            if (aqi <= 100) return 'Air quality is acceptable. Sensitive individuals should consider limiting prolonged outdoor exertion.';
+            if (aqi <= 150) return 'Members of sensitive groups may experience health effects. Limit prolonged outdoor exertion.';
+            if (aqi <= 200) return 'Everyone may begin to experience health effects. Avoid prolonged outdoor exertion.';
+            if (aqi <= 300) return 'Health alert: everyone may experience serious health effects. Avoid outdoor activities.';
+            return 'Health warnings of emergency conditions. Stay indoors and avoid all outdoor activities.';
+        }
+
+        // Initialize map
+        function initializeMap() {
+            map = L.map('map').setView([40.7128, -74.0060], 2);
+            
+            // Dark theme tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Load global stations
+            loadGlobalStations();
+        }
+
+        // Load global air quality stations with improved error handling
+        async function loadGlobalStations() {
+            try {
+                console.log('Loading global air quality stations...');
+                
+                // Expanded list of major cities
+                const cities = [
+                    'Beijing', 'London', 'New York', 'Tokyo', 'Delhi', 'Paris', 
+                    'Los Angeles', 'Mumbai', 'Shanghai', 'São Paulo', 'Moscow', 'Sydney',
+                    'Berlin', 'Madrid', 'Rome', 'Bangkok', 'Singapore', 'Seoul',
+                    'Mexico City', 'Cairo', 'Istanbul', 'Buenos Aires', 'Toronto', 'Chicago'
+                ];
+                
+                let successCount = 0;
+                let totalAttempts = 0;
+                
+                for (const city of cities) {
+                    totalAttempts++;
+                    try {
+                        // Use the improved search method for global stations too
+                        const data = await tryMultipleSearchMethods(city);
+                        
+                        if (data && data.status === 'ok' && data.data && data.data.city && data.data.city.geo) {
+                            const aqi = data.data.aqi;
+                            const color = getMarkerColor(aqi);
+                            
+                            L.circleMarker([data.data.city.geo[0], data.data.city.geo[1]], {
+                                radius: 8,
+                                fillColor: color,
+                                color: color,
+                                weight: 2,
+                                opacity: 0.8,
+                                fillOpacity: 0.6
+                            }).addTo(map).bindPopup(`
+                                <div style="color: #000;">
+                                    <strong>${data.data.city.name}</strong><br>
+                                    AQI: <span style="color: ${color}; font-weight: bold;">${aqi}</span><br>
+                                    Status: ${getAQIStatus(aqi)}<br>
+                                    <small>Updated: ${new Date(data.data.time.s).toLocaleDateString()}</small>
+                                </div>
+                            `);
+                            
+                            successCount++;
+                            console.log(`✓ Loaded ${city}: AQI ${aqi}`);
+                        } else {
+                            console.log(`✗ No data available for ${city}`);
+                        }
+                    } catch (error) {
+                        console.log(`✗ Error loading data for ${city}:`, error.message);
+                    }
+                    
+                    // Add small delay to avoid overwhelming the API
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                console.log(`Global stations loaded: ${successCount}/${totalAttempts} successful`);
+                
+                if (successCount === 0) {
+                    console.warn('No global stations could be loaded. Check API connectivity.');
+                }
+                
+            } catch (error) {
+                console.error('Error loading global stations:', error);
+            }
+        }
+
+        // Get marker color based on AQI
+        function getMarkerColor(aqi) {
+            if (aqi <= 50) return '#00ff00';
+            if (aqi <= 100) return '#ffff00';
+            if (aqi <= 150) return '#ff8000';
+            if (aqi <= 200) return '#ff0000';
+            if (aqi <= 300) return '#8000ff';
+            return '#800000';
+        }
+
+
+        // Compare cities function with improved search
+        async function compareCities() {
+            const city1 = document.getElementById('city1').value.trim();
+            const city2 = document.getElementById('city2').value.trim();
+            
+            if (!city1 || !city2) {
+                alert('Please enter both cities to compare');
+                return;
+            }
+            
+            const city1Result = document.getElementById('city1Result');
+            const city2Result = document.getElementById('city2Result');
+            
+            // Show loading
+            city1Result.innerHTML = '<div class="loading"></div>';
+            city2Result.innerHTML = '<div class="loading"></div>';
+            
+            try {
+                // Use the improved search method for both cities
+                const [data1, data2] = await Promise.all([
+                    tryMultipleSearchMethods(city1),
+                    tryMultipleSearchMethods(city2)
+                ]);
+                
+                if (data1 && data1.status === 'ok' && data1.data) {
+                    displayComparisonResult(city1Result, data1.data);
+                } else {
+                    city1Result.innerHTML = `
+                        <div style="text-align: center; padding: 1rem; color: #ff8000;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>City "${city1}" not found</p>
+                        </div>
+                    `;
+                }
+                
+                if (data2 && data2.status === 'ok' && data2.data) {
+                    displayComparisonResult(city2Result, data2.data);
+                } else {
+                    city2Result.innerHTML = `
+                        <div style="text-align: center; padding: 1rem; color: #ff8000;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>City "${city2}" not found</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error comparing cities:', error);
+                city1Result.innerHTML = `
+                    <div style="text-align: center; padding: 1rem; color: #ff0000;">
+                        <i class="fas fa-wifi"></i>
+                        <p>Connection error</p>
+                    </div>
+                `;
+                city2Result.innerHTML = `
+                    <div style="text-align: center; padding: 1rem; color: #ff0000;">
+                        <i class="fas fa-wifi"></i>
+                        <p>Connection error</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display comparison result
+        function displayComparisonResult(container, data) {
+            const aqi = data.aqi;
+            const aqiClass = getAQIClass(aqi);
+            const aqiStatus = getAQIStatus(aqi);
+            
+            container.innerHTML = `
+                <div style="text-align: center; padding: 1rem;">
+                    <div class="aqi-value ${aqiClass}" style="font-size: 2rem; margin-bottom: 0.5rem;">${aqi}</div>
+                    <div class="${aqiClass}" style="font-weight: 600; margin-bottom: 1rem;">${aqiStatus}</div>
+                    <div style="font-size: 0.9rem; color: #aaa;">
+                        ${data.city.name}<br>
+                        Updated: ${new Date(data.time.s).toLocaleDateString()}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Show credits
+        function showCredits() {
+            alert('Global Air Quality Dashboard\n\nData provided by World Air Quality Index (WAQI)\nBuilt with HTML, CSS, JavaScript, Leaflet.js, and Chart.js\n\nAPI: https://aqicn.org/api/');
+        }
+
+        // Add some sample searches for demonstration
+        function searchSampleCity(city) {
+            document.getElementById('locationSearch').value = city;
+            searchLocation();
+        }
+
+        // Add click handlers for sample searches (you can add buttons for these)
+        console.log('Global Air Quality Dashboard loaded successfully!');
+        console.log('Try searching for cities like: Beijing, London, New York, Delhi, Paris');
+    </script>
+</body>
+</html>

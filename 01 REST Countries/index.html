@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore the World - REST Countries</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-globe-americas"></i>
+                <span>WorldExplorer</span>
+            </div>
+            <div class="nav-links">
+                <a href="../index.html" class="nav-link back-to-hub">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Hub
+                </a>
+                <a href="#hero" class="nav-link">Home</a>
+                <a href="#search-section" class="nav-link">Countries</a>
+                <a href="#about-section" class="nav-link">About</a>
+            </div>
+            <div class="nav-mobile-toggle" id="mobileToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+        <div class="nav-mobile-menu" id="mobileMenu">
+            <a href="../index.html" class="nav-mobile-link back-to-hub">
+                <i class="fas fa-arrow-left"></i>
+                Back to Hub
+            </a>
+            <a href="#hero" class="nav-mobile-link">Home</a>
+            <a href="#search-section" class="nav-mobile-link">Countries</a>
+            <a href="#about-section" class="nav-mobile-link">About</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-spotlight"></div>
+            <h1 class="hero-title">Explore the World</h1>
+            <p class="hero-subtitle">Discover fascinating facts about countries around the globe</p>
+            <button class="cta-button" onclick="scrollToSection('search-section')">
+                <span>Start Exploring</span>
+                <i class="fas fa-arrow-down"></i>
+            </button>
+        </div>
+    </section>
+
+    <!-- Search & Filter Section -->
+    <section class="search-section" id="search-section">
+        <div class="container">
+            <div class="search-container">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search for a country...">
+                </div>
+                <div class="filter-dropdown">
+                    <select id="regionFilter">
+                        <option value="">Filter by Region</option>
+                        <option value="Africa">Africa</option>
+                        <option value="Americas">Americas</option>
+                        <option value="Asia">Asia</option>
+                        <option value="Europe">Europe</option>
+                        <option value="Oceania">Oceania</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Countries Grid -->
+    <section class="countries-section">
+        <div class="container">
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p>Loading countries...</p>
+            </div>
+            <div class="countries-grid" id="countriesGrid">
+                <!-- Country cards will be dynamically inserted here -->
+            </div>
+            <div class="error-message" id="errorMessage" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>Oops! Something went wrong</h3>
+                <p>Unable to fetch country data. Please check your internet connection and try again.</p>
+                <button onclick="loadCountries()" class="retry-button">Try Again</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Country Detail Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <button class="close-modal" id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-body" id="modalBody">
+                <!-- Country details will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <section class="about-section" id="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="about-title">About WorldExplorer</h2>
+                    <p class="about-description">
+                        WorldExplorer is your gateway to discovering the fascinating diversity of our planet. With comprehensive data on countries from every continent, we bring you detailed information about populations, cultures, languages, currencies, and much more.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-globe-americas"></i>
+                            <div>
+                                <h4>250+ Countries</h4>
+                                <p>Explore detailed information about every country in the world</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-search"></i>
+                            <div>
+                                <h4>Smart Search</h4>
+                                <p>Find countries by name, capital, or region with instant results</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-chart-bar"></i>
+                            <div>
+                                <h4>Rich Data</h4>
+                                <p>Population, languages, currencies, borders, and cultural insights</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div>
+                                <h4>Mobile Friendly</h4>
+                                <p>Optimized experience across all devices and screen sizes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">195</div>
+                        <div class="stat-label">UN Member Countries</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">7.8B</div>
+                        <div class="stat-label">World Population</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Continents</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">7000+</div>
+                        <div class="stat-label">Languages</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>WorldExplorer</h3>
+                    <p>Discover the world, one country at a time. Explore comprehensive country data, learn about cultures, and expand your global knowledge.</p>
+                    <div class="footer-stats">
+                        <div class="footer-stat">
+                            <i class="fas fa-globe"></i>
+                            <span>250+ Countries</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-users"></i>
+                            <span>7.8B+ People</span>
+                        </div>
+                        <div class="footer-stat">
+                            <i class="fas fa-language"></i>
+                            <span>7000+ Languages</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Explore</h4>
+                    <ul class="footer-links">
+                        <li><a href="#hero">Home</a></li>
+                        <li><a href="#search-section">Search Countries</a></li>
+                        <li><a href="#about-section">About Us</a></li>
+                        <li><a onclick="showRandomCountry()">Random Country</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Features</h4>
+                    <ul class="footer-links">
+                        <li><a onclick="filterByRegion('Asia')">Asian Countries</a></li>
+                        <li><a onclick="filterByRegion('Europe')">European Countries</a></li>
+                        <li><a onclick="filterByRegion('Africa')">African Countries</a></li>
+                        <li><a onclick="filterByRegion('Americas')">American Countries</a></li>
+                        <li><a onclick="filterByRegion('Oceania')">Oceania Countries</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Connect With Us</h4>
+                    <p>Follow our journey of global exploration</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" title="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                    <div class="footer-contact">
+                        <p><i class="fas fa-envelope"></i> IleshDevX@gmail.com</p>
+                        <p><i class="fas fa-code"></i> Open Source Project</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 WorldExplorer. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Cookie Policy</a>
+                        <a href="#">Accessibility</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

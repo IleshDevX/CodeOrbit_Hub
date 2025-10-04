@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Bank Data Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- AOS (Animate On Scroll) Library for animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Custom styles for the dark theme and spotlight effect */
+        body {
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .spotlight {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(90deg, #FFFFFF, #676FDD, #F6B17A);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .btn-gradient {
+            background-image: linear-gradient(to right, #676FDD 0%, #424769  51%, #676FDD  100%);
+            transition: 0.5s;
+            background-size: 200% auto;
+            color: white;            
+        }
+
+        .btn-gradient:hover {
+            background-position: right center;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2D3250;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #424769;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #676FDD;
+        }
+
+        /* Custom Dropdown */
+        .custom-select-container .custom-select-options {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .custom-select-container input[type="checkbox"] {
+            accent-color: #676FDD;
+        }
+    </style>
+</head>
+<body class="relative">
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md border-b border-gray-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl gradient-text">DataExplorer</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#hero" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Home</a>
+                        <a href="#controls" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Explorer</a>
+                        <a href="#about" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">About</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Header -->
+    <header id="hero" class="h-screen flex items-center justify-center text-center relative overflow-hidden" data-aos="fade-in" data-aos-duration="1500">
+        <div class="spotlight"></div>
+        <div class="z-10 p-4">
+            <h1 class="text-5xl md:text-7xl font-black mb-4 gradient-text">Explore Global Trends</h1>
+            <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+                Dive into World Bank data. Select countries and indicators to visualize development trends over time.
+            </p>
+            <a href="#controls" class="btn-gradient text-lg font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105">
+                Start Exploring
+            </a>
+        </div>
+    </header>
+
+    <main class="relative z-10">
+        <!-- Redesigned Data Controls & Selection Panel -->
+        <section id="controls" class="py-24 px-4 md:px-8 relative bg-black">
+            <div class="spotlight"></div>
+            <div class="max-w-2xl mx-auto p-8 bg-[#1a1a1a]/50 border border-gray-700 rounded-2xl shadow-2xl backdrop-blur-lg" data-aos="fade-up">
+                <div class="text-center">
+                     <h2 class="text-3xl font-bold mb-2 gradient-text">Start Your Analysis</h2>
+                     <p class="text-gray-400 mb-8">Select your parameters below to generate a custom visualization.</p>
+                </div>
+                <div class="space-y-6">
+                    <!-- Custom Country Selector -->
+                    <div class="custom-select-container relative">
+                        <label for="country-select-button" class="block text-lg font-medium mb-2">1. Choose Countries</label>
+                        <button id="country-select-button" class="w-full bg-[#2D3250] border border-[#424769] rounded-lg p-3 text-left flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-[#676FDD]">
+                            <span>Select Countries</span>
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="country-select-options" class="hidden absolute w-full mt-1 bg-[#2D3250] border border-[#424769] rounded-lg z-10 p-2">
+                            <input type="text" id="country-search" class="w-full bg-[#424769] rounded-md p-2 mb-2 focus:outline-none" placeholder="Search countries...">
+                            <div id="country-list" class="custom-select-options space-y-1">
+                                <!-- Country checkboxes will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Indicator Selector -->
+                    <div>
+                        <label for="indicator-select" class="block text-lg font-medium mb-2">2. Choose an Indicator</label>
+                        <select id="indicator-select" class="w-full bg-[#2D3250] border border-[#424769] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#676FDD]">
+                            <!-- Options will be populated by JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <button id="generate-chart" class="btn-gradient text-xl font-bold py-4 px-10 rounded-full shadow-xl transform transition hover:scale-105 w-full">
+                        Generate Visualization
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization Dashboard -->
+        <section id="visualization" class="py-20 px-4 md:px-8 relative min-h-screen">
+            <div class="spotlight"></div>
+            <div class="max-w-6xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+                <!-- Loading Spinner -->
+                <div id="loading" class="text-center hidden">
+                    <svg class="animate-spin h-10 w-10 text-[#676FDD] mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-2">Fetching data...</p>
+                </div>
+                 <!-- Error Message -->
+                <div id="error-message" class="text-center hidden bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg relative" role="alert">
+                    <strong class="font-bold">Error:</strong>
+                    <span class="block sm:inline" id="error-text"></span>
+                </div>
+                <!-- Chart and Table container -->
+                <div id="dashboard-content" class="hidden">
+                    <h2 class="text-3xl font-bold text-center mb-10" id="chart-title"></h2>
+                    <!-- Chart -->
+                    <div class="bg-[#0a0a0a] p-4 md:p-6 rounded-2xl shadow-2xl relative" style="backdrop-filter: blur(10px); background-color: rgba(10, 10, 10, 0.7);">
+                         <canvas id="myChart" height="400"></canvas>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="mt-16" data-aos="fade-up">
+                        <h3 class="text-2xl font-bold text-center mb-6">Raw Data</h3>
+                        <div class="overflow-x-auto bg-[#0a0a0a] rounded-2xl shadow-2xl p-4" style="backdrop-filter: blur(10px); background-color: rgba(10, 10, 10, 0.7);">
+                             <table class="min-w-full text-left" id="data-table">
+                                <!-- Content will be populated by JavaScript -->
+                             </table>
+                        </div>
+                        <!-- Pagination Controls -->
+                        <div id="pagination-controls" class="flex justify-center items-center mt-6 space-x-4">
+                            <button id="prev-btn" class="bg-[#2D3250] py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">&larr; Previous</button>
+                            <span id="page-info" class="text-gray-300"></span>
+                            <button id="next-btn" class="bg-[#2D3250] py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">Next &rarr;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- About Section -->
+        <section id="about" class="py-20 px-4 md:px-8 relative bg-[#0a0a0a]">
+            <div class="spotlight"></div>
+            <div class="max-w-4xl mx-auto text-center" data-aos="fade-up">
+                <h2 class="text-3xl font-bold mb-4 gradient-text">About This Project</h2>
+                <p class="text-lg text-gray-300 mb-8 max-w-3xl mx-auto">
+                    The World Bank Data Explorer is an interactive tool designed to make global development data accessible and easy to understand. It allows users to visualize trends by comparing various countries across a wide range of economic and social indicators.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-[#1a1a1a]/50 p-6 rounded-xl border border-gray-800">
+                        <h3 class="text-xl font-bold mb-2 text-white">Technology</h3>
+                        <p class="text-gray-400">Built with pure HTML, modern JavaScript, and styled with Tailwind CSS. Visualizations are powered by the robust Chart.js library.</p>
+                    </div>
+                    <div class="bg-[#1a1a1a]/50 p-6 rounded-xl border border-gray-800">
+                        <h3 class="text-xl font-bold mb-2 text-white">Data Source</h3>
+                        <p class="text-gray-400">All data is fetched in real-time from the official World Bank Open Data API, ensuring accuracy and reliability.</p>
+                    </div>
+                    <div class="bg-[#1a1a1a]/50 p-6 rounded-xl border border-gray-800">
+                        <h3 class="text-xl font-bold mb-2 text-white">Design</h3>
+                        <p class="text-gray-400">Features a sleek dark mode theme, scroll-triggered animations via AOS, and a fully responsive layout for a seamless experience on any device.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="text-center py-8 px-4 relative bg-black">
+        <div class="spotlight"></div>
+        <p class="text-gray-400">&copy; 2024 World Bank Data Explorer. Created for demonstration purposes.</p>
+        <p class="text-gray-500">Data provided by the <a href="https://data.worldbank.org/" target="noopener" rel="noopener noreferrer" class="underline hover:text-[#676FDD]">World Bank API</a>.</p>
+    </footer>
+
+    <script>
+        // Initialize AOS
+        AOS.init({
+            once: true,
+            mirror: false,
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const indicatorSelect = document.getElementById('indicator-select');
+            const generateBtn = document.getElementById('generate-chart');
+            const loadingEl = document.getElementById('loading');
+            const errorMessageEl = document.getElementById('error-message');
+            const errorTextEl = document.getElementById('error-text');
+            const dashboardContentEl = document.getElementById('dashboard-content');
+            const chartTitleEl = document.getElementById('chart-title');
+            const dataTableEl = document.getElementById('data-table');
+            const paginationControls = document.getElementById('pagination-controls');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const pageInfoEl = document.getElementById('page-info');
+
+            // Custom Country Select Elements
+            const countrySelectButton = document.getElementById('country-select-button');
+            const countrySelectOptions = document.getElementById('country-select-options');
+            const countrySearch = document.getElementById('country-search');
+            const countryList = document.getElementById('country-list');
+
+            let chartInstance = null;
+            let selectedCountries = [];
+            
+            // Pagination state
+            let fullTableData = [];
+            let currentPage = 1;
+            const rowsPerPage = 5;
+            
+            // --- Predefined Lists ---
+            const countries = [
+                { id: 'USA', name: 'United States' }, { id: 'CHN', name: 'China' }, { id: 'JPN', name: 'Japan' },
+                { id: 'DEU', name: 'Germany' }, { id: 'IND', name: 'India' }, { id: 'GBR', name: 'United Kingdom' },
+                { id: 'FRA', name: 'France' }, { id: 'BRA', name: 'Brazil' }, { id: 'CAN', name: 'Canada' },
+                { id: 'RUS', name: 'Russia' }, { id: 'AUS', name: 'Australia' }, { id: 'NGA', name: 'Nigeria' },
+                { id: 'ZAF', name: 'South Africa' },
+            ];
+
+            const indicators = [
+                { id: 'SP.POP.TOTL', name: 'Population, total' }, { id: 'NY.GDP.MKTP.CD', name: 'GDP (current US$)' },
+                { id: 'EN.ATM.CO2E.KT', name: 'CO2 emissions (kt)' }, { id: 'SH.XPD.CHEX.GD.ZS', name: 'Current health expenditure (% of GDP)'},
+                { id: 'SE.PRM.ENRR', name: 'School enrollment, primary (% gross)'}
+            ];
+            
+            // --- Populate Dropdowns ---
+            function populateDropdowns() {
+                // Populate custom country selector
+                countries.forEach(country => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'flex items-center p-2 rounded-md hover:bg-[#424769] cursor-pointer';
+                    optionDiv.innerHTML = `
+                        <input type="checkbox" id="country-${country.id}" value="${country.id}" class="mr-3 h-4 w-4 rounded">
+                        <label for="country-${country.id}" class="cursor-pointer flex-grow">${country.name}</label>
+                    `;
+                    countryList.appendChild(optionDiv);
+                });
+
+                // Populate standard indicator selector
+                indicators.forEach(indicator => {
+                    const option = document.createElement('option');
+                    option.value = indicator.id;
+                    option.textContent = indicator.name;
+                    indicatorSelect.appendChild(option);
+                });
+            }
+
+            // --- Custom Country Selector Logic ---
+            countrySelectButton.addEventListener('click', () => {
+                countrySelectOptions.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!countrySelectButton.contains(e.target) && !countrySelectOptions.contains(e.target)) {
+                    countrySelectOptions.classList.add('hidden');
+                }
+            });
+
+            countryList.addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    if (e.target.checked) {
+                        selectedCountries.push(e.target.value);
+                    } else {
+                        selectedCountries = selectedCountries.filter(id => id !== e.target.value);
+                    }
+                    updateCountryButtonText();
+                }
+            });
+
+            function updateCountryButtonText() {
+                const buttonText = countrySelectButton.querySelector('span');
+                if (selectedCountries.length === 0) {
+                    buttonText.textContent = 'Select Countries';
+                } else if (selectedCountries.length === 1) {
+                    const countryName = countries.find(c => c.id === selectedCountries[0]).name;
+                    buttonText.textContent = countryName;
+                } else {
+                    buttonText.textContent = `${selectedCountries.length} countries selected`;
+                }
+            }
+
+            countrySearch.addEventListener('input', () => {
+                const filter = countrySearch.value.toLowerCase();
+                const labels = countryList.querySelectorAll('label');
+                labels.forEach(label => {
+                    const text = label.textContent.toLowerCase();
+                    label.parentElement.style.display = text.includes(filter) ? '' : 'none';
+                });
+            });
+
+
+            // --- API Call Function ---
+            async function fetchData(countryCodes, indicatorCode) {
+                const dateRange = "1995:2022";
+                const countriesStr = countryCodes.join(';');
+                const url = `https://api.worldbank.org/v2/country/${countriesStr}/indicator/${indicatorCode}?date=${dateRange}&format=json&per_page=1000`;
+                
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error((await response.json())[0]?.message || 'Failed to fetch data');
+                    const data = await response.json();
+                    if (!data || !data[1] || data[1].length === 0) throw new Error('No data available for the selected criteria.');
+                    return data[1];
+                } catch (error) {
+                    console.error("API Error:", error);
+                    throw error;
+                }
+            }
+            
+            // --- Data Processing ---
+            function processDataForChart(apiData) {
+                const datasets = {};
+                const allYears = new Set();
+                apiData.forEach(item => {
+                    if (item.value === null) return;
+                    const countryCode = item.countryiso3code;
+                    if (!datasets[countryCode]) {
+                       const countryInfo = countries.find(c => c.id === countryCode);
+                       datasets[countryCode] = { label: countryInfo ? countryInfo.name : countryCode, data: [] };
+                    }
+                    datasets[countryCode].data.push({ x: parseInt(item.date), y: item.value });
+                    allYears.add(parseInt(item.date));
+                });
+
+                const sortedYears = Array.from(allYears).sort();
+                Object.values(datasets).forEach(dataset => {
+                     dataset.data.sort((a,b) => a.x - b.x);
+                     const dataByYear = new Map(dataset.data.map(d => [d.x, d.y]));
+                     dataset.data = sortedYears.map(year => ({ x: year, y: dataByYear.get(year) || null }));
+                });
+                return { labels: sortedYears, datasets: Object.values(datasets) };
+            }
+            
+            // --- Chart Rendering ---
+            function renderChart(chartData) {
+                const ctx = document.getElementById('myChart').getContext('2d');
+                const gradientColors = [ ['#676FDD', '#424769'], ['#F6B17A', '#a16c4f'], ['#FFFFFF', '#cccccc'], ['#4CAF50', '#2E7D32'], ['#FFC107', '#FFA000'] ];
+                if (chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: chartData.datasets.map((ds, index) => ({
+                            ...ds,
+                            borderColor: gradientColors[index % gradientColors.length][0],
+                            backgroundColor: 'rgba(0,0,0,0)',
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointBackgroundColor: '#fff',
+                            pointHoverRadius: 7,
+                            spanGaps: false,
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { labels: { color: '#FFFFFF', font: { size: 14 } } },
+                            tooltip: {
+                                mode: 'index', intersect: false, backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleFont: { size: 16 }, bodyFont: { size: 14 },
+                                callbacks: { label: c => `${c.dataset.label || ''}: ${c.parsed.y !== null ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 2 }).format(c.parsed.y) : 'N/A'}` }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#FFFFFF' } },
+                            y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#FFFFFF', callback: val => new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(val) } }
+                        }
+                    }
+                });
+            }
+
+            // --- Table Pagination & Rendering ---
+            function setupPagination(data) {
+                fullTableData = data.filter(item => item.value !== null).sort((a, b) => {
+                    if (a.country.value < b.country.value) return -1;
+                    if (a.country.value > b.country.value) return 1;
+                    return b.date - a.date;
+                });
+                currentPage = 1;
+                renderTablePage();
+            }
+
+            function renderTablePage() {
+                const totalPages = Math.ceil(fullTableData.length / rowsPerPage);
+                if (totalPages <= 1) {
+                    paginationControls.style.display = 'none';
+                } else {
+                    paginationControls.style.display = 'flex';
+                }
+
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+                pageInfoEl.textContent = `Page ${currentPage} of ${totalPages}`;
+
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const pageData = fullTableData.slice(start, end);
+                renderTable(pageData);
+            }
+
+            function renderTable(data) {
+                let tableHTML = `<thead><tr class="border-b border-gray-700"><th class="py-3 px-4 text-left">Country</th><th class="py-3 px-4 text-left">Year</th><th class="py-3 px-4 text-left">Value</th></tr></thead><tbody>`;
+                data.forEach(item => {
+                    tableHTML += `<tr class="border-b border-gray-800 hover:bg-gray-800/50"><td class="py-3 px-4">${item.country.value}</td><td class="py-3 px-4">${item.date}</td><td class="py-3 px-4">${new Intl.NumberFormat('en-US').format(parseFloat(item.value).toFixed(2))}</td></tr>`;
+                });
+                tableHTML += `</tbody>`;
+                dataTableEl.innerHTML = tableHTML;
+            }
+
+            prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTablePage(); } });
+            nextBtn.addEventListener('click', () => { if (currentPage < Math.ceil(fullTableData.length / rowsPerPage)) { currentPage++; renderTablePage(); } });
+            
+            // --- UI Helper Functions ---
+            function showLoading() { loadingEl.classList.remove('hidden'); errorMessageEl.classList.add('hidden'); dashboardContentEl.classList.add('hidden'); }
+            function hideLoading() { loadingEl.classList.add('hidden'); }
+            function showError(message) { errorTextEl.textContent = message; errorMessageEl.classList.remove('hidden'); }
+            function showDashboard() { dashboardContentEl.classList.remove('hidden'); document.getElementById('visualization').scrollIntoView({ behavior: 'smooth' }); }
+            
+            // --- Main Event Listener ---
+            generateBtn.addEventListener('click', async () => {
+                const selectedIndicator = indicatorSelect.value;
+                const selectedIndicatorName = indicatorSelect.options[indicatorSelect.selectedIndex].text;
+                if (selectedCountries.length === 0 || !selectedIndicator) {
+                    showError('Please select at least one country and an indicator.'); return;
+                }
+                showLoading();
+                try {
+                    const apiData = await fetchData(selectedCountries, selectedIndicator);
+                    const chartData = processDataForChart(apiData);
+                    hideLoading();
+                    chartTitleEl.textContent = selectedIndicatorName;
+                    renderChart(chartData);
+                    setupPagination(apiData);
+                    showDashboard();
+                } catch (error) {
+                    hideLoading();
+                    showError(error.message || 'An unexpected error occurred.');
+                }
+            });
+
+            // --- Initial Setup ---
+            populateDropdowns();
+        });
+    </script>
+</body>
+</html>
+

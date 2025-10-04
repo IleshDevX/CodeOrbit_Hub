@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Projects Hub - Explore Amazing Projects</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="emailjs-config.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-rocket"></i>
+                <span>API Hub</span>
+            </div>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#categories" class="nav-link">Categories</a></li>
+                <li><a href="#projects" class="nav-link">Projects</a></li>
+                <li><a href="#developers" class="nav-link">Team</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-background parallax-element">
+            <div class="hero-particles parallax-element"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title scroll-element">
+                    <span class="gradient-text">Explore Our Collection</span>
+                    <br>of Amazing Projects
+                </h1>
+                <p class="hero-subtitle scroll-element">
+                    Discover a curated collection of web applications showcasing various APIs, 
+                    from country data to AI models, all built with modern web technologies.
+                </p>
+                <div class="hero-buttons scroll-element">
+                    <a href="#projects" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Explore Projects
+                    </a>
+                    <a href="#about" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="hero-stats scroll-element">
+                <div class="stat-item">
+                    <div class="stat-number">35+</div>
+                    <div class="stat-label">Projects</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">7+</div>
+                    <div class="stat-label">Categories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Open Source</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Categories Section -->
+    <section id="categories" class="categories-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Browse by Category</h2>
+                <p class="section-subtitle">Explore projects organized by their primary focus and functionality</p>
+            </div>
+            <div class="categories-grid">
+                <div class="category-card" data-category="data-apis">
+                    <div class="category-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Data APIs</h3>
+                    <p>REST Countries, Census, World Bank, and more data-driven projects</p>
+                    <span class="project-count">8 projects</span>
+                </div>
+                <div class="category-card" data-category="ai-ml">
+                    <div class="category-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>AI & Machine Learning</h3>
+                    <p>Computer vision, NLP, speech recognition, and AI model implementations</p>
+                    <span class="project-count">9 projects</span>
+                </div>
+                <div class="category-card" data-category="media-entertainment">
+                    <div class="category-icon">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <h3>Media & Entertainment</h3>
+                    <p>Movies, TV shows, anime, games, and multimedia content</p>
+                    <span class="project-count">6 projects</span>
+                </div>
+                <div class="category-card" data-category="finance-economics">
+                    <div class="category-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Finance & Economics</h3>
+                    <p>Economic data, cryptocurrency, exchange rates, and financial tools</p>
+                    <span class="project-count">4 projects</span>
+                </div>
+                <div class="category-card" data-category="science-research">
+                    <div class="category-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <h3>Science & Research</h3>
+                    <p>NASA data, earthquakes, research papers, and scientific datasets</p>
+                    <span class="project-count">4 projects</span>
+                </div>
+                <div class="category-card" data-category="geography-weather">
+                    <div class="category-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Geography & Weather</h3>
+                    <p>Weather data, geographical information, and location services</p>
+                    <span class="project-count">3 projects</span>
+                </div>
+                <div class="category-card" data-category="development-tools">
+                    <div class="category-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Development Tools</h3>
+                    <p>Testing APIs, placeholder data, and developer utilities</p>
+                    <span class="project-count">3 projects</span>
+                </div>
+                <div class="category-card" data-category="social-web">
+                    <div class="category-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Social & Web</h3>
+                    <p>Image sharing, GIFs, domain services, and social content</p>
+                    <span class="project-count">2 projects</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">All Projects</h2>
+                <p class="section-subtitle">Browse through our complete collection of API-powered applications</p>
+            </div>
+            
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <input type="text" id="searchInput" placeholder="Search projects..." class="search-input">
+                    <select id="categoryFilter" class="category-filter">
+                        <option value="">All Categories</option>
+                        <option value="data-apis">Data APIs</option>
+                        <option value="ai-ml">AI & Machine Learning</option>
+                        <option value="media-entertainment">Media & Entertainment</option>
+                        <option value="finance-economics">Finance & Economics</option>
+                        <option value="science-research">Science & Research</option>
+                        <option value="geography-weather">Geography & Weather</option>
+                        <option value="development-tools">Development Tools</option>
+                        <option value="social-web">Social & Web</option>
+                    </select>
+                    <select id="sortFilter" class="sort-filter">
+                        <option value="name">Sort by Name</option>
+                        <option value="category">Sort by Category</option>
+                    </select>
+                    <button id="clearFilters" class="btn btn-outline" onclick="clearAllFilters()">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </button>
+                </div>
+            </div>
+            
+            <div class="projects-grid" id="projectsGrid">
+                <!-- Projects will be dynamically loaded here -->
+            </div>
+            <div class="load-more-container">
+                <button id="loadMoreBtn" class="btn btn-outline" style="display: none;">
+                    <i data-feather="plus"></i>
+                    Load More Projects
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Developer Section -->
+    <section id="developers" class="developer-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Meet Our Team</h2>
+                <p class="section-subtitle">The passionate minds behind this amazing collection of projects</p>
+            </div>
+            
+            <!-- Developer Profile -->
+            <div class="developer-profile">
+                <div class="developer-content">
+                    <div class="developer-text">
+                        <div class="developer-intro">
+                            <span class="developer-greeting">Hello, I'm</span>
+                            <h3 class="developer-name">Ilesh Patel</h3>
+                            <p class="developer-role">Full Stack Developer & Data Scientist</p>
+                        </div>
+                        <p class="developer-description">
+                            A passionate and dedicated developer driven by the ever-evolving world of technology 
+                            and its limitless possibilities. I specialize in creating innovative web applications 
+                            that showcase the power of modern APIs and development frameworks.
+                        </p>
+                        <div class="developer-skills">
+                            <span class="skill-tag">Data Analysis</span>
+                            <span class="skill-tag">Machine Learning</span>
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">JavaScript</span>
+                            <span class="skill-tag">APIs</span>
+                        </div>
+                        <div class="developer-actions">
+                            <a href="#contact" class="btn btn-primary">
+                                <i class="fas fa-envelope"></i>
+                                Contact Me
+                            </a>
+                            <a href="https://github.com/IleshDevX" class="btn btn-outline" target="_blank">
+                                <i class="fab fa-github"></i>
+                                View GitHub
+                            </a>
+                        </div>
+                    </div>
+                    <div class="developer-image">
+                        <div class="image-container">
+                            <img src="Images/Devloper_Profile.jpg" alt="Ilesh Patel - Developer" class="profile-img">
+                            <div class="image-overlay"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mentor Profile -->
+            <div class="mentor-profile">
+                <div class="mentor-content">
+                    <div class="mentor-image">
+                        <div class="image-container">
+                            <img src="Images/Sir_Profile.jpg" alt="Mentor Profile" class="profile-img">
+                            <div class="image-overlay"></div>
+                        </div>
+                    </div>
+                    <div class="mentor-text">
+                        <div class="mentor-intro">
+                            <span class="mentor-badge">Mentor</span>
+                            <h3 class="mentor-name">Praful Vinayak Bhoyar</h3>
+                            <p class="mentor-role">Technical Mentor & Advisor</p>
+                        </div>
+                        <p class="mentor-description">
+                            With years of industry experience and deep technical expertise, our mentor provides 
+                            invaluable guidance in architecting scalable solutions and implementing best practices. 
+                            Their mentorship has been instrumental in shaping this comprehensive project collection.
+                        </p>
+                        <div class="mentor-expertise">
+                            <div class="expertise-item">
+                                <i class="fas fa-brain"></i>
+                                <span>System Architecture</span>
+                            </div>
+                            <div class="expertise-item">
+                                <i class="fas fa-users"></i>
+                                <span>Team Leadership</span>
+                            </div>
+                            <div class="expertise-item">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>Innovation Strategy</span>
+                            </div>
+                        </div>
+                        <div class="mentor-social-links">
+                            <a href="mailto:prafulbhoyar@example.com" class="social-link" title="Email">
+                                <i class="fas fa-envelope"></i>
+                            </a>
+                            <a href="https://github.com/prafulbhoyar" class="social-link" title="GitHub" target="_blank">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/in/prafulbhoyar/" class="social-link" title="LinkedIn" target="_blank">
+                                <i class="fab fa-linkedin"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Section -->
+            <div class="services-grid">
+                <h3 class="services-title">What We Can Do</h3>
+                <div class="services-container">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4>Data Analysis</h4>
+                        <p>Extracting meaningful insights from complex datasets using statistical methods, visualization techniques, and advanced analytics tools.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h4>Machine Learning</h4>
+                        <p>Building predictive models and intelligent systems using supervised, unsupervised, and deep learning algorithms for various applications.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4>Research & Development</h4>
+                        <p>Conducting comprehensive research projects, implementing cutting-edge algorithms, and developing innovative solutions for complex problems.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h4>AI Solutions</h4>
+                        <p>Developing artificial intelligence applications including natural language processing, computer vision, and intelligent automation systems.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <h4>Data Engineering</h4>
+                        <p>Designing and implementing robust data pipelines, ETL processes, and scalable data architectures for big data processing.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <h4>Scientific Computing</h4>
+                        <p>Applying computational methods to solve scientific problems, numerical simulations, and mathematical modeling for research applications.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2 class="section-title">About This Collection</h2>
+                    <p class="about-description">
+                        Welcome to our comprehensive collection of 39 web applications, each showcasing different APIs 
+                        and modern web development techniques. This hub serves as a central portal to explore projects 
+                        ranging from data visualization to AI implementations.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature-item">
+                            <i class="fas fa-rocket"></i>
+                            <div>
+                                <h4>Modern Technology</h4>
+                                <p>Built with HTML5, CSS3, and vanilla JavaScript for optimal performance</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div>
+                                <h4>Responsive Design</h4>
+                                <p>Fully responsive and optimized for all devices and screen sizes</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-code"></i>
+                            <div>
+                                <h4>Open Source</h4>
+                                <p>All projects are open source and available for learning and contribution</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-search"></i>
+                            <div>
+                                <h4>Easy Discovery</h4>
+                                <p>Advanced search and filtering to quickly find the projects you're interested in</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-stats-detailed">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number">35+</div>
+                            <div class="stat-label">Total Projects</div>
+                            <div class="stat-description">Covering diverse APIs and use cases</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number">7+</div>
+                            <div class="stat-label">Categories</div>
+                            <div class="stat-description">Organized for easy navigation</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Open Source</div>
+                            <div class="stat-description">Free to use and modify</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+        <div class="container">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2 class="section-title">Get in Touch</h2>
+                    <p class="contact-description">
+                        Have questions, suggestions, or want to contribute? We'd love to hear from you!
+                    </p>
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>ileshpatel666@gmail.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-method">
+                            <i class="fab fa-github"></i>
+                            <div>
+                                <h4>GitHub</h4>
+                                <p><a href="https://github.com/IleshDevX" target="_blank" rel="noopener noreferrer">github.com/IleshDevX</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-method">
+                            <i class="fas fa-code"></i>
+                            <div>
+                                <h4>Contribute</h4>
+                                <p>Submit issues or pull requests</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form-container">
+                    <form class="contact-form" id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">Select a subject</option>
+                                <option value="general">General Inquiry</option>
+                                <option value="bug">Bug Report</option>
+                                <option value="feature">Feature Request</option>
+                                <option value="contribution">Contribution</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Message
+                        </button>
+                        <div class="form-status" id="formStatus" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#projects">All Projects</a></li>
+                        <li><a href="#categories">Categories</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Categories</h4>
+                    <ul class="footer-links">
+                        <li><a href="#" data-category="data-apis">Data APIs</a></li>
+                        <li><a href="#" data-category="ai-ml">AI & ML</a></li>
+                        <li><a href="#" data-category="media-entertainment">Media</a></li>
+                        <li><a href="#" data-category="finance-economics">Finance</a></li>
+                        <li><a href="#" data-category="science-research">Science</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Technologies</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">HTML5</a></li>
+                        <li><a href="#">CSS3</a></li>
+                        <li><a href="#">JavaScript</a></li>
+                        <li><a href="#">APIs</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-rocket"></i>
+                        <span>API Hub</span>
+                    </div>
+                    <p class="footer-description">
+                        A comprehensive collection of 35+ web applications showcasing various APIs 
+                        and modern web development techniques.
+                    </p>
+                    <div class="social-links">
+                        <a href="https://github.com/IleshDevX" class="social-link" title="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/in/ileshdevx/" class="social-link" title="LinkedIn">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://x.com/Ilesh_009" class="social-link" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>&copy; 2025 API Hub. All rights reserved By IleshDevX.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">License</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="back-to-top" title="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Loading projects...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

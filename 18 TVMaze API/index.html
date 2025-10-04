@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cine-Verse | TV Show Discovery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Reset and Global Styles */
+        :root {
+            --color-dark-bg: #000000;
+            --color-dark-blue-gray: #1e202c;
+            --color-vibrant-purple: #60519b;
+            --color-charcoal: #31323e;
+            --color-light-lavender: #bfc0d1;
+            --gradient-accent: linear-gradient(90deg, var(--color-dark-blue-gray), var(--color-vibrant-purple));
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--color-dark-bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--color-light-lavender);
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Subtle Spotlight Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(49, 50, 62, 0.15) 0%, rgba(0,0,0,0) 30%);
+            transition: background 0.2s ease-out;
+        }
+
+        /* Scroll-Triggered Animations */
+        .fade-in-section {
+            opacity: 0;
+            filter: blur(8px);
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, filter 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in-section.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-charcoal);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-vibrant-purple);
+        }
+        
+        /* Loading Spinner */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 5px solid var(--color-charcoal);
+            border-top-color: var(--color-vibrant-purple);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Hero Header Section */
+        .hero-header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Background Nebula Animation */
+        .hero-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 80%, rgba(96, 81, 155, 0.3), transparent 70%),
+                radial-gradient(ellipse at 80% 30%, rgba(30, 32, 44, 0.4), transparent 70%);
+            animation: nebula-shift 25s infinite alternate ease-in-out;
+        }
+
+        @keyframes nebula-shift {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1.3) rotate(10deg);
+                opacity: 1;
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 15px rgba(191, 192, 209, 0.3);
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 50px;
+            border: 2px solid var(--color-charcoal);
+            background-color: var(--color-dark-blue-gray);
+            color: var(--color-light-lavender);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .search-bar:focus {
+            border-color: transparent;
+            box-shadow: 0 0 20px var(--color-vibrant-purple), 0 0 0 2px var(--color-vibrant-purple);
+        }
+
+        /* Shows Display Section */
+        #shows-section {
+            padding: 100px 5%;
+            min-height: 100vh;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #fff;
+        }
+
+        #shows-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 2rem;
+        }
+
+        .show-card {
+            background: var(--color-charcoal);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        .show-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: var(--gradient-accent) border-box;
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) padding-box, 
+                linear-gradient(#fff 0 0);
+            mask: 
+                linear-gradient(#fff 0 0) padding-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .show-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(96, 81, 155, 0.3);
+        }
+        
+        .show-card:hover::before {
+            opacity: 1;
+        }
+
+        .show-card img {
+            width: 100%;
+            height: 330px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .show-card-info {
+            padding: 1rem;
+        }
+
+        .show-card-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .show-card-rating {
+            font-size: 0.9rem;
+            color: var(--color-vibrant-purple);
+            margin-top: 0.5rem;
+        }
+
+        #no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            font-size: 1.2rem;
+            padding: 2rem;
+        }
+
+        /* About Section */
+        #about-section {
+            padding: 100px 5%;
+            text-align: center;
+            max-width: 1000px; /* Adjusted for wider features grid */
+            margin: 0 auto;
+        }
+        
+        /* Show Detail Modal */
+        #modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 100;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        
+        #modal-container.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        #modal-content {
+            background: var(--color-dark-blue-gray);
+            border-radius: 15px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.4s ease;
+        }
+
+        #modal-container.show #modal-content {
+            transform: scale(1);
+        }
+
+        #modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: var(--color-light-lavender);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        #modal-close:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .modal-poster img {
+            width: 250px;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .modal-details h2 {
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .modal-summary {
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-meta span {
+            display: inline-block;
+            margin-right: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .modal-meta span strong {
+            color: var(--color-light-lavender);
+            margin-right: 0.5rem;
+        }
+        
+        .modal-genres {
+             margin-top: 1rem;
+             display: flex;
+             flex-wrap: wrap;
+             gap: 0.5rem;
+        }
+
+        .genre-tag {
+            background: var(--color-charcoal);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .modal-section-title {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: #fff;
+            border-bottom: 2px solid var(--color-charcoal);
+            padding-bottom: 0.5rem;
+        }
+        
+        .cast-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .cast-member {
+            text-align: center;
+        }
+
+        .cast-member img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+        }
+        
+        .cast-name {
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .cast-character {
+            font-size: 0.8rem;
+            color: var(--color-light-lavender);
+        }
+
+        /* --- NEW: SaaS-style About Section --- */
+        #about-section .section-title {
+            margin-bottom: 4rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--color-charcoal);
+            padding: 2rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            text-align: left;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-vibrant-purple);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--color-vibrant-purple);
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--color-light-lavender);
+        }
+
+        /* --- NEW: Load More Button --- */
+        .load-more-container {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        #load-more-btn {
+            background: var(--color-vibrant-purple);
+            border: none;
+            color: #fff;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(96, 81, 155, 0.4);
+        }
+
+        #load-more-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(96, 81, 155, 0.6);
+        }
+
+        /* --- NEW: Footer --- */
+        .site-footer {
+            background-color: var(--color-dark-blue-gray);
+            padding: 4rem 5%;
+            border-top: 1px solid var(--color-charcoal);
+        }
+
+        .footer-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-bottom: 3rem;
+        }
+
+        .footer-column h4 {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li a {
+            color: var(--color-light-lavender);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.75rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--color-vibrant-purple);
+        }
+        
+        .footer-column .social-icons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .footer-column .social-icons a {
+            color: var(--color-light-lavender);
+            font-size: 1.5rem;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .footer-column .social-icons a:hover {
+            color: var(--color-vibrant-purple);
+            transform: translateY(-2px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--color-charcoal);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-body {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .modal-poster img {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Spinner -->
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Hero Header -->
+    <header class="hero-header">
+        <h1 class="hero-title fade-in-section">Cine-Verse: Your Gateway to Endless Stories.</h1>
+        <div class="search-container fade-in-section" style="transition-delay: 0.2s;">
+            <form id="search-form">
+                <input type="text" id="search-input" class="search-bar" placeholder="Search for a TV show...">
+            </form>
+        </div>
+    </header>
+
+    <main>
+        <!-- Shows Display Section -->
+        <section id="shows-section" class="fade-in-section">
+            <h2 id="section-title" class="section-title">Trending Shows</h2>
+            <div id="shows-grid">
+                <!-- TV Show cards will be injected here by JavaScript -->
+            </div>
+            <!-- NEW: Load More Button Container -->
+            <div class="load-more-container">
+                <button id="load-more-btn" style="display: none;">Load More</button>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about-section" class="fade-in-section">
+            <h2 class="section-title">Why Cine-Verse?</h2>
+             <!-- NEW: SaaS-style features grid -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎬</div>
+                    <h3>Vast Library</h3>
+                    <p>Explore thousands of TV shows, from timeless classics to the latest hits, all in one place.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Powerful Search</h3>
+                    <p>Instantly find any show with our fast and intuitive search, powered by the TVMaze API.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Stunning Interface</h3>
+                    <p>A sleek, modern dark-mode design with fluid animations for a premium browsing experience.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- NEW: Footer Section -->
+    <footer class="site-footer fade-in-section">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h4>Cine-Verse</h4>
+                <p style="color: var(--color-light-lavender); line-height: 1.6;">Explore America's television landscape through a comprehensive and interactive platform.</p>
+                 <div class="social-icons" style="margin-top: 1rem;">
+                    <a href="#" aria-label="GitHub">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    </a>
+                    <a href="#" aria-label="Twitter">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                    </a>
+                 </div>
+            </div>
+            <div class="footer-column">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#about-section">About</a></li>
+                    <li><a href="#shows-section">Search Data</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Data Sources</h4>
+                <ul>
+                    <li><a href="https://www.tvmaze.com/api" target="_blank">TVMaze API</a></li>
+                    <li><a href="https://www.tvmaze.com/" target="_blank">TVMaze Documentation</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h4>Contact</h4>
+                <p style="color: var(--color-light-lavender);">Built with ❤️ using the public TVMaze API.</p>
+                <p style="color: var(--color-light-lavender); margin-top: 0.5rem;">Data provided by TVMaze.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 Cine-Verse. Educational project, using public domain data.
+        </div>
+    </footer>
+    
+    <!-- Show Detail Modal -->
+    <div id="modal-container">
+        <div id="modal-content">
+            <button id="modal-close">&times;</button>
+            <div id="modal-body-content">
+                <!-- Modal content will be injected here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DOM Element References ---
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const showsGrid = document.getElementById('shows-grid');
+            const sectionTitle = document.getElementById('section-title');
+            const loader = document.getElementById('loader');
+            const modalContainer = document.getElementById('modal-container');
+            const modalContent = document.getElementById('modal-content');
+            const modalClose = document.getElementById('modal-close');
+            const modalBodyContent = document.getElementById('modal-body-content');
+            const body = document.body;
+            const loadMoreBtn = document.getElementById('load-more-btn');
+
+            // --- API Configuration ---
+            const API_BASE_URL = 'https://api.tvmaze.com';
+
+            // --- State Management ---
+            let isLoading = false;
+            let allTrendingShows = [];
+            const showsPerPage = 12;
+            let currentPage = 1;
+
+
+            // --- UI Functions ---
+            const toggleLoader = (show) => {
+                loader.style.opacity = show ? '1' : '0';
+                loader.style.pointerEvents = show ? 'auto' : 'none';
+            };
+
+            const displayShows = (shows, append = false) => {
+                if (!append) {
+                    showsGrid.innerHTML = '';
+                }
+                
+                if (shows.length === 0 && !append) {
+                    showsGrid.innerHTML = '<p id="no-results">No shows found. Try another search!</p>';
+                    return;
+                }
+                shows.forEach(item => {
+                    const show = item.show || item; // Handle both search results and direct show objects
+                    const imageUrl = show.image ? show.image.medium : 'https://placehold.co/210x295/1e202c/bfc0d1?text=No+Image';
+                    const rating = show.rating && show.rating.average ? `⭐ ${show.rating.average}` : 'No rating';
+                    
+                    const showCard = document.createElement('div');
+                    showCard.className = 'show-card';
+                    showCard.dataset.id = show.id;
+                    showCard.innerHTML = `
+                        <img src="${imageUrl}" alt="${show.name}" onerror="this.onerror=null;this.src='https://placehold.co/210x295/1e202c/bfc0d1?text=No+Image';">
+                        <div class="show-card-info">
+                            <h3 class="show-card-title">${show.name}</h3>
+                            <p class="show-card-rating">${rating}</p>
+                        </div>
+                    `;
+                    showsGrid.appendChild(showCard);
+                });
+            };
+            
+            const displayShowDetails = (show) => {
+                const imageUrl = show.image ? show.image.original : 'https://placehold.co/250x370/1e202c/bfc0d1?text=No+Image';
+                const summary = show.summary || '<p>No summary available.</p>';
+                const genres = show.genres.length > 0 ? show.genres.map(g => `<span class="genre-tag">${g}</span>`).join('') : 'N/A';
+                
+                // Fetch and display cast
+                let castHtml = '<p>Cast information not available.</p>';
+                if (show._embedded && show._embedded.cast && show._embedded.cast.length > 0) {
+                    castHtml = show._embedded.cast.slice(0, 10).map(member => `
+                        <div class="cast-member">
+                            <img src="${member.person.image ? member.person.image.medium : 'https://placehold.co/80x80/31323e/bfc0d1?text=N/A'}" alt="${member.person.name}" onerror="this.onerror=null;this.src='https://placehold.co/80x80/31323e/bfc0d1?text=N/A';">
+                            <p class="cast-name">${member.person.name}</p>
+                            <p class="cast-character">${member.character.name}</p>
+                        </div>
+                    `).join('');
+                }
+
+                modalBodyContent.innerHTML = `
+                    <div class="modal-body">
+                        <div class="modal-poster">
+                            <img src="${imageUrl}" alt="${show.name}" onerror="this.onerror=null;this.src='https://placehold.co/250x370/1e202c/bfc0d1?text=No+Image';">
+                        </div>
+                        <div class="modal-details">
+                            <h2>${show.name}</h2>
+                            <div class="modal-summary">${summary}</div>
+                            <div class="modal-meta">
+                                <span><strong>Premiered:</strong> ${show.premiered || 'N/A'}</span>
+                                <span><strong>Status:</strong> ${show.status || 'N/A'}</span>
+                                <span><strong>Rating:</strong> ${show.rating.average ? `⭐ ${show.rating.average}` : 'N/A'}</span>
+                            </div>
+                            <div class="modal-genres">${genres}</div>
+
+                            <h3 class="modal-section-title">Main Cast</h3>
+                            <div class="cast-list">${castHtml}</div>
+                        </div>
+                    </div>
+                `;
+                modalContainer.classList.add('show');
+                body.style.overflow = 'hidden';
+            };
+
+            // --- API Fetching Functions ---
+            const fetchAPI = async (endpoint) => {
+                if (isLoading) return;
+                toggleLoader(true);
+                try {
+                    const response = await fetch(`${API_BASE_URL}${endpoint}`);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error("API Fetch Error: ", error);
+                    showsGrid.innerHTML = '<p id="no-results">Could not fetch data. Please try again later.</p>';
+                    return null;
+                } finally {
+                    toggleLoader(false);
+                }
+            };
+            
+            const fetchTrendingShows = async () => {
+                sectionTitle.textContent = 'Trending Shows';
+                const data = await fetchAPI('/shows');
+                if (data) {
+                    // Sorting by rating
+                    allTrendingShows = data.sort((a, b) => (b.rating.average || 0) - (a.rating.average || 0));
+                    currentPage = 1;
+                    displayShows(allTrendingShows.slice(0, showsPerPage));
+                    
+                    if (allTrendingShows.length > showsPerPage) {
+                        loadMoreBtn.style.display = 'inline-block';
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                }
+            };
+            
+            const searchShows = async (query) => {
+                sectionTitle.textContent = `Search Results for "${query}"`;
+                loadMoreBtn.style.display = 'none';
+                const data = await fetchAPI(`/search/shows?q=${encodeURIComponent(query)}`);
+                if (data) {
+                    displayShows(data);
+                }
+            };
+
+            const fetchShowDetails = async (showId) => {
+                const data = await fetchAPI(`/shows/${showId}?embed=cast`);
+                if (data) {
+                    displayShowDetails(data);
+                }
+            };
+
+            // --- Event Listeners ---
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (query) {
+                    searchShows(query);
+                } else {
+                    fetchTrendingShows(); // If search is cleared, show trending
+                }
+            });
+
+            showsGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.show-card');
+                if (card) {
+                    const showId = card.dataset.id;
+                    fetchShowDetails(showId);
+                }
+            });
+
+            const closeModal = () => {
+                modalContainer.classList.remove('show');
+                body.style.overflow = 'auto';
+            };
+
+            modalClose.addEventListener('click', closeModal);
+            modalContainer.addEventListener('click', (e) => {
+                if (e.target === modalContainer) {
+                    closeModal();
+                }
+            });
+
+            // --- NEW: Load More Button Event Listener ---
+            loadMoreBtn.addEventListener('click', () => {
+                currentPage++;
+                const startIndex = (currentPage - 1) * showsPerPage;
+                const endIndex = currentPage * showsPerPage;
+                const nextShows = allTrendingShows.slice(startIndex, endIndex);
+                
+                displayShows(nextShows, true); // Append the new shows
+
+                if (endIndex >= allTrendingShows.length) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            });
+
+            // --- Advanced Effects ---
+            // Spotlight Effect
+            document.addEventListener('mousemove', (e) => {
+                body.style.setProperty('--mouse-x', e.clientX + 'px');
+                body.style.setProperty('--mouse-y', e.clientY + 'px');
+            });
+
+            // Scroll-triggered Animations
+            const sectionsToAnimate = document.querySelectorAll('.fade-in-section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            sectionsToAnimate.forEach(section => observer.observe(section));
+
+            // --- Initial Load ---
+            fetchTrendingShows();
+        });
+    </script>
+</body>
+</html>
+

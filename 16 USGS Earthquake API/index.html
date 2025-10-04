@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terra Monitor: Visualizing Global Tremors</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet.js for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --base-black: #090A0D;
+            --dark-blue-purple: #151626;
+            --muted-blue-grey: #5D6C8C;
+            --light-beige-pink: #F2E0DC;
+            --muted-pink-lavender: #D9BACB;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--base-black);
+            color: var(--light-beige-pink);
+            overflow-x: hidden;
+        }
+
+        /* Gradient Spotlight Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(93, 108, 140, 0.1), transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(217, 186, 203, 0.08), transparent 25%);
+            animation: moveSpotlights 25s linear infinite alternate;
+        }
+
+        @keyframes moveSpotlights {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(5vw, -10vh);
+                opacity: 1;
+            }
+        }
+
+        /* Glassmorphism Effect */
+        .glassmorphism {
+            background: rgba(21, 22, 38, 0.4); /* --dark-blue-purple with alpha */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(93, 108, 140, 0.2);
+        }
+
+        /* Leaflet Map Dark Theme */
+        .leaflet-container {
+            background: var(--dark-blue-purple);
+        }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: var(--dark-blue-purple);
+            color: var(--light-beige-pink);
+            box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+        }
+        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+            background-color: var(--dark-blue-purple) !important;
+            color: var(--light-beige-pink) !important;
+            border-color: var(--muted-blue-grey) !important;
+        }
+        .leaflet-control-attribution a {
+            color: var(--muted-pink-lavender);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--base-black);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--muted-blue-grey);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted-pink-lavender);
+        }
+
+        /* Animation Classes */
+        .reveal {
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out;
+        }
+        .reveal.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Hero Section -->
+    <header id="home" class="h-screen w-full flex flex-col justify-center items-center relative text-center px-4 overflow-hidden">
+        <div class="absolute inset-0 bg-cover bg-center opacity-10" style="background-image: url('https://placehold.co/1920x1080/090A0D/090A0D?text=');">
+            <!-- Subtle wave animation could be added here via another element -->
+        </div>
+        <div class="z-10">
+            <h1 class="text-4xl md:text-7xl font-extrabold text-white reveal" style="text-shadow: 0 0 20px rgba(217, 186, 203, 0.3);">
+                Earth's Pulse
+            </h1>
+            <p class="mt-4 text-lg md:text-2xl text-light-beige-pink max-w-3xl mx-auto reveal" style="transition-delay: 200ms;">
+                Tracking Tectonic Shifts in Real-Time
+            </p>
+        </div>
+        <a href="#dashboard" class="absolute bottom-10 z-10 animate-bounce">
+            <svg class="w-8 h-8 text-muted-pink-lavender" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </a>
+    </header>
+
+    <main class="py-20 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="max-w-7xl mx-auto reveal">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2">Recent Earthquakes</h2>
+            <p class="text-center text-muted-blue-grey mb-12">Displaying significant earthquakes (magnitude 4.5+) from the last 7 days.</p>
+            
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Map -->
+                <div class="w-full lg:w-2/3 h-[500px] lg:h-[600px] rounded-2xl overflow-hidden glassmorphism shadow-2xl" id="map">
+                    <div id="map-loader" class="w-full h-full flex justify-center items-center">
+                        <svg class="animate-spin -ml-1 mr-3 h-10 w-10 text-muted-pink-lavender" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Earthquake List -->
+                <div class="w-full lg:w-1/3">
+                     <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold">Events List</h3>
+                         <button id="refresh-button" class="p-2 rounded-full hover:bg-dark-blue-purple transition-colors duration-300">
+                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.664 0l3.181-3.183m-3.181-3.183l-3.181 3.183a8.25 8.25 0 01-11.664 0l-3.181-3.183" />
+                             </svg>
+                         </button>
+                    </div>
+                    <div id="earthquake-list" class="h-[524px] overflow-y-auto space-y-4 pr-2">
+                        <!-- Earthquake cards will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="max-w-4xl mx-auto text-center mt-32 reveal">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">About Terra Monitor</h2>
+            <p class="text-muted-blue-grey leading-relaxed">
+                This website provides a near real-time visualization of global seismic activity using data from the U.S. Geological Survey (USGS). Our goal is to make this vital information accessible and understandable to everyone, presented in a modern and immersive interface. All data is fetched directly from the <a href="https://earthquake.usgs.gov/fdsnws/event/1/" target="_blank" rel="noopener noreferrer" class="text-muted-pink-lavender hover:underline">USGS Earthquake API</a>, ensuring accuracy and timeliness.
+            </p>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-dark-blue-purple mt-20 pt-16 pb-8 px-4 sm:px-6 lg:px-8 border-t border-muted-blue-grey/20">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
+            <!-- Column 1: Terra Monitor -->
+            <div class="col-span-1 md:col-span-2">
+                <h3 class="text-lg font-semibold text-white">Terra Monitor</h3>
+                <p class="mt-2 text-sm text-muted-blue-grey">Visualizing global tremors for educational and informational purposes.</p>
+                <div class="mt-4 flex justify-center md:justify-start space-x-4">
+                    <a href="#" class="text-muted-blue-grey hover:text-light-beige-pink transition-colors">
+                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.167 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg>
+                    </a>
+                </div>
+            </div>
+            <!-- Column 2: Quick Links -->
+            <div>
+                <h3 class="text-sm font-semibold tracking-wider uppercase text-muted-pink-lavender">Quick Links</h3>
+                <ul class="mt-4 space-y-2">
+                    <li><a href="#home" class="text-sm text-muted-blue-grey hover:text-light-beige-pink transition-colors">Home</a></li>
+                    <li><a href="#dashboard" class="text-sm text-muted-blue-grey hover:text-light-beige-pink transition-colors">Dashboard</a></li>
+                    <li><a href="#about" class="text-sm text-muted-blue-grey hover:text-light-beige-pink transition-colors">About</a></li>
+                </ul>
+            </div>
+            <!-- Column 3: Data Sources -->
+            <div>
+                <h3 class="text-sm font-semibold tracking-wider uppercase text-muted-pink-lavender">Data Sources</h3>
+                <ul class="mt-4 space-y-2">
+                    <li><a href="https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php" target="_blank" rel="noopener noreferrer" class="text-sm text-muted-blue-grey hover:text-light-beige-pink transition-colors">USGS Earthquake API</a></li>
+                     <li><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" class="text-sm text-muted-blue-grey hover:text-light-beige-pink transition-colors">OpenStreetMap</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-8 border-t border-muted-blue-grey/20 pt-8 text-center text-sm text-muted-blue-grey">
+            <p>Built with ❤️ using the USGS API. Data provided by the U.S. Geological Survey.</p>
+            <p class="mt-2">&copy; <span id="current-year"></span> Terra Monitor. An educational project.</p>
+        </div>
+    </footer>
+    
+    <!-- Details Modal -->
+    <div id="details-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden items-center justify-center p-4">
+        <div id="modal-content" class="glassmorphism rounded-2xl w-full max-w-lg p-8 transform scale-95 opacity-0 transition-all duration-300">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mapElement = document.getElementById('map');
+            const mapLoader = document.getElementById('map-loader');
+            const earthquakeList = document.getElementById('earthquake-list');
+            const detailsModal = document.getElementById('details-modal');
+            const modalContent = document.getElementById('modal-content');
+            const refreshButton = document.getElementById('refresh-button');
+            
+            let map;
+            let earthquakeData = [];
+            
+            // Set current year in footer
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+
+            // Function to get a color based on magnitude
+            const getMagnitudeColor = (mag) => {
+                if (mag >= 7.0) return '#b30000'; // Dark Red
+                if (mag >= 6.0) return '#e34a33'; // Red-Orange
+                if (mag >= 5.0) return '#fc8d59'; // Orange
+                if (mag >= 4.5) return '#fdbb84'; // Light Orange
+                return '#fee8c8'; // Pale Yellow
+            };
+
+            // Initialize the map
+            const initMap = () => {
+                map = L.map(mapElement, {
+                    center: [20, 0],
+                    zoom: 2,
+                    worldCopyJump: true,
+                    minZoom: 2,
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(map);
+            };
+
+            // Fetch and process earthquake data
+            const fetchEarthquakeData = async () => {
+                console.log('Fetching earthquake data...');
+                setLoadingState(true);
+
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                const startTime = sevenDaysAgo.toISOString().split('T')[0];
+
+                const apiUrl = `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startTime}&minmagnitude=4.5`;
+                
+                try {
+                    const response = await fetch(apiUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    earthquakeData = data.features;
+                    displayData(earthquakeData);
+                } catch (error) {
+                    console.error("Could not fetch earthquake data:", error);
+                    earthquakeList.innerHTML = `<p class="text-center text-muted-blue-grey">Failed to load earthquake data. Please try again later.</p>`;
+                } finally {
+                    setLoadingState(false);
+                }
+            };
+            
+            // Display data on map and list
+            const displayData = (features) => {
+                // Clear existing layers and list
+                map.eachLayer(layer => {
+                    if (layer instanceof L.CircleMarker) {
+                        map.removeLayer(layer);
+                    }
+                });
+                earthquakeList.innerHTML = '';
+                
+                if (features.length === 0) {
+                     earthquakeList.innerHTML = `<p class="text-center text-muted-blue-grey p-4">No significant earthquakes in the last 7 days.</p>`;
+                     return;
+                }
+
+                features.forEach((quake, index) => {
+                    const { geometry, properties } = quake;
+                    const [longitude, latitude, depth] = geometry.coordinates;
+                    const { mag, place, time, url, tsunami } = properties;
+
+                    // Add markers to map
+                    const circle = L.circleMarker([latitude, longitude], {
+                        radius: Math.pow(mag, 1.5) / 2, // Scale radius by magnitude
+                        fillColor: getMagnitudeColor(mag),
+                        color: "#fff",
+                        weight: 0.5,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+
+                    circle.bindPopup(`<strong>Mag ${mag.toFixed(1)}</strong><br>${place}`);
+                    circle.on('click', () => {
+                        showDetailsModal(quake);
+                        map.flyTo([latitude, longitude], 5);
+                    });
+
+                    // Add cards to list
+                    const card = document.createElement('div');
+                    card.className = 'p-4 rounded-xl glassmorphism cursor-pointer hover:bg-dark-blue-purple/60 transition-all duration-300 reveal';
+                    card.style.transitionDelay = `${index * 50}ms`;
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-lg" style="color: ${getMagnitudeColor(mag)};">M ${mag.toFixed(1)}</span>
+                            <span class="text-xs text-muted-blue-grey">${new Date(time).toLocaleString()}</span>
+                        </div>
+                        <p class="mt-2 text-sm">${place}</p>
+                    `;
+                    card.addEventListener('click', () => {
+                        showDetailsModal(quake);
+                        map.flyTo([latitude, longitude], 5);
+                    });
+                    earthquakeList.appendChild(card);
+                });
+                
+                 // Trigger card animations after they are added to the DOM
+                 setTimeout(() => {
+                    document.querySelectorAll('#earthquake-list .reveal').forEach(el => {
+                        el.classList.add('visible');
+                    });
+                }, 100);
+            };
+
+            // Show details modal
+            const showDetailsModal = (quake) => {
+                const { geometry, properties } = quake;
+                const [longitude, latitude, depth] = geometry.coordinates;
+                
+                modalContent.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <h2 class="text-2xl font-bold mb-4" style="color: ${getMagnitudeColor(properties.mag)};">M ${properties.mag.toFixed(1)} - ${properties.place}</h2>
+                         <button id="close-modal-btn" class="p-1 -mt-2 -mr-2 rounded-full hover:bg-dark-blue-purple transition-colors">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <p><strong>Date & Time:</strong> ${new Date(properties.time).toLocaleString()}</p>
+                        <p><strong>Coordinates:</strong> ${latitude.toFixed(4)}, ${longitude.toFixed(4)}</p>
+                        <p><strong>Depth:</strong> ${depth.toFixed(2)} km</p>
+                        <p><strong>Tsunami Alert:</strong> <span class="${properties.tsunami ? 'text-red-400 font-bold' : 'text-green-400'}">${properties.tsunami ? 'Yes' : 'No'}</span></p>
+                    </div>
+                    <a href="${properties.url}" target="_blank" rel="noopener noreferrer" class="block w-full text-center mt-6 bg-muted-pink-lavender text-base-black font-semibold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity">
+                        View on USGS
+                    </a>
+                `;
+                
+                detailsModal.classList.remove('hidden');
+                detailsModal.classList.add('flex');
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                }, 10);
+                
+                document.getElementById('close-modal-btn').addEventListener('click', hideDetailsModal);
+            };
+
+            // Hide details modal
+            const hideDetailsModal = () => {
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    detailsModal.classList.add('hidden');
+                    detailsModal.classList.remove('flex');
+                }, 300);
+            };
+            
+            // Set loading state
+            const setLoadingState = (isLoading) => {
+                if (isLoading) {
+                    mapLoader.classList.remove('hidden');
+                    mapLoader.classList.add('flex');
+                    refreshButton.classList.add('animate-spin');
+                    earthquakeList.innerHTML = `<div class="w-full h-full flex justify-center items-center pt-16">
+                        <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-muted-pink-lavender" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>`;
+                } else {
+                    mapLoader.classList.add('hidden');
+                    mapLoader.classList.remove('flex');
+                    refreshButton.classList.remove('animate-spin');
+                }
+            };
+
+            // Event Listeners
+            detailsModal.addEventListener('click', (e) => {
+                if (e.target === detailsModal) {
+                    hideDetailsModal();
+                }
+            });
+            
+            refreshButton.addEventListener('click', fetchEarthquakeData);
+
+            // Intersection Observer for scroll animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Initial Load
+            initMap();
+            fetchEarthquakeData();
+        });
+    </script>
+</body>
+</html>

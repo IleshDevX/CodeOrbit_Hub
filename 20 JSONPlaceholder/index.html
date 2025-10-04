@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev-Dash | SaaS API Playground</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables for Color Palette */
+        :root {
+            --bg-color: #000000;
+            --dark-charcoal: #171725;
+            --deep-blue: #073A69;
+            --steel-blue: #5A94C1;
+            --cadet-blue: #77A6C0;
+            --text-gray: #848688;
+            --text-light: #E0E0E0;
+            --accent-gradient: linear-gradient(90deg, var(--steel-blue), var(--cadet-blue));
+            --spotlight-x: 50%;
+            --spotlight-y: 50%;
+        }
+
+        /* Basic Reset and Setup */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-gray);
+            font-family: 'Source Code Pro', monospace;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Spotlight Effect */
+        .spotlight-container {
+            position: relative;
+            isolation: isolate;
+        }
+
+        .spotlight-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: radial-gradient(circle 400px at var(--spotlight-x) var(--spotlight-y), rgba(90, 148, 193, 0.08), transparent);
+            pointer-events: none;
+            z-index: -1;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero Header */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            /* Digital Grid Background */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(23, 23, 37, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(23, 23, 37, 0.5) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            opacity: 0.5;
+            animation: moveGrid 60s linear infinite;
+        }
+
+        @keyframes moveGrid {
+            0% { background-position: 0 0; }
+            100% { background-position: 1000px 1000px; }
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            animation: fadeInBlur 1s ease-out forwards;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: var(--text-gray);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            animation: fadeInBlur 1s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        .hero-nav-title {
+            color: var(--cadet-blue);
+            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            animation: fadeInBlur 1s ease-out 0.4s forwards;
+            opacity: 0;
+        }
+
+        .hero-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            animation: fadeInBlur 1s ease-out 0.6s forwards;
+            opacity: 0;
+        }
+
+        .resource-btn {
+            background: transparent;
+            border: 2px solid var(--dark-charcoal);
+            color: var(--cadet-blue);
+            padding: 0.75rem 1.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .resource-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: var(--accent-gradient);
+            transform: translate(-50%, -50%) rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+        
+        .resource-btn span {
+            position: relative;
+            z-index: 2;
+        }
+
+        .resource-btn:hover {
+            color: var(--dark-charcoal);
+            border-color: var(--steel-blue);
+        }
+
+        .resource-btn:hover::before {
+            opacity: 1;
+        }
+        
+        .resource-btn.active {
+             color: var(--dark-charcoal);
+             background: var(--accent-gradient);
+             border-color: var(--steel-blue);
+        }
+
+        /* General Section Styling */
+        section {
+            padding: 6rem 0;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--accent-gradient);
+        }
+
+        /* Data Display Section */
+        #data-display {
+            min-height: 100vh;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .data-card {
+            background-color: rgba(23, 23, 37, 0.6);
+            border: 1px solid var(--dark-charcoal);
+            padding: 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            position: relative;
+        }
+
+        .data-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background: var(--accent-gradient) border-box;
+            -webkit-mask:
+                linear-gradient(#fff 0 0) padding-box,
+                linear-gradient(#fff 0 0);
+            mask:
+                linear-gradient(#fff 0 0) padding-box,
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .data-card:hover {
+            transform: translateY(-10px) rotate(1deg);
+            border-color: transparent;
+        }
+        
+        .data-card:hover::after {
+            opacity: 1;
+        }
+
+        .data-card h3 {
+            color: var(--cadet-blue);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .data-card p {
+            font-size: 0.9rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .data-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        .card-hidden {
+            display: none;
+        }
+
+        /* Loader Animation */
+        .loader-container {
+            display: none; /* Hidden by default */
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+        }
+        
+        .loader {
+            font-size: 2.5rem;
+            color: var(--steel-blue);
+            font-weight: bold;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+        
+        .loader::before { content: '<'; }
+        .loader::after { content: '>'; }
+
+
+        /* About Section */
+        #about {
+            text-align: left;
+        }
+        
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .about-content h3 {
+            color: var(--steel-blue);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .about-content p {
+            margin-bottom: 1rem;
+            color: var(--text-gray);
+        }
+        
+        .about-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            min-height: 300px;
+        }
+        
+        .about-visual::before, .about-visual::after {
+            content: '';
+            position: absolute;
+            border-radius: 8px;
+            background: var(--accent-gradient);
+        }
+        
+        .about-visual::before {
+            width: 80%;
+            height: 80%;
+            opacity: 0.1;
+            transform: rotate(-5deg);
+        }
+
+        .about-visual::after {
+            width: 80%;
+            height: 80%;
+            opacity: 0.1;
+            transform: rotate(5deg);
+        }
+
+        .about-visual-text {
+            color: var(--deep-blue);
+            font-size: 5rem;
+            font-weight: bold;
+            transform: rotate(-5deg);
+            z-index: 2;
+        }
+
+        @media(max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        /* Modal */
+        .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .modal-container.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--dark-charcoal);
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--deep-blue);
+        }
+
+        .modal-container.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--deep-blue);
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            color: var(--steel-blue);
+            font-size: 1.5rem;
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        
+        .close-modal-btn:hover {
+            color: var(--text-light);
+            transform: rotate(90deg);
+        }
+        
+        .modal-body h4 {
+            color: var(--cadet-blue);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--cadet-blue);
+            padding-left: 0.5rem;
+        }
+        
+        .modal-body p, .modal-body li {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-comments-list, .modal-albums-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .modal-comments-list li, .modal-albums-list li {
+            background: rgba(0,0,0,0.2);
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            border-left: 2px solid var(--deep-blue);
+        }
+
+        /* Footer */
+        .site-footer {
+            background-color: var(--dark-charcoal);
+            padding: 4rem 0;
+            border-top: 1px solid var(--deep-blue);
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+        
+        .footer-column h4 {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--cadet-blue);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .footer-socials a {
+            color: var(--text-gray);
+            transition: color 0.2s ease;
+        }
+        .footer-socials a:hover {
+            color: var(--cadet-blue);
+        }
+        
+        .footer-socials svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--deep-blue);
+        }
+
+        /* Scroll-triggered Animations */
+        .fade-in-section {
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, filter 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-section.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+        
+        @keyframes fadeInBlur {
+            from {
+                opacity: 0;
+                filter: blur(5px);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="spotlight-container">
+        <!-- Hero Header -->
+        <header class="hero">
+            <div class="container">
+                <h1 class="hero-title">The Ultimate API Sandbox</h1>
+                <p class="hero-subtitle">Test, visualize, and interact with REST APIs in a stunning, real-time developer environment. No setup required.</p>
+                <h2 class="hero-nav-title">-- Select an Endpoint to Begin --</h2>
+                <nav class="hero-nav">
+                    <button class="resource-btn" data-resource="posts"><span>Posts</span></button>
+                    <button class="resource-btn" data-resource="comments"><span>Comments</span></button>
+                    <button class="resource-btn" data-resource="users"><span>Users</span></button>
+                    <button class="resource-btn" data-resource="photos"><span>Photos</span></button>
+                    <button class="resource-btn" data-resource="todos"><span>Todos</span></button>
+                    <button class="resource-btn" data-resource="albums"><span>Albums</span></button>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <!-- Data Display Section -->
+            <section id="data-display" class="fade-in-section">
+                <div class="container">
+                    <h2 class="section-title" id="data-title">Live Dashboard</h2>
+                    <div class="loader-container">
+                        <div class="loader"></div>
+                    </div>
+                    <div class="grid-container" id="grid-container">
+                        <!-- Data cards will be injected here by JavaScript -->
+                    </div>
+                    <div id="load-more-container" style="display: none; text-align: center; margin-top: 2rem;">
+                        <button class="resource-btn" id="load-more-btn"><span>Load More</span></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="fade-in-section">
+                <div class="container">
+                    <h2 class="section-title">Why Dev-Dash?</h2>
+                    <div class="about-grid">
+                        <div class="about-content">
+                            <h3>Our Mission</h3>
+                            <p>In a world of complex developer tools, we believe in the power of simplicity and elegance. Dev-Dash was born from a desire to create a frictionless environment for developers to interact with APIs. Our mission is to accelerate learning and streamline testing, one API call at a time.</p>
+                             <h3>A Tool Built for Modern Developers</h3>
+                            <p>Dev-Dash provides a clean, responsive, and highly visual way to explore API endpoints. Forget cumbersome setup or clunky interfaces. Here, the data takes center stage, allowing you to focus on what truly matters: understanding API structures and prototyping with real-world data instantly.</p>
+                        </div>
+                        <div class="about-visual">
+                             <div class="about-visual-text">{ API }</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Detail Modal -->
+        <div class="modal-container" id="modal-container">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modal-title"></h3>
+                    <button class="close-modal-btn" id="close-modal-btn">&times;</button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Modal content will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-column">
+                        <div class="footer-logo">Dev-Dash</div>
+                        <p>The Ultimate API Sandbox.</p>
+                        <div class="footer-socials">
+                            <a href="#" aria-label="Github"><!-- SVG for Github -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                            </a>
+                            <a href="#" aria-label="Twitter"><!-- SVG for Twitter -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Product</h4>
+                        <ul>
+                            <li><a href="#">Features</a></li>
+                            <li><a href="#">Integrations</a></li>
+                            <li><a href="#">Documentation</a></li>
+                            <li><a href="#">API Status</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <ul>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Blog</a></li>
+                            <li><a href="#">Careers</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                     <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 Dev-Dash. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_BASE_URL = 'https://jsonplaceholder.typicode.com';
+
+            // DOM Elements
+            const resourceButtons = document.querySelectorAll('.resource-btn');
+            const gridContainer = document.getElementById('grid-container');
+            const dataTitle = document.getElementById('data-title');
+            const loaderContainer = document.querySelector('.loader-container');
+            
+            const modalContainer = document.getElementById('modal-container');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            
+            const spotlightContainer = document.querySelector('.spotlight-container');
+            const loadMoreContainer = document.getElementById('load-more-container');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+
+            let currentResource = '';
+            const ITEMS_PER_PAGE = 12;
+
+            // --- EVENT LISTENERS ---
+
+            // Resource button clicks
+            resourceButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const resource = button.dataset.resource;
+                    
+                    currentResource = resource;
+                    
+                    resourceButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    document.getElementById('data-display').scrollIntoView({ behavior: 'smooth' });
+
+                    fetchAndDisplayData(resource);
+                });
+            });
+
+            // "Load More" button click
+            loadMoreBtn.addEventListener('click', () => {
+                const hiddenCards = gridContainer.querySelectorAll('.data-card.card-hidden');
+                let i = 0;
+                while (i < ITEMS_PER_PAGE && i < hiddenCards.length) {
+                    hiddenCards[i].classList.remove('card-hidden');
+                    i++;
+                }
+                if (gridContainer.querySelectorAll('.data-card.card-hidden').length === 0) {
+                    loadMoreContainer.style.display = 'none';
+                }
+            });
+
+            // Card clicks for modal (Event Delegation)
+            gridContainer.addEventListener('click', (e) => {
+                const card = e.target.closest('.data-card');
+                if (card) {
+                    const id = card.dataset.id;
+                    const resource = card.dataset.resource;
+                    openDetailModal(resource, id);
+                }
+            });
+
+            // Modal close events
+            closeModalBtn.addEventListener('click', closeDetailModal);
+            modalContainer.addEventListener('click', (e) => {
+                if (e.target === modalContainer) {
+                    closeDetailModal();
+                }
+            });
+            
+            // Spotlight effect
+            spotlightContainer.addEventListener('mousemove', (e) => {
+                const rect = spotlightContainer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                spotlightContainer.style.setProperty('--spotlight-x', `${x}px`);
+                spotlightContainer.style.setProperty('--spotlight-y', `${y}px`);
+            });
+
+
+            // --- API & RENDERING FUNCTIONS ---
+
+            async function fetchAndDisplayData(resource) {
+                showLoader();
+                gridContainer.innerHTML = '';
+                loadMoreContainer.style.display = 'none';
+                dataTitle.textContent = `Loading ${resource.charAt(0).toUpperCase() + resource.slice(1)}...`;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/${resource}`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    
+                    const itemsToRender = resource === 'photos' ? data.slice(0, 100) : data;
+
+                    gridContainer.innerHTML = itemsToRender.map(item => createCardHTML(item, resource)).join('');
+
+                    const cards = gridContainer.querySelectorAll('.data-card');
+                    if (cards.length > ITEMS_PER_PAGE) {
+                        for (let i = ITEMS_PER_PAGE; i < cards.length; i++) {
+                            cards[i].classList.add('card-hidden');
+                        }
+                        loadMoreContainer.style.display = 'block';
+                    }
+                    
+                    dataTitle.textContent = `Endpoint: /${resource}`;
+                } catch (error) {
+                    console.error("Failed to fetch data:", error);
+                    gridContainer.innerHTML = `<p style="color: var(--cadet-blue); text-align: center; grid-column: 1 / -1;">Failed to load data. Please try again.</p>`;
+                    dataTitle.textContent = 'Error';
+                } finally {
+                    hideLoader();
+                }
+            }
+            
+            function createCardHTML(item, resource) {
+                let cardContent = '';
+                switch(resource) {
+                    case 'posts':
+                        cardContent = `<h3>${item.title}</h3><p>${item.body}</p>`;
+                        break;
+                    case 'comments':
+                        cardContent = `<h3>${item.name}</h3><p><em>by ${item.email}</em></p><p>${item.body}</p>`;
+                        break;
+                    case 'users':
+                        cardContent = `<h3>${item.name}</h3><p>@${item.username}</p><p>${item.email}</p>`;
+                        break;
+                    case 'photos':
+                        cardContent = `<img src="${item.thumbnailUrl}" alt="${item.title}" loading="lazy"><h3>${item.title}</h3>`;
+                        break;
+                    case 'todos':
+                        cardContent = `<h3>${item.title}</h3><p>Status: ${item.completed ? 'Completed' : 'Pending'}</p>`;
+                        break;
+                    case 'albums':
+                        cardContent = `<h3>${item.title}</h3>`;
+                        break;
+                }
+                return `<div class="data-card" data-id="${item.id}" data-resource="${resource}">${cardContent}</div>`;
+            }
+
+            async function openDetailModal(resource, id) {
+                modalContainer.classList.add('show');
+                modalBody.innerHTML = '<div class="loader-container" style="display: flex;"><div class="loader"></div></div>';
+                modalTitle.textContent = 'Loading...';
+                
+                try {
+                    // Fetch primary item
+                    const itemRes = await fetch(`${API_BASE_URL}/${resource}/${id}`);
+                    const item = await itemRes.json();
+                    
+                    modalTitle.textContent = item.title || item.name;
+
+                    let detailsHTML = '';
+                    
+                    // Fetch related data
+                    if (resource === 'posts') {
+                        detailsHTML = `<p>${item.body}</p>`;
+                        const commentsRes = await fetch(`${API_BASE_URL}/posts/${id}/comments`);
+                        const comments = await commentsRes.json();
+                        detailsHTML += `<h4>Comments (${comments.length})</h4><ul class="modal-comments-list">${comments.map(c => `<li><strong>${c.name}</strong><br>${c.body}</li>`).join('')}</ul>`;
+                    } else if (resource === 'users') {
+                        detailsHTML = `<p><strong>Username:</strong> ${item.username}</p><p><strong>Email:</strong> ${item.email}</p><p><strong>Website:</strong> ${item.website}</p>`;
+                        const albumsRes = await fetch(`${API_BASE_URL}/users/${id}/albums`);
+                        const albums = await albumsRes.json();
+                        detailsHTML += `<h4>Albums (${albums.length})</h4><ul class="modal-albums-list">${albums.map(a => `<li>${a.title}</li>`).join('')}</ul>`;
+                    } else if (resource === 'photos') {
+                        detailsHTML = `<img src="${item.url}" alt="${item.title}" style="max-width: 100%; border-radius: 4px;"><p>${item.title}</p>`;
+                    } else if (resource === 'albums') {
+                        detailsHTML = `<p>Album by User ID: ${item.userId}</p>`;
+                        const photosRes = await fetch(`${API_BASE_URL}/albums/${id}/photos?_limit=10`);
+                        const photos = await photosRes.json();
+                        detailsHTML += `<h4>Photos (first 10)</h4><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;">${photos.map(p => `<img src="${p.thumbnailUrl}" alt="${p.title}" style="width: 100%; border-radius: 4px;">`).join('')}</div>`;
+                    } else {
+                        // Generic display for others
+                        detailsHTML = `<pre>${JSON.stringify(item, null, 2)}</pre>`;
+                    }
+                    
+                    modalBody.innerHTML = detailsHTML;
+                } catch (error) {
+                    console.error("Failed to fetch modal data:", error);
+                    modalBody.innerHTML = `<p style="color: var(--cadet-blue);">Could not load details.</p>`;
+                }
+            }
+
+            function closeDetailModal() {
+                modalContainer.classList.remove('show');
+            }
+            
+            function showLoader() {
+                loaderContainer.style.display = 'flex';
+            }
+
+            function hideLoader() {
+                loaderContainer.style.display = 'none';
+            }
+
+            // --- SCROLL ANIMATIONS ---
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-in-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
+

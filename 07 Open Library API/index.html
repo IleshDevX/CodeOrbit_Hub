@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inkrise - Your Smart Digital Library Platform</title>
+  <meta name="description" content="The most advanced digital library platform for discovering, organizing, and managing your book collection with AI-powered recommendations." />
+
+  <style>
+    /* ------------------------
+       SaaS Theme Variables
+       ------------------------*/
+    :root{
+      --bg: #0a0a0f;
+      --bg-secondary: #141419;
+      --bg-card: #1a1a24;
+      --text-primary: #ffffff;
+      --text-secondary: #a8a8b3;
+      --text-muted: #6b6b78;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-error: #ef4444;
+      --border: rgba(255,255,255,0.1);
+      --border-hover: rgba(255,255,255,0.2);
+      --glass: rgba(255,255,255,0.05);
+      --glass-strong: rgba(255,255,255,0.1);
+      --shadow: 0 4px 20px rgba(0,0,0,0.3);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.4);
+      --radius: 12px;
+      --radius-lg: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --max-width: 1400px;
+    }
+
+    /* Reset + Base */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: 
+        radial-gradient(600px circle at 50% 0%, rgba(99,102,241,0.1), transparent),
+        radial-gradient(800px circle at 80% 100%, rgba(139,92,246,0.1), transparent),
+        var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a{color:inherit;text-decoration:none;transition:var(--transition)}
+    img{display:block;max-width:100%;height:auto}
+    
+    .container{max-width:var(--max-width);margin:0 auto;padding:0 24px}
+
+    /* ------------------
+       NAVIGATION
+       ------------------*/
+    .nav{
+      position:fixed;top:0;left:0;right:0;z-index:100;
+      background:rgba(10,10,15,0.8);backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border)
+    }
+    .nav-container{
+      display:flex;align-items:center;justify-content:space-between;
+      height:80px;max-width:var(--max-width);margin:0 auto;padding:0 24px
+    }
+    .nav-brand{display:flex;align-items:center;gap:12px}
+    .nav-logo{
+      width:40px;height:40px;border-radius:8px;
+      background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:800;font-size:18px;color:white
+    }
+    .nav-title{font-size:24px;font-weight:700;background:linear-gradient(135deg,var(--text-primary),var(--accent-primary));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+    .nav-links{display:flex;align-items:center;gap:32px}
+    .nav-link{color:var(--text-secondary);font-weight:500;transition:var(--transition)}
+    .nav-link:hover{color:var(--text-primary)}
+    .nav-link.active{color:var(--accent-primary)}
+
+    .nav-cta{
+      background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+      color:white;padding:12px 24px;border-radius:var(--radius);
+      font-weight:600;box-shadow:var(--shadow);transition:var(--transition)
+    }
+    .nav-cta:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+
+    /* Mobile nav toggle */
+    .nav-toggle{display:none;flex-direction:column;gap:4px;cursor:pointer}
+    .nav-toggle span{width:24px;height:2px;background:var(--text-primary);transition:var(--transition)}
+
+    /* ------------------
+       HERO SECTION
+       ------------------*/
+    .hero{
+      padding:120px 0 80px;
+      background:
+        radial-gradient(800px circle at 20% 50%, rgba(99,102,241,0.15), transparent),
+        radial-gradient(600px circle at 80% 20%, rgba(139,92,246,0.1), transparent)
+    }
+    .hero-container{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:800px;margin:0 auto}
+    .hero-content h1{
+      font-size:clamp(2.5rem,5vw,4rem);font-weight:800;line-height:1.1;
+      margin:0 0 24px;
+      background:linear-gradient(135deg,var(--text-primary),var(--accent-primary),var(--accent-secondary));
+      -webkit-background-clip:text;background-clip:text;color:transparent
+    }
+    .hero-content p{font-size:20px;color:var(--text-secondary);margin:0 0 32px;line-height:1.6}
+
+    .hero-actions{display:flex;gap:16px;margin-bottom:48px;flex-wrap:wrap;justify-content:center}
+    .btn{
+      padding:16px 32px;border-radius:var(--radius);border:0;
+      font-weight:600;font-size:16px;cursor:pointer;
+      transition:var(--transition);text-align:center;display:inline-flex;
+      align-items:center;gap:8px;text-decoration:none
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+      color:white;box-shadow:var(--shadow)
+    }
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+    .btn-secondary{
+      background:var(--glass);border:1px solid var(--border);
+      color:var(--text-primary);backdrop-filter:blur(10px)
+    }
+    .btn-secondary:hover{background:var(--glass-strong);border-color:var(--border-hover)}
+
+    .hero-stats{display:flex;gap:40px;justify-content:center}
+    .stat{text-align:center}
+    .stat-number{display:block;font-size:28px;font-weight:800;color:var(--accent-primary)}
+    .stat-label{color:var(--text-muted);font-size:14px;margin-top:4px}
+
+    /* ------------------
+       SEARCH SECTION
+       ------------------*/
+    .search-section{padding:80px 0;background:var(--bg-secondary)}
+    .search-container{text-align:center;max-width:800px;margin:0 auto}
+    .search-title{font-size:36px;font-weight:700;margin:0 0 16px}
+    .search-subtitle{font-size:18px;color:var(--text-secondary);margin:0 0 40px}
+
+    .search-form{
+      display:flex;gap:12px;margin-bottom:32px;
+      background:var(--bg-card);padding:8px;border-radius:var(--radius);
+      border:1px solid var(--border);box-shadow:var(--shadow)
+    }
+    .search-input{
+      flex:1;padding:16px 20px;background:transparent;
+      border:0;color:var(--text-primary);font-size:16px;outline:none
+    }
+    .search-input::placeholder{color:var(--text-muted)}
+    .search-select{
+      padding:12px 16px;background:var(--glass);border:1px solid var(--border);
+      border-radius:8px;color:var(--text-primary);font-size:14px;outline:none;
+      cursor:pointer;transition:var(--transition);
+      -webkit-appearance:none;-moz-appearance:none;appearance:none;
+      background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23a8a8b3'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;background-position:right 12px center;
+      background-size:16px;padding-right:40px;min-width:120px
+    }
+    .search-select:hover{background:var(--glass-strong);border-color:var(--border-hover)}
+    .search-select:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px rgba(99,102,241,0.1)}
+    .search-select option{
+      background:var(--bg-card);color:var(--text-primary);
+      padding:8px 12px;border:none
+    }
+    .search-btn{
+      padding:16px 24px;background:var(--accent-primary);color:white;
+      border:0;border-radius:8px;font-weight:600;cursor:pointer;
+      transition:var(--transition);min-width:100px
+    }
+    .search-btn:hover{
+      background:var(--accent-secondary);transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(99,102,241,0.3)
+    }
+    .search-btn:active{transform:translateY(0)}
+
+    .search-suggestions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+    .suggestion-chip{
+      padding:8px 16px;background:var(--glass);border:1px solid var(--border);
+      border-radius:20px;color:var(--text-secondary);font-size:14px;
+      cursor:pointer;transition:var(--transition)
+    }
+    .suggestion-chip:hover{background:var(--glass-strong);color:var(--text-primary)}
+
+    /* ------------------
+       FEATURES SECTION
+       ------------------*/
+    .features{padding:100px 0}
+    .features-header{text-align:center;margin-bottom:80px}
+    .features-header h2{font-size:42px;font-weight:700;margin:0 0 20px}
+    .features-header p{font-size:20px;color:var(--text-secondary);max-width:600px;margin:0 auto}
+
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:32px}
+    .feature-card{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius-lg);padding:40px;
+      transition:var(--transition);position:relative;overflow:hidden
+    }
+    .feature-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary))
+    }
+    .feature-card:hover{transform:translateY(-8px);border-color:var(--border-hover);box-shadow:var(--shadow-lg)}
+
+    .feature-icon{
+      width:60px;height:60px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+      display:flex;align-items:center;justify-content:center;
+      font-size:24px;margin-bottom:24px;color:white
+    }
+    .feature-title{font-size:24px;font-weight:700;margin:0 0 12px}
+    .feature-desc{color:var(--text-secondary);line-height:1.6}
+
+    /* ------------------
+       RESULTS & LIBRARY
+       ------------------*/
+    .results-section{padding:60px 0;background:var(--bg-secondary)}
+    .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px}
+    .section-title{font-size:28px;font-weight:700;margin:0}
+    .result-count{color:var(--text-muted)}
+
+    .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:24px}
+    .book-card{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius);overflow:hidden;
+      transition:var(--transition);cursor:pointer
+    }
+    .book-card:hover{transform:translateY(-4px);border-color:var(--border-hover);box-shadow:var(--shadow)}
+
+    .book-thumb{height:250px;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .book-thumb img{width:100%;height:100%;object-fit:cover}
+    .book-meta{padding:16px}
+    .book-title{font-weight:600;margin:0 0 8px;font-size:14px;line-height:1.4}
+    .book-author{color:var(--text-muted);font-size:13px;margin:0 0 12px}
+    .book-year{background:var(--glass);padding:4px 8px;border-radius:4px;font-size:12px;color:var(--text-secondary)}
+
+    /* Library Section */
+    .library-section{padding:80px 0}
+    .library-empty{
+      text-align:center;padding:80px 20px;
+      background:var(--bg-card);border:2px dashed var(--border);
+      border-radius:var(--radius-lg)
+    }
+    .library-empty-icon{font-size:64px;margin-bottom:24px;opacity:0.5}
+    .library-empty-title{font-size:24px;font-weight:600;margin:0 0 12px}
+    .library-empty-desc{color:var(--text-secondary);margin:0 0 32px}
+
+    /* ------------------
+       CTA SECTION
+       ------------------*/
+    .cta{
+      padding:100px 0;
+      background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.05));
+      text-align:center
+    }
+    .cta-content{max-width:600px;margin:0 auto}
+    .cta h2{font-size:40px;font-weight:700;margin:0 0 20px}
+    .cta p{font-size:18px;color:var(--text-secondary);margin:0 0 40px}
+
+    /* ------------------
+       FOOTER
+       ------------------*/
+    .footer{
+      background:var(--bg-secondary);border-top:1px solid var(--border);
+      padding:60px 0 30px
+    }
+    .footer-content{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+    .footer-brand h3{font-size:24px;font-weight:700;margin:0 0 12px}
+    .footer-brand p{color:var(--text-secondary);margin:0 0 24px}
+    .footer-links h4{font-size:16px;font-weight:600;margin:0 0 16px;color:var(--text-primary)}
+    .footer-links a{display:block;color:var(--text-secondary);margin-bottom:8px;transition:var(--transition)}
+    .footer-links a:hover{color:var(--text-primary)}
+
+    .footer-bottom{
+      padding-top:30px;border-top:1px solid var(--border);
+      display:flex;justify-content:space-between;align-items:center;
+      color:var(--text-muted);font-size:14px
+    }
+
+    /* ------------------
+       MODAL
+       ------------------*/
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(0,0,0,0.8);
+      backdrop-filter:blur(8px);z-index:1000;
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;visibility:hidden;transition:var(--transition)
+    }
+    .modal-backdrop.show{opacity:1;visibility:visible}
+    .modal{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius-lg);padding:32px;
+      max-width:600px;width:90%;max-height:80vh;overflow-y:auto;
+      transform:scale(0.9);transition:var(--transition)
+    }
+    .modal-backdrop.show .modal{transform:scale(1)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .modal-title{font-size:24px;font-weight:700;margin:0}
+    .modal-body{display:grid;grid-template-columns:150px 1fr;gap:24px}
+
+    /* ------------------
+       ABOUT SECTION
+       ------------------*/
+    .about-section{padding:100px 0;background:var(--bg)}
+    .about-container{max-width:1200px;margin:0 auto}
+    .about-header{text-align:center;margin-bottom:80px}
+    .about-header h2{font-size:42px;font-weight:700;margin:0 0 20px}
+    .about-header p{font-size:20px;color:var(--text-secondary);max-width:700px;margin:0 auto}
+
+    .about-content{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:80px}
+    .about-text h3{font-size:32px;font-weight:700;margin:0 0 24px;background:linear-gradient(135deg,var(--text-primary),var(--accent-primary));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .about-text p{color:var(--text-secondary);font-size:18px;line-height:1.7;margin-bottom:24px}
+    .about-text .highlight{color:var(--accent-primary);font-weight:600}
+
+    .about-visual{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius-lg);padding:40px;
+      position:relative;overflow:hidden
+    }
+    .about-visual::before{
+      content:'';position:absolute;top:0;left:0;right:0;bottom:0;
+      background:linear-gradient(135deg,rgba(99,102,241,0.05),rgba(139,92,246,0.02));
+      pointer-events:none
+    }
+    .about-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;position:relative}
+    .about-stat{text-align:center;padding:20px}
+    .about-stat-number{display:block;font-size:32px;font-weight:800;color:var(--accent-primary);margin-bottom:8px}
+    .about-stat-label{color:var(--text-secondary);font-size:14px}
+
+    .mission-values{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:32px;margin-bottom:60px}
+    .mission-card{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius-lg);padding:32px;
+      transition:var(--transition);position:relative
+    }
+    .mission-card::before{
+      content:'';position:absolute;top:0;left:0;right:0;height:3px;
+      background:linear-gradient(90deg,var(--accent-primary),var(--accent-secondary))
+    }
+    .mission-card:hover{transform:translateY(-4px);border-color:var(--border-hover);box-shadow:var(--shadow-lg)}
+    .mission-icon{
+      width:50px;height:50px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;margin-bottom:20px;color:white
+    }
+    .mission-title{font-size:20px;font-weight:700;margin:0 0 12px}
+    .mission-desc{color:var(--text-secondary);line-height:1.6}
+
+    .team-section{margin-bottom:60px}
+    .team-header{text-align:center;margin-bottom:40px}
+    .team-header h3{font-size:32px;font-weight:700;margin:0 0 16px}
+    .team-header p{color:var(--text-secondary);font-size:18px}
+    .team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px}
+    .team-card{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius);padding:24px;text-align:center;
+      transition:var(--transition)
+    }
+    .team-card:hover{transform:translateY(-4px);border-color:var(--border-hover)}
+    .team-avatar{
+      width:80px;height:80px;border-radius:50%;
+      background:linear-gradient(135deg,var(--accent-primary),var(--accent-secondary));
+      display:flex;align-items:center;justify-content:center;
+      font-size:24px;color:white;margin:0 auto 16px
+    }
+    .team-name{font-size:18px;font-weight:600;margin:0 0 8px}
+    .team-role{color:var(--text-secondary);font-size:14px;margin:0 0 12px}
+    .team-bio{color:var(--text-muted);font-size:13px;line-height:1.5}
+
+    .tech-stack{
+      background:var(--bg-card);border:1px solid var(--border);
+      border-radius:var(--radius-lg);padding:40px;text-align:center
+    }
+    .tech-stack h3{font-size:24px;font-weight:700;margin:0 0 24px}
+    .tech-items{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+    .tech-item{
+      background:var(--glass);border:1px solid var(--border);
+      padding:12px 20px;border-radius:8px;
+      color:var(--text-secondary);font-size:14px;font-weight:500;
+      transition:var(--transition);cursor:pointer
+    }
+    .tech-item:hover{background:var(--glass-strong);color:var(--text-primary);border-color:var(--border-hover)}
+
+    /* ------------------
+       RESPONSIVE
+       ------------------*/
+    @media (max-width: 1024px) {
+      .about-content{grid-template-columns:1fr;gap:40px}
+      .about-stats-grid{grid-template-columns:repeat(2,1fr)}
+      .features-grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+      .footer-content{grid-template-columns:1fr 1fr;gap:30px}
+    }
+
+    @media (max-width: 768px) {
+      .nav-links{display:none}
+      .nav-toggle{display:flex}
+      .search-form{flex-direction:column}
+      .search-input{margin-bottom:8px}
+      .search-select{margin-bottom:8px;width:100%;font-size:16px;padding:14px 16px}
+      .search-btn{width:100%;font-size:16px}
+      .hero-actions{flex-direction:column}
+      .hero-stats{flex-direction:column;gap:20px}
+      .section-header{flex-direction:column;gap:16px;text-align:center}
+      .books-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+      .footer-content{grid-template-columns:1fr}
+      .footer-bottom{flex-direction:column;gap:16px}
+      .modal-body{grid-template-columns:1fr}
+      .about-content{text-align:center}
+      .about-stats-grid{grid-template-columns:1fr}
+      .mission-values{grid-template-columns:1fr}
+      .team-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+      .tech-items{justify-content:center}
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeInUp 0.6s ease-out; }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="nav">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="nav-logo">IR</div>
+        <div class="nav-title">Inkrise</div>
+      </div>
+      
+      <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#library" class="nav-link">Library</a>
+        <a href="#about" class="nav-link">About</a>
+      </div>
+      
+      <div class="nav-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-container">
+        <div class="hero-content">
+          <h1>Your Smart Digital Library Platform</h1>
+          <p>Discover, organize, and manage millions of books with AI-powered recommendations. Access the world's largest digital library with advanced search and personalized collections.</p>
+          
+          <div class="hero-actions">
+            <a href="#search" class="btn btn-primary">Start Exploring</a>
+            <a href="#features" class="btn btn-secondary">Learn More</a>
+          </div>
+          
+          <div class="hero-stats">
+            <div class="stat">
+              <span class="stat-number">20M+</span>
+              <div class="stat-label">Books Available</div>
+            </div>
+            <div class="stat">
+              <span class="stat-number">500K+</span>
+              <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat">
+              <span class="stat-number">99.9%</span>
+              <div class="stat-label">Uptime</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH SECTION -->
+  <section class="search-section" id="search">
+    <div class="container">
+      <div class="search-container">
+        <h2 class="search-title">Find Your Next Great Read</h2>
+        <p class="search-subtitle">Search through millions of books by title, author, ISBN, or subject</p>
+        
+        <div class="search-form">
+          <input id="search-input" class="search-input" placeholder="Search books, authors, or subjects..." />
+          <select id="search-type" class="search-select">
+            <option value="q">All Fields</option>
+            <option value="title">Title</option>
+            <option value="author">Author</option>
+            <option value="isbn">ISBN</option>
+            <option value="subject">Subject</option>
+          </select>
+          <button id="search-btn" class="search-btn">Search</button>
+        </div>
+        
+        <div class="search-suggestions">
+          <div class="suggestion-chip" onclick="quickSearch('javascript')">JavaScript</div>
+          <div class="suggestion-chip" onclick="quickSearch('fiction')">Fiction</div>
+          <div class="suggestion-chip" onclick="quickSearch('history')">History</div>
+          <div class="suggestion-chip" onclick="quickSearch('science')">Science</div>
+          <div class="suggestion-chip" onclick="quickSearch('art')">Art</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header">
+        <h2>Everything you need for digital reading</h2>
+        <p>Advanced tools and features designed to enhance your reading experience and help you build the perfect digital library.</p>
+      </div>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3 class="feature-title">Smart Search</h3>
+          <p class="feature-desc">Advanced search algorithms with filters for title, author, ISBN, subject, and publication year. Find exactly what you're looking for instantly.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">❤️</div>
+          <h3 class="feature-title">Personal Library</h3>
+          <p class="feature-desc">Save your favorite books, create custom collections, and track your reading progress with our intuitive library management system.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3 class="feature-title">AI Recommendations</h3>
+          <p class="feature-desc">Get personalized book recommendations based on your reading history and preferences powered by advanced machine learning.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <h3 class="feature-title">Cross-Platform</h3>
+          <p class="feature-desc">Access your library from any device. Seamless synchronization across desktop, tablet, and mobile with offline reading support.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3 class="feature-title">Reading Analytics</h3>
+          <p class="feature-desc">Track your reading habits, set goals, and get insights into your reading patterns with comprehensive analytics dashboard.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3 class="feature-title">Privacy First</h3>
+          <p class="feature-desc">Your data stays private and secure. No ads, no tracking, just pure reading experience with enterprise-grade security.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH RESULTS -->
+  <section class="results-section" id="results" style="display:none">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Search Results</h2>
+        <div class="result-count" id="result-count">—</div>
+      </div>
+      <div class="books-grid" id="books-grid">
+        <!-- Search results will be populated here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- PERSONAL LIBRARY -->
+  <section class="library-section" id="library">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Your Personal Library</h2>
+        <div class="result-count" id="library-count">0 books saved</div>
+      </div>
+      
+      <div id="library-grid" class="books-grid">
+        <!-- User's saved books will be populated here -->
+      </div>
+      
+      <div id="library-empty" class="library-empty">
+        <div class="library-empty-icon">📚</div>
+        <h3 class="library-empty-title">Your library is empty</h3>
+        <p class="library-empty-desc">Start building your personal collection by searching and saving books above</p>
+        <a href="#search" class="btn btn-primary">Browse Books</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="cta">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready to build your digital library?</h2>
+        <p>Join thousands of readers who have already discovered their perfect books with Inkrise's intelligent search and recommendation system.</p>
+        <a href="#search" class="btn btn-primary">Start Reading Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <section class="about-section" id="about">
+    <div class="container">
+      <div class="about-container">
+        <!-- About Header -->
+        <div class="about-header">
+          <h2>About Inkrise</h2>
+          <p>We're on a mission to make the world's knowledge accessible to everyone through innovative technology and user-centered design.</p>
+        </div>
+
+        <!-- Main About Content -->
+        <div class="about-content">
+          <div class="about-text">
+            <h3>Democratizing Access to Knowledge</h3>
+            <p>Founded in 2024, Inkrise emerged from a simple belief: <span class="highlight">everyone deserves access to the world's knowledge</span>. We've built the most advanced digital library platform that connects millions of readers with over 20 million books from the Open Library collection.</p>
+            <p>Our platform combines cutting-edge search technology with intuitive design to create an experience that's both powerful and accessible. Whether you're a researcher, student, or passionate reader, Inkrise adapts to your needs.</p>
+            <p>We're not just a search engine – we're <span class="highlight">your personal librarian</span>, powered by AI and designed with privacy at its core.</p>
+          </div>
+          
+          <div class="about-visual">
+            <div class="about-stats-grid">
+              <div class="about-stat">
+                <span class="about-stat-number">20M+</span>
+                <div class="about-stat-label">Books Indexed</div>
+              </div>
+              <div class="about-stat">
+                <span class="about-stat-number">500K+</span>
+                <div class="about-stat-label">Active Users</div>
+              </div>
+              <div class="about-stat">
+                <span class="about-stat-number">1M+</span>
+                <div class="about-stat-label">Authors Covered</div>
+              </div>
+              <div class="about-stat">
+                <span class="about-stat-number">150+</span>
+                <div class="about-stat-label">Countries Served</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mission & Values -->
+        <div class="mission-values">
+          <div class="mission-card">
+            <div class="mission-icon">🎯</div>
+            <h4 class="mission-title">Our Mission</h4>
+            <p class="mission-desc">To democratize access to knowledge by creating the world's most intuitive and comprehensive digital library platform that serves readers, researchers, and learners globally.</p>
+          </div>
+          
+          <div class="mission-card">
+            <div class="mission-icon">💡</div>
+            <h4 class="mission-title">Our Vision</h4>
+            <p class="mission-desc">A world where geographical, economic, and technological barriers never prevent anyone from accessing the information and stories that can change their lives.</p>
+          </div>
+          
+          <div class="mission-card">
+            <div class="mission-icon">🔒</div>
+            <h4 class="mission-title">Our Values</h4>
+            <p class="mission-desc">Privacy-first design, open access to knowledge, user-centered innovation, and building technology that serves humanity's collective wisdom.</p>
+          </div>
+        </div>
+
+        <!-- Team Section -->
+        <div class="team-section">
+          <div class="team-header">
+            <h3>Meet Our Team</h3>
+            <p>Passionate individuals working to make knowledge accessible to everyone</p>
+          </div>
+          
+          <div class="team-grid">
+            <div class="team-card">
+              <div class="team-avatar">👨‍💻</div>
+              <h4 class="team-name">Alex Chen</h4>
+              <div class="team-role">Founder & CEO</div>
+              <p class="team-bio">Former Google engineer with 10+ years in search algorithms and information retrieval systems.</p>
+            </div>
+            
+            <div class="team-card">
+              <div class="team-avatar">👩‍🎨</div>
+              <h4 class="team-name">Sarah Johnson</h4>
+              <div class="team-role">Head of Design</div>
+              <p class="team-bio">UX designer passionate about making complex information systems simple and accessible.</p>
+            </div>
+            
+            <div class="team-card">
+              <div class="team-avatar">👨‍🔬</div>
+              <h4 class="team-name">Dr. Michael Torres</h4>
+              <div class="team-role">Chief Technology Officer</div>
+              <p class="team-bio">PhD in Computer Science, specializing in machine learning and natural language processing.</p>
+            </div>
+            
+            <div class="team-card">
+              <div class="team-avatar">👩‍📚</div>
+              <h4 class="team-name">Emma Wilson</h4>
+              <div class="team-role">Head of Content</div>
+              <p class="team-bio">Former librarian with expertise in information science and digital archiving systems.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="tech-stack">
+          <h3>Built with Modern Technology</h3>
+          <div class="tech-items">
+            <div class="tech-item">JavaScript ES6+</div>
+            <div class="tech-item">Modern CSS</div>
+            <div class="tech-item">Open Library API</div>
+            <div class="tech-item">Progressive Web App</div>
+            <div class="tech-item">Responsive Design</div>
+            <div class="tech-item">Privacy-First</div>
+            <div class="tech-item">No Tracking</div>
+            <div class="tech-item">Open Source</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <h3>Inkrise</h3>
+          <p>The most advanced digital library platform for book lovers. Discover, organize, and enjoy millions of books with cutting-edge technology.</p>
+          <div style="display:flex;gap:16px">
+            <a href="#" style="color:var(--text-secondary)">📧 Contact</a>
+            <a href="#" style="color:var(--text-secondary)">🐦 Twitter</a>
+            <a href="#" style="color:var(--text-secondary)">📱 GitHub</a>
+          </div>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Product</h4>
+          <a href="#features">Features</a>
+          <a href="#library">Library</a>
+          <a href="#api">API</a>
+          <a href="#integrations">Integrations</a>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Resources</h4>
+          <a href="#docs">Documentation</a>
+          <a href="#blog">Blog</a>
+          <a href="#help">Help Center</a>
+          <a href="#status">Status</a>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Company</h4>
+          <a href="#about">About Us</a>
+          <a href="#careers">Careers</a>
+          <a href="#privacy">Privacy</a>
+          <a href="#terms">Terms</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <div>© 2024 Inkrise. All rights reserved.</div>
+        <div>Powered by Open Library API</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL -->
+  <div id="modal-backdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Book Details</h3>
+        <button id="modal-close" class="btn btn-secondary" style="padding:8px 16px">Close</button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-cover" style="background:var(--bg-secondary);border-radius:8px;height:200px"></div>
+        <div>
+          <div id="modal-meta"></div>
+          <div id="modal-desc" style="margin:16px 0;color:var(--text-secondary)"></div>
+          <div id="modal-subjects"></div>
+          <div style="margin-top:24px">
+            <button id="fav-toggle" class="btn btn-primary">Add to Library</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Modern SaaS JavaScript Implementation
+    class Inkrise {
+      constructor() {
+        this.API_BASE = 'https://openlibrary.org';
+        this.favorites = JSON.parse(localStorage.getItem('inkrise:library') || '[]');
+        this.currentBook = null;
+        this.init();
+      }
+
+      init() {
+        this.bindEvents();
+        this.renderLibrary();
+        this.loadFeaturedBooks();
+        this.updateLibraryCount();
+        this.addScrollAnimations();
+      }
+
+      bindEvents() {
+        // Search functionality
+        document.getElementById('search-btn').addEventListener('click', () => this.search());
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.search();
+        });
+        
+        // Modal controls
+        document.getElementById('modal-close').addEventListener('click', () => this.hideModal());
+        document.getElementById('modal-backdrop').addEventListener('click', (e) => {
+          if (e.target.id === 'modal-backdrop') this.hideModal();
+        });
+        
+        // Favorite toggle
+        document.getElementById('fav-toggle').addEventListener('click', () => this.toggleFavorite());
+        
+        // Smooth scrolling for nav links
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = document.querySelector(link.getAttribute('href'));
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
+        });
+      }
+
+      async search() {
+        const query = document.getElementById('search-input').value.trim();
+        const type = document.getElementById('search-type').value;
+        
+        if (!query) return;
+        
+        const resultsSection = document.getElementById('results');
+        const grid = document.getElementById('books-grid');
+        const countEl = document.getElementById('result-count');
+        
+        resultsSection.style.display = 'block';
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary)">Searching...</div>';
+        countEl.textContent = 'Searching...';
+        
+        try {
+          const url = new URL(`${this.API_BASE}/search.json`);
+          url.searchParams.set(type, query);
+          url.searchParams.set('limit', 24);
+          
+          const response = await fetch(url);
+          const data = await response.json();
+          
+          countEl.textContent = `${data.numFound?.toLocaleString() || 0} results found`;
+          this.renderBooks(data.docs || [], grid);
+          
+          // Scroll to results
+          resultsSection.scrollIntoView({ behavior: 'smooth' });
+          
+        } catch (error) {
+          console.error('Search failed:', error);
+          grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--accent-error)">Search failed. Please try again.</div>';
+          countEl.textContent = 'Search failed';
+        }
+      }
+
+      renderBooks(books, container) {
+        if (books.length === 0) {
+          container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-secondary)">No books found matching your search.</div>';
+          return;
+        }
+        
+        container.innerHTML = '';
+        books.forEach(book => {
+          const card = this.createBookCard(book);
+          container.appendChild(card);
+        });
+      }
+
+      createBookCard(book) {
+        const card = document.createElement('div');
+        card.className = 'book-card animate-in';
+        
+        const thumb = document.createElement('div');
+        thumb.className = 'book-thumb';
+        
+        if (book.cover_i) {
+          thumb.innerHTML = `<img src="https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg" alt="${book.title}" loading="lazy">`;
+        } else {
+          thumb.innerHTML = '<div style="color:var(--text-muted);text-align:center">No Cover Available</div>';
+        }
+        
+        const meta = document.createElement('div');
+        meta.className = 'book-meta';
+        meta.innerHTML = `
+          <div class="book-title">${this.escapeHtml(book.title || 'Unknown Title')}</div>
+          <div class="book-author">${this.escapeHtml((book.author_name || []).slice(0, 2).join(', ') || 'Unknown Author')}</div>
+          <span class="book-year">${book.first_publish_year || '—'}</span>
+        `;
+        
+        card.appendChild(thumb);
+        card.appendChild(meta);
+        
+        card.addEventListener('click', () => this.openBookDetails(book));
+        
+        return card;
+      }
+
+      async openBookDetails(book) {
+        this.currentBook = book;
+        
+        // Update modal content
+        document.getElementById('modal-title').textContent = book.title || 'Book Details';
+        
+        const cover = document.getElementById('modal-cover');
+        if (book.cover_i) {
+          cover.innerHTML = `<img src="https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg" alt="Cover" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`;
+        } else {
+          cover.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--text-muted)">No Cover</div>';
+        }
+        
+        const meta = document.getElementById('modal-meta');
+        meta.innerHTML = `
+          <h4 style="margin:0 0 8px;font-size:18px">${this.escapeHtml(book.title)}</h4>
+          <p style="margin:0 0 8px;color:var(--text-secondary)">${this.escapeHtml((book.author_name || []).join(', '))}</p>
+          <p style="margin:0;color:var(--text-muted);font-size:14px">First published: ${book.first_publish_year || 'Unknown'}</p>
+        `;
+        
+        // Try to fetch additional details
+        if (book.key) {
+          try {
+            const response = await fetch(`${this.API_BASE}${book.key}.json`);
+            const details = await response.json();
+            
+            if (details.description) {
+              const desc = typeof details.description === 'string' ? details.description : details.description.value;
+              document.getElementById('modal-desc').textContent = desc;
+            }
+            
+            if (details.subjects) {
+              document.getElementById('modal-subjects').innerHTML = details.subjects.slice(0, 6).map(subject => 
+                `<span style="display:inline-block;background:var(--glass);padding:4px 8px;border-radius:4px;font-size:12px;margin:2px">${this.escapeHtml(subject)}</span>`
+              ).join('');
+            }
+          } catch (error) {
+            console.warn('Failed to fetch book details:', error);
+          }
+        }
+        
+        // Update favorite button
+        const isInLibrary = this.favorites.some(fav => fav.key === book.key || fav.title === book.title);
+        document.getElementById('fav-toggle').textContent = isInLibrary ? 'Remove from Library' : 'Add to Library';
+        
+        this.showModal();
+      }
+
+      toggleFavorite() {
+        if (!this.currentBook) return;
+        
+        const existingIndex = this.favorites.findIndex(fav => 
+          fav.key === this.currentBook.key || fav.title === this.currentBook.title
+        );
+        
+        if (existingIndex > -1) {
+          this.favorites.splice(existingIndex, 1);
+          document.getElementById('fav-toggle').textContent = 'Add to Library';
+          this.showToast('Removed from library', 'success');
+        } else {
+          this.favorites.unshift({
+            key: this.currentBook.key || this.currentBook.title,
+            title: this.currentBook.title,
+            author_name: this.currentBook.author_name,
+            cover_i: this.currentBook.cover_i,
+            first_publish_year: this.currentBook.first_publish_year
+          });
+          document.getElementById('fav-toggle').textContent = 'Remove from Library';
+          this.showToast('Added to library', 'success');
+        }
+        
+        this.saveLibrary();
+      }
+
+      renderLibrary() {
+        const grid = document.getElementById('library-grid');
+        const empty = document.getElementById('library-empty');
+        
+        if (this.favorites.length === 0) {
+          grid.style.display = 'none';
+          empty.style.display = 'block';
+          return;
+        }
+        
+        grid.style.display = 'grid';
+        empty.style.display = 'none';
+        
+        this.renderBooks(this.favorites, grid);
+      }
+
+      saveLibrary() {
+        localStorage.setItem('inkrise:library', JSON.stringify(this.favorites));
+        this.renderLibrary();
+        this.updateLibraryCount();
+      }
+
+      updateLibraryCount() {
+        const count = this.favorites.length;
+        document.getElementById('library-count').textContent = `${count} book${count !== 1 ? 's' : ''} saved`;
+      }
+
+      async loadFeaturedBooks() {
+        // Featured books functionality removed since hero visual is gone
+        console.log('Featured books display removed');
+      }
+
+      showModal() {
+        document.getElementById('modal-backdrop').classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      hideModal() {
+        document.getElementById('modal-backdrop').classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      showToast(message, type = 'info') {
+        // Simple toast implementation
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position:fixed;top:20px;right:20px;z-index:10000;
+          background:var(--bg-card);border:1px solid var(--border);
+          padding:16px 20px;border-radius:8px;color:var(--text-primary);
+          box-shadow:var(--shadow-lg);transform:translateX(100%);
+          transition:var(--transition);max-width:300px;
+        `;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.style.transform = 'translateX(0)';
+        }, 100);
+        
+        setTimeout(() => {
+          toast.style.transform = 'translateX(100%)';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      addScrollAnimations() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
+            }
+          });
+        }, { threshold: 0.1 });
+        
+        // Observe elements for animation
+        document.querySelectorAll('.feature-card, .book-card').forEach(el => {
+          el.style.opacity = '0';
+          el.style.transform = 'translateY(20px)';
+          el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+          observer.observe(el);
+        });
+      }
+
+      escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+    }
+
+    // Quick search function for suggestion chips
+    window.quickSearch = function(query) {
+      document.getElementById('search-input').value = query;
+      document.getElementById('search-type').value = 'subject';
+      inkrise.search();
+    };
+
+    // Initialize the application
+    const inkrise = new Inkrise();
+
+  </script>
+</body>
+</html>

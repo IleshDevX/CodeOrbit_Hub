@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA API Space Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            background-color: #090A0D;
+            color: #F2E0DC;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Gradient Spotlight Effect */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), 
+                        rgba(21, 22, 38, 0.2) 0%, 
+                        rgba(9, 10, 13, 0) 40%);
+            z-index: 999;
+            transition: background 0.2s ease-out;
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(90deg, #D9BACB, #5D6C8C, #F2E0DC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Gradient Button */
+        .gradient-button {
+            background-image: linear-gradient(90deg, #151626, #5D6C8C, #151626);
+            background-size: 200% 100%;
+            transition: background-position 0.5s ease;
+        }
+
+        .gradient-button:hover {
+            background-position: -100% 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090A0D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #151626;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #5D6C8C;
+        }
+
+        /* Scroll-triggered Animations */
+        .scroll-animate {
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out, filter 0.6s ease-out;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        /* Custom input styles for date and text */
+        .custom-input {
+            background-color: rgba(21, 22, 38, 0.5);
+            border: 1px solid #5D6C8C;
+            color: #F2E0DC;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        select.custom-input {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23D9BACB' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        select.custom-input option {
+            background-color: #151626;
+            color: #F2E0DC;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: #D9BACB;
+            box-shadow: 0 0 0 3px rgba(217, 186, 203, 0.3);
+        }
+        
+        /* Style for date picker icon */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Modal styling */
+        .modal {
+            background-color: rgba(9, 10, 13, 0.8);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 w-full z-50 bg-[#090A0D]/80 backdrop-blur-sm shadow-lg shadow-[#151626]/20">
+        <div class="container mx-auto px-4 md:px-8 flex justify-between items-center py-4">
+            <a href="#hero" class="text-xl font-bold gradient-text">Cosmic Explorer</a>
+            <div class="flex space-x-4 md:space-x-8 text-sm md:text-base">
+                <a href="#about" class="text-[#D9BACB] hover:text-white transition-colors duration-300">About</a>
+                <a href="#apod" class="text-[#D9BACB] hover:text-white transition-colors duration-300">APOD</a>
+                <a href="#mars-rover" class="text-[#D9BACB] hover:text-white transition-colors duration-300">Mars</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Loading Spinner -->
+    <div id="loader" class="fixed inset-0 bg-[#090A0D] flex items-center justify-center z-[1000]">
+        <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-[#5D6C8C]"></div>
+    </div>
+
+    <!-- Hero Header -->
+    <header id="hero" class="h-screen w-full flex flex-col items-center justify-center text-center relative transition-background duration-1000 ease-in-out bg-cover bg-center">
+        <div class="absolute inset-0 bg-black/50"></div>
+        <div class="relative z-10 p-4 scroll-animate">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black uppercase gradient-text">Explore the Cosmos</h1>
+            <p class="mt-4 text-lg md:text-xl max-w-2xl mx-auto text-[#F2E0DC]">Your personal window to the marvels of the universe, powered by NASA's extensive data.</p>
+            <button id="explore-btn" class="mt-8 px-8 py-4 rounded-full text-lg font-bold text-white gradient-button transition-transform duration-300 hover:scale-105">
+                Begin Exploration
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 md:px-8">
+        <!-- About Section -->
+        <section id="about" class="py-20 md:py-32 scroll-animate">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4 gradient-text">About This Mission</h2>
+                    <p class="text-lg text-[#D9BACB] leading-relaxed">
+                        This website is a passion project designed to bring the wonders of space closer to you. It leverages live data from NASA's public APIs, including the Astronomy Picture of the Day (APOD) and Mars Rover Photos, to create an immersive and ever-changing cosmic experience.
+                    </p>
+                </div>
+                <div class="flex justify-center">
+                    <!-- Placeholder for a futuristic graphic, e.g., a rotating satellite SVG -->
+                     <svg xmlns="http://www.w3.org/2000/svg" class="w-48 h-48 md:w-64 md:h-64" viewBox="0 0 200 200" fill="none">
+                        <defs>
+                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#5D6C8C;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#151626;stop-opacity:1" />
+                            </linearGradient>
+                            <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#D9BACB;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#F2E0DC;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="100" cy="100" r="80" stroke="url(#grad1)" stroke-width="4" />
+                        <circle cx="100" cy="100" r="40" fill="url(#grad2)" />
+                        <g id="rings">
+                            <ellipse cx="100" cy="100" rx="90" ry="30" stroke="#5D6C8C" stroke-width="2" transform="rotate(30 100 100)"/>
+                            <ellipse cx="100" cy="100" rx="90" ry="30" stroke="#5D6C8C" stroke-width="2" transform="rotate(90 100 100)"/>
+                            <ellipse cx="100" cy="100" rx="90" ry="30" stroke="#5D6C8C" stroke-width="2" transform="rotate(150 100 100)"/>
+                        </g>
+                        <style>
+                            #rings {
+                                animation: rotate 20s linear infinite;
+                                transform-origin: center;
+                            }
+                            @keyframes rotate {
+                                from { transform: rotate(0deg); }
+                                to { transform: rotate(360deg); }
+                            }
+                        </style>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- APOD Showcase -->
+        <section id="apod" class="py-20 md:py-32 scroll-animate">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center gradient-text">Astronomy Picture of the Day</h2>
+            <div class="flex justify-center mb-8">
+                <input type="date" id="apod-date-picker" class="custom-input w-full max-w-xs text-center">
+            </div>
+            <div id="apod-content" class="bg-[#151626]/50 rounded-lg shadow-2xl overflow-hidden">
+                <!-- APOD data will be injected here -->
+            </div>
+             <p id="apod-error" class="text-center text-red-400 mt-4"></p>
+        </section>
+
+        <!-- Mars Rover Photo Gallery -->
+        <section id="mars-rover" class="py-20 md:py-32 scroll-animate">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center gradient-text">Mars Rover Photos</h2>
+            <!-- Filters -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <select id="rover-select" class="custom-input">
+                    <option value="curiosity">Curiosity</option>
+                    <option value="opportunity">Opportunity</option>
+                    <option value="spirit">Spirit</option>
+                </select>
+                <select id="camera-select" class="custom-input">
+                    <!-- Camera options will be populated dynamically -->
+                </select>
+                <input type="number" id="sol-input" placeholder="Martian Sol (e.g., 1000)" class="custom-input">
+                <button id="fetch-mars-photos" class="px-6 py-3 rounded-lg font-bold text-white gradient-button transition-transform duration-300 hover:scale-105">Fetch Photos</button>
+            </div>
+            <div id="mars-gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Mars rover photos will be injected here -->
+            </div>
+            <p id="mars-error" class="text-center text-red-400 mt-4"></p>
+            <div id="mars-loader" class="text-center hidden mt-8">
+                <div class="inline-block w-8 h-8 border-4 border-dashed rounded-full animate-spin border-[#5D6C8C]"></div>
+                <p>Fetching Martian landscape...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#090A0D] border-t border-[#5D6C8C]/30 text-[#D9BACB] py-12">
+        <div class="container mx-auto px-4 md:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <!-- Column 1: About -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4">Cosmic Explorer</h3>
+                    <p class="text-sm leading-relaxed">Explore our universe's demographic landscape through comprehensive NASA data and interactive visualizations.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-[#D9BACB] hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg></a>
+                        <a href="#" class="text-[#D9BACB] hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
+                        <a href="#" class="text-[#D9BACB] hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M19.335 1.5A2.667 2.667 0 0122 4.165v15.666A2.667 2.667 0 0119.335 22.5h-14.67A2.667 2.667 0 012 19.831V4.165A2.667 2.667 0 014.665 1.5h14.67zM8.31 18.75h2.834V10.29H8.31v8.46zM9.728 8.955a1.42 1.42 0 100-2.84 1.42 1.42 0 000 2.84zM17.25 18.75h-2.834v-4.01c0-.957-.018-2.186-1.332-2.186-1.333 0-1.538 1.042-1.538 2.118v4.078h-2.834V10.29h2.718v1.244h.038c.377-.714 1.3-1.465 2.68-1.465 2.868 0 3.398 1.887 3.398 4.342v4.95h.001z" clip-rule="evenodd" /></svg></a>
+                    </div>
+                </div>
+                <!-- Column 2: Quick Links -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#hero" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#about" class="hover:text-white transition-colors">About</a></li>
+                        <li><a href="#apod" class="hover:text-white transition-colors">APOD</a></li>
+                        <li><a href="#mars-rover" class="hover:text-white transition-colors">Mars Rover</a></li>
+                    </ul>
+                </div>
+                <!-- Column 3: Data Sources -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4">Data Sources</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://api.nasa.gov/" target="_blank" rel="noopener" class="hover:text-white transition-colors">NASA Open APIs</a></li>
+                        <li><a href="https://apod.nasa.gov/apod/astropix.html" target="_blank" rel="noopener" class="hover:text-white transition-colors">Astronomy Picture of the Day</a></li>
+                        <li><a href="https://mars.nasa.gov/msl/multimedia/raw-images/" target="_blank" rel="noopener" class="hover:text-white transition-colors">Mars Rover Photos</a></li>
+                    </ul>
+                </div>
+                <!-- Column 4: Credit -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-4">Credit</h3>
+                    <p class="text-sm">Built with ❤️ using the US Census Bureau API</p>
+                    <p class="text-sm mt-2">Data provided by the U.S. Census Bureau</p>
+                </div>
+            </div>
+            <div class="border-t border-[#5D6C8C]/30 pt-8 mt-8 text-center text-sm">
+                <p>&copy; 2025 Cosmic Explorer. Educational project, using public domain data.</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Modal for Mars Photo -->
+    <div id="modal" class="fixed inset-0 z-50 items-center justify-center hidden p-4 modal">
+        <div class="relative w-full max-w-4xl max-h-full">
+            <img id="modal-img" src="" alt="Mars Rover Photo" class="object-contain w-full h-auto max-h-[85vh] rounded-lg">
+            <button id="modal-close" class="absolute top-4 right-4 text-white text-3xl">&times;</button>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const loader = document.getElementById('loader');
+            const heroSection = document.getElementById('hero');
+            const exploreBtn = document.getElementById('explore-btn');
+            const aboutSection = document.getElementById('about');
+            
+            // APOD elements
+            const apodDatePicker = document.getElementById('apod-date-picker');
+            const apodContent = document.getElementById('apod-content');
+            const apodError = document.getElementById('apod-error');
+            
+            // Mars Rover elements
+            const roverSelect = document.getElementById('rover-select');
+            const cameraSelect = document.getElementById('camera-select');
+            const solInput = document.getElementById('sol-input');
+            const fetchMarsPhotosBtn = document.getElementById('fetch-mars-photos');
+            const marsGallery = document.getElementById('mars-gallery');
+            const marsError = document.getElementById('mars-error');
+            const marsLoader = document.getElementById('mars-loader');
+
+            // Modal elements
+            const modal = document.getElementById('modal');
+            const modalImg = document.getElementById('modal-img');
+            const modalClose = document.getElementById('modal-close');
+
+            // --- API Configuration ---
+            // IMPORTANT: The DEMO_KEY has very strict rate limits. 
+            // You will likely encounter 429 "Too Many Requests" errors.
+            // For a stable experience, get your own free API key from https://api.nasa.gov/
+            const API_KEY = 'a4FAuQ57EzKrVAyBj8mXlrNzex8bGAzUsnxfRXN1'; 
+            const APOD_URL = `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}`;
+            const MARS_ROVER_URL = `https://api.nasa.gov/mars-photos/api/v1/rovers`;
+
+            const cameraOptions = {
+                curiosity: [
+                    { name: 'Front Hazard Avoidance Camera', value: 'FHAZ' },
+                    { name: 'Rear Hazard Avoidance Camera', value: 'RHAZ' },
+                    { name: 'Mast Camera', value: 'MAST' },
+                    { name: 'Chemistry and Camera Complex', value: 'CHEMCAM' },
+                    { name: 'Mars Hand Lens Imager', value: 'MAHLI' },
+                    { name: 'Mars Descent Imager', value: 'MARDI' },
+                    { name: 'Navigation Camera', value: 'NAVCAM' },
+                ],
+                opportunity: [
+                    { name: 'Front Hazard Avoidance Camera', value: 'FHAZ' },
+                    { name: 'Rear Hazard Avoidance Camera', value: 'RHAZ' },
+                    { name: 'Navigation Camera', value: 'NAVCAM' },
+                    { name: 'Panoramic Camera', value: 'PANCAM' },
+                    { name: 'Miniature Thermal Emission Spectrometer', value: 'MINITES' },
+                ],
+                spirit: [
+                    { name: 'Front Hazard Avoidance Camera', value: 'FHAZ' },
+                    { name: 'Rear Hazard Avoidance Camera', value: 'RHAZ' },
+                    { name: 'Navigation Camera', value: 'NAVCAM' },
+                    { name: 'Panoramic Camera', value: 'PANCAM' },
+                    { name: 'Miniature Thermal Emission Spectrometer', value: 'MINITES' },
+                ],
+            };
+
+            // --- Functions ---
+
+            /**
+             * Hides the main loader.
+             */
+            const hideLoader = () => {
+                loader.style.display = 'none';
+            };
+
+            /**
+             * Fetches Astronomy Picture of the Day.
+             * @param {string} date - The date for the APOD in YYYY-MM-DD format.
+             */
+            const getAPOD = async (date = '') => {
+                const today = new Date().toISOString().split('T')[0];
+                const requestDate = date || today;
+                const cacheKey = `apod-${requestDate}`;
+
+                try {
+                    // Check session cache first
+                    const cachedData = sessionStorage.getItem(cacheKey);
+                    if (cachedData) {
+                        renderAPOD(JSON.parse(cachedData));
+                        return;
+                    }
+
+                    apodError.textContent = '';
+                    apodContent.innerHTML = `<div class="p-8 text-center">Loading today's cosmic marvel...</div>`;
+                    const response = await fetch(`${APOD_URL}${date ? `&date=${date}` : ''}`);
+                    if (!response.ok) throw new Error(`Status: ${response.status}`);
+                    const data = await response.json();
+                    
+                    // Cache the new data for the session
+                    sessionStorage.setItem(cacheKey, JSON.stringify(data));
+                    renderAPOD(data);
+
+                } catch (error) {
+                    console.error("Error fetching APOD:", error);
+                    if (error.message.includes('429')) {
+                         apodError.textContent = 'Too many requests. Please wait a bit or get a personal API key from api.nasa.gov.';
+                    } else {
+                        apodError.textContent = 'Could not fetch the APOD. Please try a different date or check back later.';
+                    }
+                    apodContent.innerHTML = '';
+                }
+            };
+            
+            /**
+             * Renders the APOD data into the DOM.
+             * @param {object} data - The APOD data from the API.
+             */
+            const renderAPOD = (data) => {
+                // Set Hero background
+                if (data.media_type === 'image') {
+                    // Ensure HTTPS to prevent mixed content issues
+                    heroSection.style.backgroundImage = `url(${data.hdurl.replace('http://', 'https://')})`;
+                } else if (data.media_type === 'video') {
+                     // Fallback image for video types on hero
+                    heroSection.style.backgroundImage = `url('https://placehold.co/1920x1080/090A0D/F2E0DC?text=Video+Not+Supported+Here')`;
+                }
+
+                // Populate APOD section
+                let contentHTML = '';
+                if (data.media_type === 'image') {
+                    // Ensure HTTPS
+                    contentHTML = `<img src="${data.url.replace('http://', 'https://')}" alt="${data.title}" class="w-full h-auto object-cover">`;
+                } else if (data.media_type === 'video') {
+                    // Ensure HTTPS
+                    contentHTML = `<div class="aspect-w-16 aspect-h-9"><iframe src="${data.url.replace('http://', 'https://')}" frameborder="0" allowfullscreen class="w-full h-full"></iframe></div>`;
+                }
+
+                contentHTML += `
+                    <div class="p-6 md:p-8">
+                        <h3 class="text-2xl font-bold mb-2">${data.title}</h3>
+                        <p class="text-sm text-[#D9BACB] mb-4">${data.date}</p>
+                        <p class="text-[#F2E0DC] leading-relaxed">${data.explanation}</p>
+                    </div>
+                `;
+                apodContent.innerHTML = contentHTML;
+            };
+
+            /**
+             * Populates camera options based on the selected rover.
+             */
+            const populateCameras = () => {
+                const selectedRover = roverSelect.value;
+                cameraSelect.innerHTML = cameraOptions[selectedRover]
+                    .map(cam => `<option value="${cam.value}">${cam.name}</option>`)
+                    .join('');
+            };
+
+            /**
+             * Fetches Mars Rover Photos based on user-selected filters.
+             */
+            const getMarsRoverPhotosByFilter = async () => {
+                const rover = roverSelect.value;
+                const camera = cameraSelect.value;
+                const sol = solInput.value; 
+
+                if (!sol) {
+                    marsError.textContent = 'Please enter a Martian Sol day.';
+                    return;
+                }
+
+                marsError.textContent = '';
+                marsLoader.classList.remove('hidden');
+                marsGallery.innerHTML = '';
+                
+                try {
+                    const url = `${MARS_ROVER_URL}/${rover}/photos?sol=${sol}&camera=${camera}&api_key=${API_KEY}`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Status: ${response.status}`);
+                    const data = await response.json();
+                    renderMarsPhotos(data.photos);
+                } catch (error) {
+                    console.error("Error fetching Mars photos:", error);
+                     if (error.message.includes('429')) {
+                        marsError.textContent = 'Too many requests. The DEMO_KEY has very low limits. Please try again later.';
+                    } else {
+                        marsError.textContent = 'Could not fetch photos. The rover might not have been active on that sol, or there are no photos for that camera. Please try different filters.';
+                    }
+                } finally {
+                    marsLoader.classList.add('hidden');
+                }
+            };
+            
+            /**
+             * Fetches the latest available Mars Rover photos for a given rover.
+             * @param {string} rover - The name of the rover.
+             */
+            const getLatestMarsPhotos = async (rover = 'curiosity') => {
+                const cacheKey = `latest-mars-photos-${rover}`;
+                
+                marsError.textContent = '';
+                marsLoader.classList.remove('hidden');
+                marsGallery.innerHTML = '';
+
+                try {
+                    // Check session cache first
+                    const cachedData = sessionStorage.getItem(cacheKey);
+                    if(cachedData) {
+                        renderMarsPhotos(JSON.parse(cachedData));
+                        return; // Exit function after rendering cached data
+                    }
+
+                    const url = `${MARS_ROVER_URL}/${rover}/latest_photos?api_key=${API_KEY}`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`Status: ${response.status}`);
+                    const data = await response.json();
+
+                    // Cache the new data for the session
+                    if(data.latest_photos) {
+                        sessionStorage.setItem(cacheKey, JSON.stringify(data.latest_photos));
+                        renderMarsPhotos(data.latest_photos); 
+                    } else {
+                        throw new Error('No latest_photos data found');
+                    }
+
+                } catch (error) {
+                    console.error("Error fetching latest Mars photos:", error);
+                    if (error.message.includes('429')) {
+                        marsError.textContent = 'Too many requests. The DEMO_KEY has very low limits. Please try again later.';
+                    } else {
+                        marsError.textContent = 'Could not fetch the latest photos. The API might be busy. Please try again later.';
+                    }
+                } finally {
+                    marsLoader.classList.add('hidden');
+                }
+            };
+
+            /**
+             * Renders Mars rover photos into the gallery.
+             * @param {Array} photos - Array of photo objects from the API.
+             */
+            const renderMarsPhotos = (photos) => {
+                if (!photos || photos.length === 0) {
+                    marsError.textContent = 'No photos found for the selected criteria. Try different filters.';
+                    return;
+                }
+                
+                const galleryHTML = photos.slice(0, 20).map(photo => {
+                    // Ensure HTTPS to prevent mixed content issues that can block images
+                    const secureImgSrc = photo.img_src.replace('http://', 'https://');
+                    return `
+                    <div class="group relative overflow-hidden rounded-lg cursor-pointer" data-img-src="${secureImgSrc}">
+                        <img src="${secureImgSrc}" alt="Mars Rover Photo" class="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-2">
+                            <p class="text-white text-xs text-center">${photo.camera.full_name}</p>
+                        </div>
+                    </div>
+                `
+                }).join('');
+                marsGallery.innerHTML = galleryHTML;
+            };
+            
+            // --- Event Listeners ---
+
+            // Spotlight Effect
+            window.addEventListener('mousemove', e => {
+                document.body.style.setProperty('--x', `${e.clientX}px`);
+                document.body.style.setProperty('--y', `${e.clientY}px`);
+            });
+
+            // Scroll-trigger animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.scroll-animate').forEach(el => observer.observe(el));
+            
+            // "Begin Exploration" button click
+            exploreBtn.addEventListener('click', () => {
+                aboutSection.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            // APOD date picker change
+            apodDatePicker.addEventListener('change', (e) => {
+                getAPOD(e.target.value);
+            });
+
+            // Rover select change
+            roverSelect.addEventListener('change', populateCameras);
+
+            // Fetch Mars photos button click
+            fetchMarsPhotosBtn.addEventListener('click', getMarsRoverPhotosByFilter);
+
+            // Mars gallery click for modal
+            marsGallery.addEventListener('click', e => {
+                const item = e.target.closest('[data-img-src]');
+                if (item) {
+                    modalImg.src = item.dataset.imgSrc;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+            });
+
+            // Modal close
+            const closeModal = () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modalImg.src = '';
+            };
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', e => {
+                if (e.target === modal) closeModal();
+            });
+
+
+            // --- Initial Load ---
+            const initialize = async () => {
+                // Set APOD date picker to today
+                apodDatePicker.value = new Date().toISOString().split('T')[0];
+                apodDatePicker.max = new Date().toISOString().split('T')[0];
+
+                populateCameras();
+
+                await getAPOD();
+                await getLatestMarsPhotos();
+                
+                hideLoader();
+                document.querySelector('.scroll-animate').classList.add('visible'); // Show hero content
+            };
+
+            initialize();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaldi: Research-Grade Speech Recognition Toolkit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #e2e8f0;
+        }
+
+        /* --- Gradient Spotlight Effect --- */
+        .spotlight-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spotlight-effect::before {
+            content: '';
+            position: absolute;
+            top: var(--spotlight-y, 50%);
+            left: var(--spotlight-x, 50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(128, 0, 0, 0.2), rgba(128, 0, 0, 0) 60%);
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease-out;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* --- Animations --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            filter: blur(5px);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0);
+        }
+
+        .card-glow {
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .card-glow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.4), 0 0 10px rgba(128, 0, 0, 0.3);
+        }
+        
+        .button-glow {
+             transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .button-glow:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(220, 38, 38, 0.5);
+        }
+
+        /* --- Microphone Pulse Animation --- */
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(220, 38, 38, 0);
+            }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        /* --- Waveform Animation --- */
+        #waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100px;
+        }
+
+        .waveform-bar {
+            width: 5px;
+            height: 10px;
+            margin: 0 3px;
+            background-color: #dc2626;
+            border-radius: 5px;
+            animation: waveform-animate 1.5s infinite ease-in-out;
+        }
+        
+        .waveform-bar:nth-child(2) { animation-delay: 0.2s; }
+        .waveform-bar:nth-child(3) { animation-delay: 0.4s; }
+        .waveform-bar:nth-child(4) { animation-delay: 0.6s; }
+        .waveform-bar:nth-child(5) { animation-delay: 0.8s; }
+        .waveform-bar:nth-child(6) { animation-delay: 1.0s; }
+
+
+        @keyframes waveform-animate {
+            0%, 100% { transform: scaleY(0.1); }
+            50% { transform: scaleY(1); }
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #881337;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a0a] text-slate-300">
+
+    <!-- Hero Header -->
+    <header id="hero" class="relative min-h-screen flex items-center justify-center text-center overflow-hidden spotlight-effect">
+        <div class="absolute inset-0 bg-black opacity-40 z-10"></div>
+        <div class="absolute inset-0 z-0">
+             <!-- Abstract animated background could go here -->
+        </div>
+        <div class="relative z-20 px-4">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-black text-white leading-tight mb-4 reveal">
+                Kaldi: Research-Grade <br/> Speech Recognition Toolkit
+            </h1>
+            <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto mb-8 reveal" style="transition-delay: 0.2s;">
+                An open-source, self-hosted, and powerful Automatic Speech Recognition (ASR) toolkit designed for researchers and developers.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 reveal" style="transition-delay: 0.4s;">
+                <a href="#demo" class="button-glow bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-transform duration-300 hover:bg-red-600">Try Demo</a>
+                <a href="#features" class="button-glow bg-gray-800/60 backdrop-blur-sm border border-gray-700 text-white font-bold py-3 px-8 rounded-full transition-transform duration-300 hover:bg-gray-700">Explore Features</a>
+                <a href="#documentation" class="button-glow bg-gray-800/60 backdrop-blur-sm border border-gray-700 text-white font-bold py-3 px-8 rounded-full transition-transform duration-300 hover:bg-gray-700">Get Started</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative z-10">
+        <!-- About Section -->
+        <section id="about" class="py-20 lg:py-32 px-4 container mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">What is Kaldi?</h2>
+                    <p class="mb-4 text-slate-400">
+                        Kaldi is a free, open-source toolkit for speech recognition, written in C++ and licensed under the Apache License v2.0. It is designed to be a comprehensive and flexible platform for ASR research, supporting everything from acoustic modeling with deep neural networks to advanced language modeling techniques.
+                    </p>
+                    <p class="text-slate-400">
+                        Its modular design, extensive documentation, and active community make it the go-to choice for academic institutions and companies building state-of-the-art speech technology.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-6 reveal" style="transition-delay: 0.2s;">
+                    <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-red-500"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>
+                        <h3 class="font-bold text-white">Open Source</h3>
+                        <p class="text-sm text-slate-400">Community-driven and fully transparent.</p>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-red-500"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                        <h3 class="font-bold text-white">Research Focused</h3>
+                        <p class="text-sm text-slate-400">Built for cutting-edge ASR research.</p>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-red-500"><path d="M10.6 5c-.3.2-.5.5-.7.9l-2.4 5.3c-.2.5-.3 1.1-.3 1.6C7.2 18 10.3 21 14 21c.9 0 1.8-.2 2.6-.5l3.4-1.2c.7-.2 1.2-.6 1.6-1.1.4-.5.6-1.2.6-1.9s-.2-1.4-.6-1.9c-.4-.5-1-1-1.6-1.1l-3.6-1.3c-.2 0-.5-.1-.7-.1l-2.2-2.1c-.2-.2-.3-.5-.3-.8V7.2c0-.3.1-.7.4-1s.6-.5.9-.7L15 4.1c.3-.2.5-.5.7-.9l.2-1c.2-.5-.1-1.1-.6-1.3s-1.1.1-1.3.6L14 1.5l-1.3 2.8c-.2.5-.3 1-.3 1.5Z"/><path d="M7 13c-2.5 0-4.5-2-4.5-4.5S4.5 4 7 4c.9 0 1.8.3 2.5.8"/></svg>
+                        <h3 class="font-bold text-white">Versatile</h3>
+                        <p class="text-sm text-slate-400">Supports diverse languages and tasks.</p>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 text-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-3 text-red-500"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                        <h3 class="font-bold text-white">Extensible</h3>
+                        <p class="text-sm text-slate-400">Integrates with C++, Python, and more.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Highlights -->
+        <section id="features" class="py-20 lg:py-32 px-4 bg-gray-900/40">
+            <div class="container mx-auto">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Core Features</h2>
+                    <p class="text-slate-400 mt-2 max-w-2xl mx-auto">A look at the powerful capabilities Kaldi offers for speech recognition research and development.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature Card 1 -->
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 reveal">
+                        <h3 class="font-bold text-xl text-white mb-2">Flexible Recognition Pipelines</h3>
+                        <p class="text-slate-400">Utilize classic GMM-HMM systems or state-of-the-art DNN-based acoustic models with extensive recipes.</p>
+                    </div>
+                    <!-- Feature Card 2 -->
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 reveal" style="transition-delay: 0.1s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Advanced Modeling</h3>
+                        <p class="text-slate-400">Supports various neural network architectures, including TDNNs, LSTMs, and Transformers for acoustic and language modeling.</p>
+                    </div>
+                    <!-- Feature Card 3 -->
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 reveal" style="transition-delay: 0.2s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Multilingual Support</h3>
+                        <p class="text-slate-400">Build high-performance models for a wide array of languages and dialects with provided example scripts.</p>
+                    </div>
+                     <!-- Feature Card 4 -->
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 reveal" style="transition-delay: 0.3s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Real-time Streaming</h3>
+                        <p class="text-slate-400">Optimized for low-latency, real-time decoding, suitable for live captioning and voice assistant applications.</p>
+                    </div>
+                     <!-- Feature Card 5 -->
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 reveal" style="transition-delay: 0.4s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Powerful Tooling</h3>
+                        <p class="text-slate-400">A rich set of command-line tools for data preparation, feature extraction, training, and decoding.</p>
+                    </div>
+                     <!-- Feature Card 6 -->
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 reveal" style="transition-delay: 0.5s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Easy Integration</h3>
+                        <p class="text-slate-400">Provides wrappers and libraries for easy integration into C++, Python, and other programming environments.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Demo -->
+        <section id="demo" class="py-20 lg:py-32 px-4">
+            <div class="container mx-auto">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Interactive Demo</h2>
+                    <p class="text-slate-400 mt-2 max-w-2xl mx-auto">Simulate Kaldi's transcription capabilities. Record or upload an audio file to see a mock result.</p>
+                </div>
+                <div class="max-w-3xl mx-auto bg-gray-900/50 border border-gray-800 rounded-xl p-8 reveal">
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-8">
+                        <button id="record-btn" class="button-glow flex items-center gap-3 bg-red-700 text-white font-bold py-4 px-8 rounded-full transition-transform duration-300 hover:bg-red-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                            <span id="record-text">Start Recording</span>
+                        </button>
+                        <span class="text-slate-400">or</span>
+                        <div class="relative">
+                            <input type="file" id="upload-btn-real" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="audio/*">
+                            <button id="upload-btn-fake" class="button-glow w-full bg-gray-800/60 border border-gray-700 text-white font-bold py-4 px-8 rounded-full transition-transform duration-300 hover:bg-gray-700">
+                                Upload Audio File
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="processing-state" class="text-center hidden">
+                        <p id="processing-text" class="text-lg text-white mb-4">Processing audio...</p>
+                        <div id="waveform">
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                            <div class="waveform-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="result-state" class="hidden">
+                        <h3 class="font-bold text-white mb-2">Transcription Result:</h3>
+                        <div class="bg-black/30 p-4 rounded-md border border-gray-700 min-h-[80px]">
+                            <p id="transcribed-text" class="text-slate-300 opacity-0 transition-opacity duration-1000"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Research & Documentation -->
+        <section id="documentation" class="py-20 lg:py-32 px-4 bg-gray-900/40">
+            <div class="container mx-auto">
+                <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Research & Documentation</h2>
+                    <p class="text-slate-400 mt-2 max-w-2xl mx-auto">Find all the resources you need to get started and master Kaldi for your projects.</p>
+                </div>
+                <div class="max-w-4xl mx-auto reveal">
+                    <div class="bg-gray-900/50 rounded-xl border border-gray-800 overflow-hidden">
+                        <div class="flex border-b border-gray-800">
+                            <button data-tab="beginner" class="tab-btn flex-1 p-4 font-bold text-white bg-red-800/40">Beginner</button>
+                            <button data-tab="intermediate" class="tab-btn flex-1 p-4 font-bold text-slate-400">Intermediate</button>
+                            <button data-tab="advanced" class="tab-btn flex-1 p-4 font-bold text-slate-400">Advanced</button>
+                        </div>
+                        <div class="p-8">
+                            <!-- Beginner Content -->
+                            <div id="beginner" class="tab-content">
+                                <h3 class="text-xl font-bold text-white mb-3">Getting Started with Kaldi</h3>
+                                <p class="text-slate-400 mb-4">New to Kaldi? These resources will guide you through installation, basic concepts, and running your first example scripts. Perfect for understanding the core architecture.</p>
+                                <a href="#" class="text-red-500 font-semibold hover:underline">Official Documentation &rarr;</a>
+                            </div>
+                            <!-- Intermediate Content -->
+                            <div id="intermediate" class="tab-content hidden">
+                                <h3 class="text-xl font-bold text-white mb-3">Training Your Own Models</h3>
+                                <p class="text-slate-400 mb-4">Learn how to prepare your own data, train acoustic and language models, and customize existing recipes for your specific tasks. Dive deeper into the training pipelines.</p>
+                                <a href="#" class="text-red-500 font-semibold hover:underline">View Tutorials &rarr;</a>
+                            </div>
+                            <!-- Advanced Content -->
+                            <div id="advanced" class="tab-content hidden">
+                                <h3 class="text-xl font-bold text-white mb-3">Advanced Development</h3>
+                                <p class="text-slate-400 mb-4">Explore the C++ codebase, create custom components, and contribute to the Kaldi project. For researchers pushing the boundaries of ASR technology.</p>
+                                <a href="#" class="text-red-500 font-semibold hover:underline">Explore on GitHub &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Use Cases -->
+        <section id="use-cases" class="py-20 lg:py-32 px-4">
+            <div class="container mx-auto">
+                 <div class="text-center mb-12 reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white">Use Cases & Applications</h2>
+                    <p class="text-slate-400 mt-2 max-w-2xl mx-auto">Kaldi's flexibility makes it suitable for a wide range of academic and commercial applications.</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 text-center reveal">
+                        <h3 class="font-bold text-xl text-white mb-2">Academic Research</h3>
+                        <p class="text-slate-400 text-sm">The primary choice for universities and research labs experimenting with new ASR algorithms.</p>
+                    </div>
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 text-center reveal" style="transition-delay: 0.1s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Offline Transcription</h3>
+                        <p class="text-slate-400 text-sm">High-accuracy batch processing of audio files for subtitling, meeting notes, and data analysis.</p>
+                    </div>
+                    <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 text-center reveal" style="transition-delay: 0.2s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Voice Control Systems</h3>
+                        <p class="text-slate-400 text-sm">Building on-premise, self-hosted voice assistants and command-and-control interfaces.</p>
+                    </div>
+                     <div class="card-glow bg-gray-900/50 p-8 rounded-xl border border-gray-800 text-center reveal" style="transition-delay: 0.3s;">
+                        <h3 class="font-bold text-xl text-white mb-2">Linguistic Analysis</h3>
+                        <p class="text-slate-400 text-sm">Tools for forced alignment and phonetic analysis to support speech science research.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Community Section -->
+        <section id="community" class="py-20 lg:py-32 px-4 bg-gray-900/40">
+             <div class="container mx-auto text-center">
+                <div class="reveal">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Driven by the Open Source Community</h2>
+                    <p class="text-slate-400 mt-2 max-w-2xl mx-auto mb-10">Kaldi is actively maintained and improved by a global community of researchers and developers.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+                     <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 reveal" style="transition-delay: 0.1s;">
+                        <div class="text-4xl font-black text-red-500 mb-2">13.2k</div>
+                        <div class="text-sm text-slate-400">GitHub Stars</div>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 reveal" style="transition-delay: 0.2s;">
+                        <div class="text-4xl font-black text-red-500 mb-2">5.5k</div>
+                        <div class="text-sm text-slate-400">GitHub Forks</div>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 reveal" style="transition-delay: 0.3s;">
+                        <div class="text-4xl font-black text-red-500 mb-2">350+</div>
+                        <div class="text-sm text-slate-400">Contributors</div>
+                    </div>
+                    <div class="bg-gray-900/50 p-6 rounded-lg border border-gray-800 reveal" style="transition-delay: 0.4s;">
+                        <div class="text-4xl font-black text-red-500 mb-2">Active</div>
+                        <div class="text-sm text-slate-400">Development</div>
+                    </div>
+                </div>
+             </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#050505] text-center py-8 px-4 border-t border-gray-900">
+        <p class="text-slate-500">&copy; 2024 Kaldi ASR Toolkit. All rights reserved.</p>
+        <p class="text-sm text-slate-600 mt-1">This is an unofficial showcase website.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Spotlight Effect ---
+            const hero = document.getElementById('hero');
+            if (hero) {
+                hero.addEventListener('mousemove', (e) => {
+                    const { clientX, clientY } = e;
+                    const { offsetWidth, offsetHeight } = hero;
+                    const x = (clientX / offsetWidth) * 100;
+                    const y = (clientY / offsetHeight) * 100;
+                    hero.style.setProperty('--spotlight-x', `${x}%`);
+                    hero.style.setProperty('--spotlight-y', `${y}%`);
+                });
+            }
+
+            // --- Scroll Reveal Animation ---
+            const revealElements = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            revealElements.forEach(el => observer.observe(el));
+
+            // --- Interactive Demo Logic (Now Dynamic) ---
+            const recordBtn = document.getElementById('record-btn');
+            const recordText = document.getElementById('record-text');
+            const uploadBtnReal = document.getElementById('upload-btn-real');
+            const processingState = document.getElementById('processing-state');
+            const processingText = document.getElementById('processing-text');
+            const resultState = document.getElementById('result-state');
+            const transcribedText = document.getElementById('transcribed-text');
+            
+            let isRecording = false;
+
+            // Check for Web Speech API support
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            let recognition;
+
+            if (SpeechRecognition) {
+                recognition = new SpeechRecognition();
+                recognition.continuous = false; // Stops when user pauses
+                recognition.interimResults = true; // Show results as they are recognized
+
+                let final_transcript = '';
+
+                recognition.onstart = () => {
+                    recordBtn.classList.add('pulse-animation');
+                    recordText.textContent = 'Stop Recording';
+                    processingText.textContent = 'Listening...';
+                    processingState.classList.remove('hidden');
+                    resultState.classList.add('hidden');
+                    transcribedText.textContent = '';
+                    final_transcript = '';
+                };
+
+                recognition.onresult = (event) => {
+                    let interim_transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            final_transcript += event.results[i][0].transcript;
+                        } else {
+                            interim_transcript += event.results[i][0].transcript;
+                        }
+                    }
+                    
+                    processingState.classList.add('hidden');
+                    resultState.classList.remove('hidden');
+                    transcribedText.textContent = final_transcript + interim_transcript;
+                     if (!transcribedText.classList.contains('opacity-100')) {
+                       setTimeout(() => transcribedText.classList.add('opacity-100'), 100);
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error("Speech recognition error", event.error);
+                    processingText.textContent = `Error: ${event.error}. Please allow microphone access.`;
+                    recordBtn.classList.remove('pulse-animation');
+                    recordText.textContent = 'Start Recording';
+                };
+                
+                recognition.onend = () => {
+                    isRecording = false;
+                    recordBtn.classList.remove('pulse-animation');
+                    recordText.textContent = 'Start Recording';
+                    processingState.classList.add('hidden');
+                    if (!final_transcript.trim() && !transcribedText.textContent.trim()) {
+                         resultState.classList.add('hidden');
+                    }
+                };
+
+            } else {
+                recordBtn.disabled = true;
+                recordText.textContent = 'Not Supported';
+                console.log("Web Speech API not supported in this browser.");
+            }
+            
+            recordBtn.addEventListener('click', () => {
+                if (!SpeechRecognition) return;
+                
+                isRecording = !isRecording;
+                if (isRecording) {
+                    recognition.start();
+                } else {
+                    recognition.stop();
+                }
+            });
+
+            uploadBtnReal.addEventListener('change', (event) => {
+                if(event.target.files.length > 0) {
+                     if (isRecording) {
+                        isRecording = false;
+                        recognition.stop();
+                    }
+                    
+                    // Mock processing for uploaded file
+                    processingText.textContent = 'Processing audio...';
+                    processingState.classList.remove('hidden');
+                    resultState.classList.add('hidden');
+                    transcribedText.classList.remove('opacity-100');
+                    transcribedText.textContent = '';
+
+                    setTimeout(() => {
+                        processingState.classList.add('hidden');
+                        resultState.classList.remove('hidden');
+                        transcribedText.textContent = "This is a mock transcription for the uploaded file. Live recording is now dynamic.";
+                        setTimeout(() => transcribedText.classList.add('opacity-100'), 100);
+                    }, 4000);
+                }
+            });
+
+
+            // --- Documentation Tabs ---
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    // Update button styles
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('bg-red-800/40', 'text-white');
+                        btn.classList.add('text-slate-400');
+                    });
+                    button.classList.add('bg-red-800/40', 'text-white');
+                    button.classList.remove('text-slate-400');
+
+                    // Show/hide content
+                    tabContents.forEach(content => {
+                        if (content.id === tabId) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

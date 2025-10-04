@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iNaturalist Wildlife Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #E5E7EB; /* gray-200 */
+            overflow-x: hidden;
+        }
+
+        /* --- Animated Gradient Spotlight Background --- */
+        .spotlight-bg {
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(0, 150, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 70%, rgba(0, 255, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(50, 100, 255, 0.1) 0%, transparent 50%);
+            animation: moveSpotlights 25s linear infinite;
+        }
+
+        @keyframes moveSpotlights {
+            0% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+            25% { background-position: 100% 50%, 0% 50%, 50% 0%; }
+            50% { background-position: 0% 100%, 100% 0%, 100% 100%; }
+            75% { background-position: 50% 0%, 50% 100%, 0% 50%; }
+            100% { background-position: 0% 0%, 0% 0%, 0% 0%; }
+        }
+
+        /* --- General Styles & Accents --- */
+        .gradient-text {
+            background: linear-gradient(90deg, #38bdf8, #34d399, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .gradient-button {
+            background-image: linear-gradient(90deg, #0ea5e9, #22d3ee, #6366f1);
+            background-size: 200% 100%;
+            transition: background-position 0.5s ease;
+        }
+
+        .gradient-button:hover {
+            background-position: 100% 0;
+        }
+
+        .gradient-glow-border {
+            border: 2px solid transparent;
+            background: linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #0ea5e9, #6366f1) border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .gradient-glow-border:hover {
+             box-shadow: 0 0 15px rgba(14, 165, 233, 0.6);
+        }
+
+        .card-glow:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.3), 0 0 40px rgba(0, 191, 255, 0.2);
+        }
+
+        /* --- Scroll Animations --- */
+        .reveal {
+            opacity: 0;
+            filter: blur(5px);
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, filter 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        /* --- Modal Styles --- */
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal.hidden {
+            pointer-events: none;
+            opacity: 0;
+        }
+        .modal-content {
+             transition: transform 0.3s ease;
+        }
+         .modal.hidden .modal-content {
+             transform: scale(0.95);
+        }
+    </style>
+</head>
+<body class="spotlight-bg">
+
+    <!-- Hero Header -->
+    <header id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div class="relative z-10 text-center px-4">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
+                <span class="gradient-text">iNaturalist Wildlife Explorer</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">
+                Discover the incredible biodiversity of our planet, powered by a global community of naturalists.
+            </p>
+            <div class="max-w-xl mx-auto mb-8">
+                <div class="relative">
+                    <input type="search" id="searchInput" class="w-full px-6 py-4 rounded-full bg-gray-900/50 border-2 border-cyan-500/30 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50 focus:outline-none transition-all duration-300 backdrop-blur-sm placeholder-gray-400" placeholder="Search for 'monarch butterfly', 'Canada', etc...">
+                    <button id="searchButton" class="absolute right-2 top-1/2 -translate-y-1/2 gradient-button text-white font-semibold px-6 py-2.5 rounded-full">
+                        Search
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="#observations" class="gradient-button text-white font-bold py-3 px-8 rounded-full text-lg">Explore Observations</a>
+                <a href="#about" class="gradient-glow-border text-white font-bold py-3 px-8 rounded-full text-lg">Learn More</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 sm:py-32 reveal">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold gradient-text">What is iNaturalist?</h2>
+                <p class="mt-4 text-lg text-gray-300">A new way to connect with nature.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6 text-gray-300 text-lg">
+                    <p>iNaturalist is a social network for nature enthusiasts, citizen scientists, and biologists built on the concept of mapping and sharing observations of biodiversity across the globe.</p>
+                    <p>This explorer project leverages the incredible, open-source data from iNaturalist to provide a beautiful and engaging interface for discovering the wildlife documented by millions of users worldwide.</p>
+                    <p>Every observation you see here contributes to real scientific research, helping scientists understand and protect our planet's precious biodiversity.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Nature Icons -->
+                    <div class="bg-gray-900/50 p-6 rounded-2xl text-center border border-cyan-500/20"><svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2h1a2 2 0 002-2v-1a2 2 0 012-2h1.945M7.884 21l3.33-6.66a2 2 0 013.576 0l3.33 6.66M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span class="mt-2 block font-semibold">Animals</span></div>
+                    <div class="bg-gray-900/50 p-6 rounded-2xl text-center border border-cyan-500/20"><svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg><span class="mt-2 block font-semibold">Plants</span></div>
+                    <div class="bg-gray-900/50 p-6 rounded-2xl text-center border border-cyan-500/20"><svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6H8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" /></svg><span class="mt-2 block font-semibold">Insects</span></div>
+                    <div class="bg-gray-900/50 p-6 rounded-2xl text-center border border-cyan-500/20"><svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 14l9-5-9-5-9 5 9 5z" /><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222 4 2.222V20" /></svg><span class="mt-2 block font-semibold">Birds</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Observation Explorer -->
+    <main id="observations" class="py-20 sm:py-32 reveal">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold gradient-text">Recent Observations</h2>
+                <p id="observation-subtitle" class="mt-4 text-lg text-gray-300">Popular sightings from around the world.</p>
+            </div>
+            <div id="observationGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                <!-- Observation cards will be injected here -->
+            </div>
+            <div id="loader" class="text-center py-12 text-xl font-semibold text-cyan-400">Loading observations...</div>
+        </div>
+    </main>
+    
+    <!-- Community Section -->
+    <section id="community" class="py-20 sm:py-32 bg-gray-900/30 reveal">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold gradient-text">A Community-Driven Effort</h2>
+            <p class="mt-4 text-lg text-gray-300 max-w-3xl mx-auto">This platform is powered by millions of observations from people just like you. Every sighting helps build a richer understanding of our natural world.</p>
+            <div id="stats" class="grid grid-cols-1 sm:grid-cols-3 gap-8 mt-12">
+                <!-- Stats will be injected here -->
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer class="bg-black py-12">
+        <div class="max-w-6xl mx-auto px-4 text-center text-gray-400">
+            <p class="text-2xl font-bold gradient-text mb-4">iNaturalist Wildlife Explorer</p>
+            <p>This is an independent project using the public iNaturalist API.</p>
+            <div class="flex justify-center gap-6 mt-6">
+                <a href="https://www.inaturalist.org" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-400 transition-colors">iNaturalist.org</a>
+                <a href="https://api.inaturalist.org/v1/docs/" target="_blank" rel="noopener noreferrer" class="hover:text-cyan-400 transition-colors">API Docs</a>
+                <a href="#" class="hover:text-cyan-400 transition-colors">Project Credits</a>
+            </div>
+            <p class="mt-8 text-sm text-gray-500">&copy; 2024 Wildlife Explorer. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Species Detail Modal -->
+    <div id="speciesModal" class="modal fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden">
+        <div id="modalContent" class="modal-content bg-gray-900/80 border border-cyan-500/20 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative text-white gradient-glow-border">
+            <!-- Content will be injected here -->
+        </div>
+        <button id="closeModal" class="absolute top-6 right-6 text-gray-300 hover:text-white transition-transform transform hover:scale-125">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observationGrid = document.getElementById('observationGrid');
+            const loader = document.getElementById('loader');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const subtitle = document.getElementById('observation-subtitle');
+
+            const modal = document.getElementById('speciesModal');
+            const modalContent = document.getElementById('modalContent');
+            const closeModalBtn = document.getElementById('closeModal');
+            
+            const statsContainer = document.getElementById('stats');
+
+            const API_BASE_URL = 'https://api.inaturalist.org/v1';
+
+            // --- Animate on Scroll ---
+            const revealElements = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            revealElements.forEach(el => observer.observe(el));
+
+            // --- API Fetching and Rendering ---
+            const fetchAndDisplayObservations = async (url) => {
+                observationGrid.innerHTML = '';
+                loader.style.display = 'block';
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            // Recommended to include a User-Agent
+                            'User-Agent': 'WildlifeExplorerApp/1.0 (your-contact-info@example.com)'
+                        }
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    
+                    if (data.results && data.results.length > 0) {
+                        renderObservations(data.results);
+                    } else {
+                        observationGrid.innerHTML = `<p class="text-center text-gray-400 col-span-full">No observations found. Try a different search.</p>`;
+                    }
+
+                } catch (error) {
+                    console.error("Failed to fetch observations:", error);
+                    observationGrid.innerHTML = `<p class="text-center text-red-500 col-span-full">Could not load data. Please try again later.</p>`;
+                } finally {
+                    loader.style.display = 'none';
+                }
+            };
+
+            const renderObservations = (observations) => {
+                const fragment = document.createDocumentFragment();
+                observations.forEach(obs => {
+                    const taxon = obs.taxon;
+                    if (!taxon) return; // Skip observations without a taxon
+
+                    const imageUrl = obs.photos[0]?.url.replace('square', 'medium') || 'https://placehold.co/600x400/000000/333333?text=No+Image';
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-900/50 rounded-xl overflow-hidden shadow-lg border border-cyan-500/10 cursor-pointer transition-all duration-300 card-glow';
+                    card.innerHTML = `
+                        <img src="${imageUrl}" alt="${taxon.name || 'Species Image'}" class="w-full h-56 object-cover" onerror="this.src='https://placehold.co/600x400/000000/333333?text=Image+Error'">
+                        <div class="p-4">
+                            <h3 class="text-lg font-bold text-white truncate">${taxon.name || 'Scientific Name'}</h3>
+                            <p class="text-sm text-cyan-400 italic">${taxon.preferred_common_name || 'Unknown Common Name'}</p>
+                            <p class="text-gray-400 mt-2 text-sm flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                ${obs.place_guess || 'Location not specified'}
+                            </p>
+                            <p class="text-gray-500 mt-1 text-xs">by ${obs.user.login}</p>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => showSpeciesDetail(obs));
+                    fragment.appendChild(card);
+                });
+                observationGrid.appendChild(fragment);
+            };
+
+            const showSpeciesDetail = async (observation) => {
+                const taxon = observation.taxon;
+                const imageUrl = observation.photos[0]?.url.replace('square', 'large') || 'https://placehold.co/800x600/000000/333333?text=No+Image';
+                
+                // Fetch wikipedia summary if available
+                let wikiSummary = 'No description available.';
+                if (taxon.wikipedia_url) {
+                   try {
+                     const wikiApiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(taxon.wikipedia_url.split('/').pop())}`;
+                     const wikiRes = await fetch(wikiApiUrl);
+                     if(wikiRes.ok) {
+                        const wikiData = await wikiRes.json();
+                        wikiSummary = wikiData.extract_html || wikiData.extract || 'Could not fetch Wikipedia summary.';
+                     }
+                   } catch(e) { console.error("Could not fetch wikipedia summary", e); }
+                }
+
+                modalContent.innerHTML = `
+                    <div class="grid md:grid-cols-2 gap-6 p-6">
+                        <img src="${imageUrl}" alt="${taxon.name}" class="rounded-lg w-full h-auto object-contain max-h-96" onerror="this.src='https://placehold.co/800x600/000000/333333?text=Image+Error'">
+                        <div class="space-y-4">
+                            <h2 class="text-3xl font-bold gradient-text">${taxon.name}</h2>
+                            <p class="text-xl text-cyan-300">${taxon.preferred_common_name || 'No common name'}</p>
+                            <div class="text-sm text-gray-400">
+                                <strong class="text-gray-200">Observed by:</strong> ${observation.user.login}
+                                <br>
+                                <strong class="text-gray-200">Date:</strong> ${new Date(observation.observed_on_string).toDateString()}
+                                <br>
+                                <strong class="text-gray-200">Location:</strong> ${observation.place_guess || 'Unknown'}
+                            </div>
+                            <a href="${observation.uri}" target="_blank" rel="noopener noreferrer" class="inline-block gradient-button text-white font-semibold px-4 py-2 rounded-md text-sm">View on iNaturalist</a>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0 space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-white border-b border-cyan-500/20 pb-1">Description</h3>
+                            <div class="text-gray-300 text-base max-h-40 overflow-y-auto pr-2">${wikiSummary}</div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-lg mb-2 text-white border-b border-cyan-500/20 pb-1">Taxonomy</h3>
+                            <p class="text-gray-400 text-sm">Kingdom: ${taxon.ancestors.find(a => a.rank === 'kingdom')?.name || 'N/A'} > Phylum: ${taxon.ancestors.find(a => a.rank === 'phylum')?.name || 'N/A'} > Class: ${taxon.ancestors.find(a => a.rank === 'class')?.name || 'N/A'} > Order: ${taxon.ancestors.find(a => a.rank === 'order')?.name || 'N/A'} > Family: ${taxon.ancestors.find(a => a.rank === 'family')?.name || 'N/A'}</p>
+                        </div>
+                    </div>
+                `;
+                modal.classList.remove('hidden');
+            };
+
+            const handleSearch = () => {
+                const query = searchInput.value.trim();
+                if (query) {
+                    const searchUrl = `${API_BASE_URL}/observations?q=${encodeURIComponent(query)}&per_page=24&photos=true&order=desc&order_by=created_at`;
+                    subtitle.textContent = `Showing results for "${query}"`;
+                    fetchAndDisplayObservations(searchUrl);
+                    document.getElementById('observations').scrollIntoView();
+                }
+            };
+            
+            // --- Fetch community stats ---
+            const fetchCommunityStats = async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/observations?per_page=0`);
+                    if(!response.ok) throw new Error('Failed to fetch stats');
+                    const data = await response.json();
+                    
+                    const totalObservations = data.total_results || 0;
+                    
+                    const usersResponse = await fetch(`${API_BASE_URL}/observations/observers?per_page=1`);
+                    const usersData = await usersResponse.json();
+                    const totalUsers = usersData.total_results || 0;
+
+                    const speciesResponse = await fetch(`${API_BASE_URL}/observations/species_counts?per_page=1`);
+                    const speciesData = await speciesResponse.json();
+                    const totalSpecies = speciesData.total_results || 0;
+                    
+                    statsContainer.innerHTML = `
+                        <div class="bg-gray-900/50 p-6 rounded-xl border border-cyan-500/20">
+                            <div class="text-5xl font-extrabold gradient-text">${(totalObservations/1_000_000).toFixed(1)}M+</div>
+                            <div class="text-gray-400 mt-2">Total Observations</div>
+                        </div>
+                         <div class="bg-gray-900/50 p-6 rounded-xl border border-cyan-500/20">
+                            <div class="text-5xl font-extrabold gradient-text">${(totalSpecies/1_000).toFixed(0)}K+</div>
+                            <div class="text-gray-400 mt-2">Species Identified</div>
+                        </div>
+                         <div class="bg-gray-900/50 p-6 rounded-xl border border-cyan-500/20">
+                            <div class="text-5xl font-extrabold gradient-text">${(totalUsers/1_000_000).toFixed(1)}M+</div>
+                            <div class="text-gray-400 mt-2">Community Members</div>
+                        </div>
+                    `;
+
+                } catch(error) {
+                    console.error("Failed to fetch community stats:", error);
+                    statsContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">Could not load community stats.</p>`;
+                }
+            }
+
+
+            // --- Event Listeners ---
+            searchButton.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleSearch();
+                }
+            });
+
+            closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                    modal.classList.add('hidden');
+                }
+            });
+
+
+            // --- Initial Load ---
+            const initialUrl = `${API_BASE_URL}/observations?popular=true&per_page=24&photos=true&order=desc&order_by=created_at`;
+            fetchAndDisplayObservations(initialUrl);
+            fetchCommunityStats();
+        });
+    </script>
+
+</body>
+</html>

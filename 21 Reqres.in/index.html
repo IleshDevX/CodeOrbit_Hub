@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reqres.in API Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header id="hero" class="hero">
+        <div class="container">
+            <h1>Prototype Smarter with Reqres Mock API</h1>
+            <p>A modern, responsive dashboard to test and prototype your UI with mock data.</p>
+            <div class="cta-buttons">
+                <a href="#users" class="btn btn-primary">View Users</a>
+                <a href="#auth" class="btn btn-secondary">Test Login</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="about" class="about hidden">
+            <div class="container">
+                <h2>A Frontend Playground</h2>
+                <p>This dashboard is a hands-on project designed to showcase modern frontend development techniques. It's built with vanilla HTML, CSS, and JavaScript, and it interacts directly with the <a href="https://reqres.in/" target="_blank" rel="noopener noreferrer">Reqres.in</a> mock API. The goal is to demonstrate how to build a dynamic, responsive, and visually appealing web application without relying on any frameworks.</p>
+                
+                <div class="features-list">
+                    <h3>Key Features Demonstrated:</h3>
+                    <ul>
+                        <li>✔️ <strong>API Interaction:</strong> Fetching, creating, and displaying data from a live REST API.</li>
+                        <li>✔️ <strong>Dynamic UI:</strong> Rendering data on the fly and updating the page without a reload.</li>
+                        <li>✔️ <strong>Advanced CSS:</strong> A dark-mode theme with gradient effects, custom animations, and a responsive layout.</li>
+                        <li>✔️ <strong>User Experience:</strong> Interactive elements like modals, loaders, and smooth, scroll-triggered animations.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="users" class="users hidden">
+            <div class="container">
+                <h2>User Management</h2>
+                <div id="user-grid" class="user-grid">
+                    </div>
+                <div id="loader" class="loader-container">
+                    <div class="spinner"></div>
+                </div>
+                <div class="pagination" id="pagination">
+                    </div>
+            </div>
+        </section>
+        
+        <section id="auth" class="auth hidden">
+            <div class="container">
+                <h2>Authentication Demo</h2>
+                <div class="auth-forms">
+                    <form id="login-form" class="form-card">
+                        <h3>Login</h3>
+                        <input type="email" id="login-email" placeholder="Email (e.g., eve.holt@reqres.in)" required>
+                        <input type="password" id="login-password" placeholder="Password" required>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <p id="login-feedback" class="feedback"></p>
+                    </form>
+                    <form id="register-form" class="form-card">
+                        <h3>Register</h3>
+                        <input type="email" id="register-email" placeholder="Email (e.g., eve.holt@reqres.in)" required>
+                        <input type="password" id="register-password" placeholder="Password" required>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <p id="register-feedback" class="feedback"></p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="delayed" class="delayed hidden">
+            <div class="container">
+                <h2>Delayed Response</h2>
+                <button id="fetch-delayed-btn" class="btn btn-primary">Fetch Delayed Data (3s)</button>
+                <div id="delayed-loader" class="loader-container" style="display: none;">
+                    <div class="shimmer-wrapper">
+                        <div class="shimmer"></div>
+                    </div>
+                </div>
+                <pre id="delayed-response" class="response-viewer"></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h4>About This Project</h4>
+                    <p>A demonstration of frontend skills using the Reqres.in mock API. Built with HTML, CSS, and pure JavaScript.</p>
+                </div>
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#hero">Home</a></li>
+                        <li><a href="#users">Users</a></li>
+                        <li><a href="#auth">Authentication</a></li>
+                        <li><a href="#delayed">Delayed Test</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>API Provider</h4>
+                    <p>This project is powered by the free REST API from <a href="https://reqres.in/" target="_blank" rel="noopener noreferrer">Reqres.in</a>, a fantastic tool for testing and prototyping.</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Designed and coded to demonstrate modern web development techniques.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="user-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close-btn">&times;</button>
+            <div id="modal-body">
+                </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

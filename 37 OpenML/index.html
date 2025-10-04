@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenML - Explore Open Datasets</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #000000;
+            --bg-card: #0a0a0a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --blue: #3b82f6;
+            --light-blue: #60a5fa;
+            --cyan: #06b6d4;
+            --gradient-1: linear-gradient(135deg, #3b82f6, #06b6d4);
+            --gradient-2: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            padding-top: 70px;
+        }
+
+        /* Animated Background */
+        .bg-spotlight {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.1), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(6, 182, 212, 0.1), transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.05), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+            animation: spotlightMove 20s ease-in-out infinite;
+        }
+
+        @keyframes spotlightMove {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(0, 0, 0, 0.95);
+            box-shadow: 0 5px 30px rgba(59, 130, 246, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-logo::before {
+            content: '🔬';
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--light-blue);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-cta {
+            background: var(--gradient-1);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 0.4rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: var(--light-blue);
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--blue);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Section Styles */
+        section {
+            padding: 6rem 0;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        /* About Section */
+        .about-content {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .about-content p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--blue);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--light-blue);
+        }
+
+        /* Dataset Cards */
+        .datasets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .dataset-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            opacity: 0;
+            animation: fadeInBlur 0.6s ease forwards;
+        }
+
+        @keyframes fadeInBlur {
+            from {
+                opacity: 0;
+                filter: blur(10px);
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                filter: blur(0);
+                transform: scale(1);
+            }
+        }
+
+        .dataset-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--blue);
+            box-shadow: 0 15px 50px rgba(59, 130, 246, 0.3);
+        }
+
+        .dataset-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .dataset-id {
+            background: var(--gradient-1);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .dataset-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        .dataset-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .dataset-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .meta-item span:first-child {
+            color: var(--light-blue);
+        }
+
+        .dataset-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--light-blue);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .dataset-link {
+            color: var(--light-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .dataset-link:hover {
+            color: var(--cyan);
+            transform: translateX(5px);
+        }
+
+        /* Search Section */
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto 3rem;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem;
+            border-radius: 50px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--blue);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* Tasks Grid */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .task-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .task-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--blue);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .task-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .task-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: var(--light-blue);
+        }
+
+        .task-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top-color: var(--blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Resources Section */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .resource-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--cyan);
+            box-shadow: 0 10px 40px rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .resource-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--light-blue);
+        }
+
+        .resource-card a {
+            color: var(--cyan);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .resource-card a:hover {
+            color: var(--light-blue);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(59, 130, 246, 0.2);
+            margin-top: 6rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--light-blue);
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .social-icon:hover {
+            background: var(--gradient-1);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .datasets-grid,
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                right: -100%;
+                width: 70%;
+                height: calc(100vh - 70px);
+                background: rgba(0, 0, 0, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 2rem;
+                gap: 1.5rem;
+                border-left: 1px solid rgba(59, 130, 246, 0.2);
+                transition: right 0.3s ease;
+                align-items: flex-start;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .nav-links a {
+                font-size: 1.2rem;
+                width: 100%;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-spotlight"></div>
+
+    <!-- Navigation Bar -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">OpenML</a>
+            
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#about">About</a></li>
+                <li><a href="#datasets">Datasets</a></li>
+                <li><a href="#tasks">Tasks</a></li>
+                <li><a href="#explorer">Explorer</a></li>
+                <li><a href="#resources">Resources</a></li>
+                <li><a href="https://www.openml.org" target="_blank" class="nav-cta">OpenML.org</a></li>
+            </ul>
+
+            <div class="menu-toggle" id="menuToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Explore Open Datasets with OpenML</h1>
+                <p>Discover, benchmark, and collaborate on machine learning datasets worldwide</p>
+                
+                <div class="cta-buttons">
+                    <button class="btn btn-primary" onclick="scrollToSection('datasets')">Explore Datasets</button>
+                    <button class="btn btn-secondary" onclick="scrollToSection('explorer')">Start Research</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>About OpenML</h2>
+                <p>The open platform for machine learning collaboration</p>
+            </div>
+            <div class="about-content">
+                <p>OpenML is an open science platform for machine learning that allows researchers to share datasets, algorithms, and experiments. It provides a collaborative environment where you can discover, download, and analyze thousands of datasets and benchmark your models.</p>
+                <p>Join a global community of researchers and data scientists working together to advance machine learning research.</p>
+                
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Open Datasets</h3>
+                        <p>Access thousands of curated ML datasets</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h3>Benchmarks</h3>
+                        <p>Compare models on standardized tasks</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔬</div>
+                        <h3>ML Experiments</h3>
+                        <p>Share and reproduce research results</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤝</div>
+                        <h3>Collaboration</h3>
+                        <p>Work together with global researchers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Datasets Section -->
+    <section id="datasets" class="datasets">
+        <div class="container">
+            <div class="section-header">
+                <h2>Featured Datasets</h2>
+                <p>Popular and trending machine learning datasets</p>
+            </div>
+            <div class="loading" id="datasetsLoading">
+                <div class="spinner"></div>
+                <p>Loading datasets...</p>
+            </div>
+            <div class="error-message" id="datasetsError"></div>
+            <div class="datasets-grid" id="datasetsGrid"></div>
+        </div>
+    </section>
+
+    <!-- Tasks & Benchmarks Section -->
+    <section id="tasks" class="tasks">
+        <div class="container">
+            <div class="section-header">
+                <h2>ML Tasks & Benchmarks</h2>
+                <p>Common machine learning task types</p>
+            </div>
+            
+            <div class="tasks-grid">
+                <div class="task-card">
+                    <div class="task-icon">🎯</div>
+                    <h3>Classification</h3>
+                    <p>Predict categorical labels from input features</p>
+                    <a href="#explorer" class="btn btn-secondary">Explore Tasks</a>
+                </div>
+                <div class="task-card">
+                    <div class="task-icon">📈</div>
+                    <h3>Regression</h3>
+                    <p>Predict continuous numerical values</p>
+                    <a href="#explorer" class="btn btn-secondary">Explore Tasks</a>
+                </div>
+                <div class="task-card">
+                    <div class="task-icon">🔍</div>
+                    <h3>Clustering</h3>
+                    <p>Group similar data points together</p>
+                    <a href="#explorer" class="btn btn-secondary">Explore Tasks</a>
+                </div>
+                <div class="task-card">
+                    <div class="task-icon">⚡</div>
+                    <h3>Feature Selection</h3>
+                    <p>Identify most relevant features</p>
+                    <a href="#explorer" class="btn btn-secondary">Explore Tasks</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dataset Explorer Section -->
+    <section id="explorer" class="explorer">
+        <div class="container">
+            <div class="section-header">
+                <h2>Dataset Explorer</h2>
+                <p>Search and discover datasets by keyword</p>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search datasets (e.g., iris, mnist, credit...)">
+                    <button class="btn btn-primary" onclick="searchDatasets()">Search</button>
+                </div>
+            </div>
+
+            <div class="loading" id="searchLoading">
+                <div class="spinner"></div>
+                <p>Searching datasets...</p>
+            </div>
+            <div class="error-message" id="searchError"></div>
+            <div class="datasets-grid" id="searchResults"></div>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources" class="resources">
+        <div class="container">
+            <div class="section-header">
+                <h2>Resources</h2>
+                <p>Documentation, tutorials, and community links</p>
+            </div>
+            
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>Documentation</h3>
+                    <p>Complete API reference and guides</p>
+                    <a href="https://docs.openml.org" target="_blank">Read Docs →</a>
+                </div>
+                <div class="resource-card">
+                    <div class="feature-icon">🐍</div>
+                    <h3>Python API</h3>
+                    <p>OpenML Python library for easy integration</p>
+                    <a href="https://openml.github.io/openml-python" target="_blank">Get Started →</a>
+                </div>
+                <div class="resource-card">
+                    <div class="feature-icon">💻</div>
+                    <h3>GitHub</h3>
+                    <p>Contribute to the open source project</p>
+                    <a href="https://github.com/openml/openml" target="_blank">View Repo →</a>
+                </div>
+                <div class="resource-card">
+                    <div class="feature-icon">📖</div>
+                    <h3>Research Papers</h3>
+                    <p>Academic publications and citations</p>
+                    <a href="https://www.openml.org/cite" target="_blank">View Papers →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://www.openml.org" target="_blank">OpenML.org</a>
+                <a href="https://docs.openml.org" target="_blank">Documentation</a>
+                <a href="https://github.com/openml/openml" target="_blank">GitHub</a>
+                <a href="#about">About</a>
+                <a href="#datasets">Datasets</a>
+            </div>
+            
+            <div class="social-icons">
+                <a href="https://github.com/openml" target="_blank" class="social-icon" title="GitHub">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://twitter.com/open_ml" target="_blank" class="social-icon" title="Twitter">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+                    </svg>
+                </a>
+                <a href="https://www.openml.org" target="_blank" class="social-icon" title="Website">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="black" stroke-width="2"/>
+                    </svg>
+                </a>
+            </div>
+            
+            <p style="color: var(--text-secondary);">
+                &copy; 2025 OpenML Integration. Powered by <a href="https://www.openml.org" target="_blank" style="color: var(--light-blue);">OpenML.org</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // API Configuration
+        const API_KEY = '247cac01e8af249644acfad06e0be69a';
+        const BASE_URL = 'https://www.openml.org/api/v1/json';
+
+        // Scroll Animation Observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Smooth Scroll
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Navigation Bar Functionality
+        const navbar = document.getElementById('navbar');
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        // Scroll effect for navbar
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+
+        // Fetch Featured Datasets
+        async function fetchFeaturedDatasets() {
+            const loading = document.getElementById('datasetsLoading');
+            const grid = document.getElementById('datasetsGrid');
+            const errorDiv = document.getElementById('datasetsError');
+            
+            loading.classList.add('active');
+            errorDiv.classList.remove('active');
+            grid.innerHTML = '';
+
+            try {
+                const response = await fetch(`${BASE_URL}/data/list/limit/12/status/active?api_key=${API_KEY}`);
+                const data = await response.json();
+
+                if (data.data && data.data.dataset) {
+                    const datasets = Array.isArray(data.data.dataset) ? data.data.dataset : [data.data.dataset];
+                    displayDatasets(datasets, grid);
+                } else {
+                    throw new Error('No datasets found');
+                }
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.classList.add('active');
+                console.error('Error fetching datasets:', error);
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        // Search Datasets - Dynamic search supporting multiple search strategies
+        async function searchDatasets() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (!query) {
+                alert('Please enter a search term');
+                return;
+            }
+
+            const loading = document.getElementById('searchLoading');
+            const grid = document.getElementById('searchResults');
+            const errorDiv = document.getElementById('searchError');
+            
+            loading.classList.add('active');
+            errorDiv.classList.remove('active');
+            grid.innerHTML = '';
+
+            try {
+                let datasets = [];
+                
+                // Strategy 1: Try exact name match first
+                try {
+                    const nameResponse = await fetch(`${BASE_URL}/data/list/data_name/${encodeURIComponent(query)}?api_key=${API_KEY}`);
+                    const nameData = await nameResponse.json();
+                    
+                    if (nameData.data && nameData.data.dataset) {
+                        const nameResults = Array.isArray(nameData.data.dataset) ? nameData.data.dataset : [nameData.data.dataset];
+                        datasets = [...datasets, ...nameResults];
+                    }
+                } catch (e) {
+                    console.log('Name search failed, trying other methods...');
+                }
+
+                // Strategy 2: Try tag-based search if name search didn't yield enough results
+                if (datasets.length < 5) {
+                    try {
+                        const tagResponse = await fetch(`${BASE_URL}/data/list/tag/${encodeURIComponent(query)}?api_key=${API_KEY}`);
+                        const tagData = await tagResponse.json();
+                        
+                        if (tagData.data && tagData.data.dataset) {
+                            const tagResults = Array.isArray(tagData.data.dataset) ? tagData.data.dataset : [tagData.data.dataset];
+                            // Avoid duplicates
+                            tagResults.forEach(dataset => {
+                                if (!datasets.find(d => d.did === dataset.did)) {
+                                    datasets.push(dataset);
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.log('Tag search failed, trying general search...');
+                    }
+                }
+
+                // Strategy 3: General search - fetch active datasets and filter client-side
+                if (datasets.length === 0) {
+                    try {
+                        const generalResponse = await fetch(`${BASE_URL}/data/list/limit/100/status/active?api_key=${API_KEY}`);
+                        const generalData = await generalResponse.json();
+                        
+                        if (generalData.data && generalData.data.dataset) {
+                            const allDatasets = Array.isArray(generalData.data.dataset) ? generalData.data.dataset : [generalData.data.dataset];
+                            
+                            // Filter datasets by query (case-insensitive search in name, description, and tags)
+                            const queryLower = query.toLowerCase();
+                            datasets = allDatasets.filter(dataset => {
+                                const name = (dataset.name || '').toLowerCase();
+                                const description = (dataset.description || '').toLowerCase();
+                                const tags = (dataset.tag || '').toLowerCase();
+                                
+                                return name.includes(queryLower) || 
+                                       description.includes(queryLower) || 
+                                       tags.includes(queryLower);
+                            });
+                        }
+                    } catch (e) {
+                        console.error('General search failed:', e);
+                    }
+                }
+
+                // Display results
+                if (datasets.length > 0) {
+                    // Remove duplicates based on dataset ID
+                    const uniqueDatasets = datasets.filter((dataset, index, self) =>
+                        index === self.findIndex((d) => d.did === dataset.did)
+                    );
+                    
+                    displayDatasets(uniqueDatasets.slice(0, 12), grid);
+                    
+                    // Show result count
+                    if (uniqueDatasets.length > 12) {
+                        const moreInfo = document.createElement('p');
+                        moreInfo.style.cssText = 'text-align: center; color: var(--text-secondary); grid-column: 1/-1; margin-top: 2rem;';
+                        moreInfo.textContent = `Showing 12 of ${uniqueDatasets.length} results. Refine your search for more specific results.`;
+                        grid.appendChild(moreInfo);
+                    }
+                } else {
+                    grid.innerHTML = `
+                        <div style="text-align: center; color: var(--text-secondary); grid-column: 1/-1; padding: 3rem;">
+                            <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary);">No datasets found for "${query}"</h3>
+                            <p>Try different keywords such as:</p>
+                            <p style="margin-top: 1rem; color: var(--light-blue);">iris, mnist, credit, diabetes, wine, breast-cancer, titanic, housing</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                errorDiv.textContent = `Error: ${error.message}`;
+                errorDiv.classList.add('active');
+                console.error('Error searching datasets:', error);
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        // Display Datasets
+        function displayDatasets(datasets, container) {
+            container.innerHTML = '';
+            
+            datasets.forEach((dataset, index) => {
+                const card = document.createElement('div');
+                card.className = 'dataset-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const name = dataset.name || 'Unnamed Dataset';
+                const description = dataset.description || 'No description available.';
+                const id = dataset.did || dataset.id || 'N/A';
+                const format = dataset.format || 'ARFF';
+                const instances = dataset.qualities?.NumberOfInstances || 'N/A';
+                const features = dataset.qualities?.NumberOfFeatures || 'N/A';
+                const status = dataset.status || 'active';
+
+                card.innerHTML = `
+                    <div class="dataset-header">
+                        <div class="dataset-id">ID: ${id}</div>
+                    </div>
+                    <h3>${name}</h3>
+                    <p class="dataset-description">${description.substring(0, 150)}${description.length > 150 ? '...' : ''}</p>
+                    <div class="dataset-meta">
+                        <div class="meta-item">
+                            <span>📊</span>
+                            <span>${instances} instances</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>🔢</span>
+                            <span>${features} features</span>
+                        </div>
+                        <div class="meta-item">
+                            <span>📁</span>
+                            <span>${format}</span>
+                        </div>
+                    </div>
+                    <div class="dataset-tags">
+                        <span class="tag">${status}</span>
+                        ${dataset.tag ? dataset.tag.split(',').slice(0, 2).map(tag => `<span class="tag">${tag.trim()}</span>`).join('') : ''}
+                    </div>
+                    <a href="https://www.openml.org/d/${id}" target="_blank" class="dataset-link">
+                        View Dataset →
+                    </a>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchDatasets();
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            fetchFeaturedDatasets();
+        });
+    </script>
+</body>
+</html>

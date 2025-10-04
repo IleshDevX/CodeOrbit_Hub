@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meowopedia - Your Ultimate Cat Knowledge Hub</title>
+    <!-- Modern Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* --- DESIGN REFINEMENT & MODERNIZATION --- */
+        
+        /* 1. Theming with CSS Variables */
+        :root {
+            --primary-color: #ff4757; /* A vibrant, modern coral red */
+            --primary-dark: #e04050;
+            --bg-dark-primary: #111111; /* A deeper, richer black */
+            --bg-dark-secondary: #1a1a1a; /* For cards and elevated surfaces */
+            --text-primary: #f5f5f7; /* Soft white for readability */
+            --text-secondary: #a1a1a6; /* Light grey for secondary info */
+            --border-color: rgba(255, 71, 87, 0.2);
+            --font-family: 'Inter', sans-serif;
+            --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 20px 40px rgba(255, 71, 87, 0.25);
+            --border-radius-md: 16px;
+            --border-radius-lg: 24px;
+            --transition-speed: 0.4s;
+        }
+
+        /* 2. Base & Typography */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            color: var(--text-primary);
+            background-color: var(--bg-dark-primary);
+            overflow-x: hidden;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        /* 3. Re-styled Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(17, 17, 17, 0.8); /* Semi-transparent */
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: background 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .navbar.scrolled {
+            background: rgba(17, 17, 17, 0.95);
+            padding: 0.75rem 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none !important;
+            background: linear-gradient(45deg, #E22227, #C7080C, #ff4757);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+        
+        .logo:hover {
+            text-decoration: none !important;
+            transform: translateY(-2px);
+            filter: brightness(1.2);
+        }
+        
+        .logo i {
+            color: var(--primary-color);
+            -webkit-text-fill-color: var(--primary-color);
+        }
+
+        /* Ensure logo link never has underline in any state */
+        .logo, .logo:hover, .logo:visited, .logo:active, .logo:focus {
+            text-decoration: none !important;
+            outline: none;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color var(--transition-speed) ease;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            transition: width var(--transition-speed) ease;
+        }
+
+        .nav-links a:hover::after, .nav-links a.active::after {
+            width: 100%;
+        }
+
+        /* 4. Background Effects */
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+            background: radial-gradient(ellipse at 70% 30%, rgba(255, 71, 87, 0.1) 0%, transparent 50%),
+                        radial-gradient(ellipse at 30% 70%, rgba(87, 71, 255, 0.08) 0%, transparent 50%);
+        }
+
+        /* 5. Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            padding: 0 2rem;
+            margin-top: -70px; /* Offset for navbar */
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--text-primary), #bbb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: fadeInDown 1s ease-out;
+            letter-spacing: -2px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+             -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            animation: fadeInUp 1s ease-out 0.3s backwards;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.6s backwards;
+        }
+        
+        /* 6. Button Styles */
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-5px);
+            box-shadow: 0 25px 45px rgba(255, 71, 87, 0.35);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        /* 7. Section Styling */
+        .section {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 5vw, 2.75rem);
+            text-align: center;
+            margin-bottom: 4rem;
+            font-weight: 700;
+            position: relative;
+            color: var(--text-primary);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* 8. About Section */
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-content h2 {
+            font-size: 2.25rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .about-content p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-list {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+        }
+        .feature-item i {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+        }
+        
+        .about-image img {
+            width: 100%;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            object-fit: cover;
+            aspect-ratio: 4/5;
+        }
+        
+        /* 9. Card Styles (Facts, Stats, Gallery) */
+        .card {
+            background: var(--bg-dark-secondary);
+            border-radius: var(--border-radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* 10. Fact Section */
+        #fact-section .card {
+            padding: 3rem 2.5rem;
+        }
+        .fact-text {
+            font-size: 1.35rem;
+            line-height: 1.8;
+            margin-bottom: 2.5rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        .fact-text.loading {
+            color: var(--primary-color);
+            font-style: italic;
+        }
+
+        .fact-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* 11. Cat Image Styles */
+        .cat-image-container {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .image-frame {
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            background-color: var(--bg-dark-secondary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .cat-image {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            display: block;
+            transition: transform var(--transition-speed) ease, opacity 0.5s ease;
+        }
+        
+        .image-frame:hover .cat-image {
+            transform: scale(1.05);
+        }
+        
+        .image-loader {
+            width: 100%;
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #cat-gallery .image-frame {
+            margin-bottom: 2.5rem;
+        }
+
+        /* 12. Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .stat-card .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-card .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* 13. Footer */
+        .footer {
+            background: linear-gradient(135deg, rgba(34, 40, 49, 0.95), rgba(68, 1, 1, 0.9));
+            margin-top: 4rem;
+            border-top: 1px solid rgba(226, 34, 39, 0.3);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem 1.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color var(--transition-speed) ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom .api-credits {
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .footer-bottom .api-credits a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer-bottom .copyright {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+        
+        .footer .api-credits a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .footer .api-credits, .footer .copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .footer .copyright {
+            margin-top: 2rem;
+        }
+
+        /* 14. Mobile Menu */
+        .mobile-menu {
+            display: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .mobile-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--text-primary);
+            margin: 5px;
+            border-radius: 3px;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .mobile-menu.open span:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+        .mobile-menu.open span:nth-child(2) {
+            opacity: 0;
+        }
+        .mobile-menu.open span:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
+
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            position: fixed;
+            top: 0;
+            left: 100%;
+            width: 100%;
+            height: 100vh;
+            background: var(--bg-dark-primary);
+            z-index: 999;
+            transition: left 0.4s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+        
+        .mobile-nav.active {
+            left: 0;
+        }
+
+        .mobile-nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        /* 15. Success Message */
+        .success-message {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.4s ease-in-out;
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .success-message.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* 16. Animations */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 17. Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-menu { display: block; }
+            
+            .hero h1 { font-size: 2.5rem; }
+            .hero .subtitle { font-size: 1.1rem; }
+            .hero-buttons { flex-direction: column; align-items: center; width: 100%; max-width: 320px; margin: 0 auto; }
+            .btn { width: 100%; justify-content: center; }
+
+            .section { padding: 4rem 1.5rem; }
+            .section-title { font-size: 2rem; }
+            
+            .about-grid { grid-template-columns: 1fr; text-align: center; }
+            .about-image { order: -1; }
+            
+            .stats-grid { grid-template-columns: 1fr; }
+            .fact-buttons { flex-direction: column; align-items: center; }
+            
+            .footer-links { 
+                flex-direction: column; 
+                gap: 1rem; 
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-container"></div>
+
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-cat"></i>
+                Meowopedia
+            </a>
+            <ul class="nav-links">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#fact-section">Facts</a></li>
+                <li><a href="#cat-gallery">Gallery</a></li>
+                <li><a href="#stats-section">Stats</a></li>
+            </ul>
+            <div class="mobile-menu" id="mobileMenu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#hero">Home</a>
+        <a href="#about">About</a>
+        <a href="#fact-section">Facts</a>
+        <a href="#cat-gallery">Gallery</a>
+        <a href="#stats-section">Stats</a>
+    </div>
+
+    <main>
+        <section class="hero" id="hero">
+            <div class="hero-content">
+                <h1>Discover the World of <span>Felines</span>.</h1>
+                <p class="subtitle">Your daily dose of amazing cat facts, beautiful feline photography, and live statistics from the cat universe.</p>
+                <div class="hero-buttons">
+                    <a href="#fact-section" class="btn btn-primary">
+                        <i class="fas fa-paw"></i> Get a Fact
+                    </a>
+                    <a href="#about" class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i> Learn More
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section fade-in" id="about">
+            <div class="about-grid">
+                <div class="about-content">
+                    <h2 class="section-title" style="text-align: left; margin-bottom: 2rem;">About Meowopedia</h2>
+                    <p>Welcome to the most comprehensive cat facts platform on the web! We're passionate about sharing the fascinating world of felines with fellow cat enthusiasts.</p>
+                    <p>Our platform combines real-time data from trusted APIs with beautiful imagery to create an immersive experience that's both educational and entertaining.</p>
+                    <div class="feature-list">
+                        <div class="feature-item"><i class="fas fa-rocket"></i><span>Real-time Facts</span></div>
+                        <div class="feature-item"><i class="fas fa-images"></i><span>HD Cat Gallery</span></div>
+                        <div class="feature-item"><i class="fas fa-chart-bar"></i><span>Live Statistics</span></div>
+                        <div class="feature-item"><i class="fas fa-share-alt"></i><span>Easy Sharing</span></div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="https://placehold.co/400x500/1a1a1a/f5f5f7?text=Cute+Cat" alt="Cute Cat" id="aboutCatImage">
+                </div>
+            </div>
+        </section>
+
+        <section class="section fact-section fade-in" id="fact-section">
+            <h2 class="section-title">Amazing Cat Facts</h2>
+            <div class="card" id="factCard">
+                <div class="fact-text" id="factText">
+                    Ready to discover a new fact? Hit the button below!
+                </div>
+                <div class="fact-buttons">
+                    <button class="btn btn-primary" onclick="fetchCatFact()" id="fetchBtn">
+                        <i class="fas fa-sync-alt"></i> Get Cat Fact
+                    </button>
+                    <button class="btn btn-secondary" onclick="copyFact()" id="copyBtn" style="display: none;">
+                        <i class="fas fa-copy"></i> Copy Fact
+                    </button>
+                    <button class="btn btn-secondary" onclick="shareOnTwitter()" id="shareBtn" style="display: none;">
+                        <i class="fab fa-twitter"></i> Share
+                    </button>
+                </div>
+            </div>
+            
+            <div class="cat-image-container fade-in" id="factImageContainer" style="display: none;">
+                <div class="image-frame">
+                    <div class="image-loader" id="factImageLoader"><div class="loading-spinner"></div></div>
+                    <img class="cat-image" id="catImage" alt="Random Cat" style="display: none;">
+                </div>
+            </div>
+        </section>
+
+        <section class="section gallery-section fade-in" id="cat-gallery">
+            <h2 class="section-title">Cat Gallery</h2>
+            <div class="image-frame">
+                <div class="image-loader" id="galleryImageLoader"><div class="loading-spinner"></div></div>
+                <img class="cat-image" id="galleryImage" alt="Featured Cat" style="display: none;">
+            </div>
+            <div style="text-align: center;">
+                <button class="btn btn-primary" onclick="loadNewCatImage('galleryImage', 'galleryImageLoader')" id="galleryBtn">
+                    <i class="fas fa-camera"></i> Show Another Cat
+                </button>
+            </div>
+        </section>
+
+        <section class="section stats-section fade-in" id="stats-section">
+            <h2 class="section-title">Live Statistics</h2>
+            <div class="stats-grid">
+                <div class="card stat-card">
+                    <div class="stat-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div class="stat-number" id="factsCount">0</div>
+                    <div class="stat-label">Facts Discovered</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon"><i class="fas fa-images"></i></div>
+                    <div class="stat-number" id="imagesLoaded">0</div>
+                    <div class="stat-label">Images Viewed</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-number" id="timeSpent">0</div>
+                    <div class="stat-label">Minutes on Site</div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-icon"><i class="fas fa-share-alt"></i></div>
+                    <div class="stat-number" id="sharesCount">0</div>
+                    <div class="stat-label">Facts Shared</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer fade-in">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#hero">Home</a>
+                <a href="#about">About</a>
+                <a href="#fact-section">Facts</a>
+                <a href="#cat-gallery">Gallery</a>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
+            </div>
+            
+            <div class="footer-bottom">
+                <p class="api-credits">Powered by <a href="https://catfact.ninja" target="_blank">Cat Facts API</a> & <a href="https://cataas.com" target="_blank">CATAAS</a></p>
+                <p class="copyright">&copy; 2025 Meowopedia. Made with ❤️ for cat lovers worldwide 🐾</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="success-message" id="successMessage">
+        <i class="fas fa-check-circle"></i>
+        <span>Fact copied to clipboard!</span>
+    </div>
+
+    <script>
+        // --- REFINED & MODERNIZED JAVASCRIPT ---
+
+        let factsCount = 0;
+        let imagesLoaded = 0;
+        let sharesCount = 0;
+        let startTime = Date.now();
+        let currentFact = '';
+        let isLoading = false;
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        function initializeApp() {
+            setupEventListeners();
+            setupScrollObserver();
+            loadInitialData();
+            updateTimeSpent();
+        }
+
+        function setupEventListeners() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileNav = document.getElementById('mobileNav');
+            mobileMenu.addEventListener('click', () => {
+                mobileMenu.classList.toggle('open');
+                mobileNav.classList.toggle('active');
+                document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+
+                // Staggered link animation for mobile nav
+                const links = mobileNav.querySelectorAll('a');
+                links.forEach((link, index) => {
+                    if (mobileNav.classList.contains('active')) {
+                        link.style.transition = `opacity 0.4s ease, transform 0.4s ease`;
+                        link.style.transitionDelay = `${index * 0.05 + 0.2}s`;
+                        link.style.opacity = '1';
+                        link.style.transform = 'translateY(0)';
+                    } else {
+                        link.style.transition = 'none';
+                        link.style.opacity = '0';
+                        link.style.transform = 'translateY(20px)';
+                    }
+                });
+            });
+            
+            mobileNav.addEventListener('click', (e) => {
+                if(e.target.tagName === 'A') {
+                    mobileMenu.classList.remove('open');
+                    mobileNav.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            window.addEventListener('scroll', handleScrollEffects);
+        }
+
+        function handleScrollEffects() {
+            // Navbar scroll effect
+            const navbar = document.getElementById('navbar');
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+
+            // Active nav link highlighting
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-links a');
+            let currentSection = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${currentSection}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        function setupScrollObserver() {
+            const observerOptions = { threshold: 0.1 };
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        if (entry.target.id === 'stats-section') {
+                           setTimeout(animateAllStats, 300);
+                        }
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        }
+
+        function loadInitialData() {
+            loadNewCatImage('galleryImage', 'galleryImageLoader');
+            // Use placeholder for about image, or fetch a real one
+            const aboutImage = document.getElementById('aboutCatImage');
+            const timestamp = new Date().getTime();
+            aboutImage.src = `https://cataas.com/cat/cute?width=400&height=500&t=${timestamp}`;
+        }
+        
+        async function fetchWithTimeout(url, options = {}, timeout = 8000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            const response = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(id);
+            return response;
+        }
+
+        async function fetchCatFact() {
+            if (isLoading) return;
+
+            const factTextEl = document.getElementById('factText');
+            const fetchBtn = document.getElementById('fetchBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            
+            isLoading = true;
+            fetchBtn.disabled = true;
+            fetchBtn.innerHTML = '<div class="loading-spinner"></div>';
+            factTextEl.classList.add('loading');
+            factTextEl.textContent = 'Fetching a purrfect fact...';
+
+            try {
+                const response = await fetchWithTimeout('https://catfact.ninja/fact');
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                
+                const data = await response.json();
+                if (!data.fact) throw new Error('Invalid fact data received.');
+
+                currentFact = data.fact;
+                factTextEl.textContent = currentFact;
+                factsCount++;
+                updateStatsDisplay();
+
+                copyBtn.style.display = 'inline-flex';
+                shareBtn.style.display = 'inline-flex';
+                
+                loadNewCatImage('catImage', 'factImageLoader', 'factImageContainer');
+
+            } catch (error) {
+                console.error("Fetch fact error:", error);
+                factTextEl.textContent = 'Oops! Could not fetch a fact. Please try again. 😿';
+            } finally {
+                isLoading = false;
+                fetchBtn.disabled = false;
+                fetchBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Get Another Fact';
+                factTextEl.classList.remove('loading');
+            }
+        }
+
+        function loadNewCatImage(imgId, loaderId, containerId) {
+            const imageEl = document.getElementById(imgId);
+            const loaderEl = document.getElementById(loaderId);
+            
+            if(containerId) document.getElementById(containerId).style.display = 'block';
+
+            loaderEl.style.display = 'flex';
+            imageEl.style.display = 'none';
+
+            const timestamp = new Date().getTime();
+            const newSrc = `https://cataas.com/cat?width=500&height=375&t=${timestamp}`;
+
+            const tempImg = new Image();
+            tempImg.src = newSrc;
+            tempImg.onload = () => {
+                imageEl.src = newSrc;
+                loaderEl.style.display = 'none';
+                imageEl.style.display = 'block';
+                imagesLoaded++;
+                updateStatsDisplay();
+                if(loaderId === 'galleryImageLoader') {
+                    document.getElementById('galleryBtn').disabled = false;
+                    document.getElementById('galleryBtn').innerHTML = '<i class="fas fa-camera"></i> Show Another Cat';
+                }
+            };
+            tempImg.onerror = () => {
+                loaderEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Image failed to load';
+                setTimeout(() => {
+                    loaderEl.style.display = 'none';
+                }, 3000);
+                if(loaderId === 'galleryImageLoader') {
+                    document.getElementById('galleryBtn').disabled = false;
+                    document.getElementById('galleryBtn').innerHTML = '<i class="fas fa-camera"></i> Try Again';
+                }
+            };
+            
+            if(loaderId === 'galleryImageLoader') {
+                document.getElementById('galleryBtn').disabled = true;
+                document.getElementById('galleryBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            }
+        }
+
+        function copyFact() {
+            if (!currentFact) return;
+            navigator.clipboard.writeText(currentFact).then(() => {
+                showSuccessMessage('Fact copied to clipboard! 📋');
+            }).catch(err => {
+                console.error('Copy failed', err);
+                showSuccessMessage('Could not copy fact.', true);
+            });
+        }
+
+        function shareOnTwitter() {
+            if (!currentFact) return;
+            sharesCount++;
+            updateStatsDisplay();
+            const tweetText = encodeURIComponent(`🐱 Cat Fact: "${currentFact}"\n\nFrom Meowopedia 🐾\n\n#CatFacts #Meowopedia`);
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}`;
+            window.open(tweetUrl, '_blank');
+        }
+
+        function showSuccessMessage(message, isError = false) {
+            const msgEl = document.getElementById('successMessage');
+            msgEl.querySelector('span').textContent = message;
+            msgEl.style.background = isError ? 'var(--primary-color)' : 'linear-gradient(45deg, #28a745, #20c997)';
+            msgEl.querySelector('i').className = isError ? 'fas fa-times-circle' : 'fas fa-check-circle';
+            
+            msgEl.classList.add('show');
+            setTimeout(() => {
+                msgEl.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('factsCount').textContent = factsCount;
+            document.getElementById('imagesLoaded').textContent = imagesLoaded;
+            document.getElementById('sharesCount').textContent = sharesCount;
+        }
+        
+        function updateTimeSpent() {
+            setInterval(() => {
+                const minutes = Math.floor((Date.now() - startTime) / 60000);
+                document.getElementById('timeSpent').textContent = minutes;
+            }, 60000);
+        }
+
+        function animateAllStats() {
+            animateCounter('factsCount', factsCount);
+            animateCounter('imagesLoaded', imagesLoaded);
+            animateCounter('timeSpent', Math.floor((Date.now() - startTime) / 60000));
+            animateCounter('sharesCount', sharesCount);
+        }
+
+        function animateCounter(id, endValue, duration = 1500) {
+            const element = document.getElementById(id);
+            if (!element) return;
+            
+            let start = 0;
+            let startTime = null;
+
+            function animation(currentTime) {
+                if (startTime === null) startTime = currentTime;
+                const timeElapsed = currentTime - startTime;
+                const progress = Math.min(timeElapsed / duration, 1);
+                const easeOutExpo = 1 - Math.pow(2, -10 * progress);
+                
+                element.innerHTML = Math.floor(easeOutExpo * (endValue - start) + start);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animation);
+                }
+            }
+            requestAnimationFrame(animation);
+        }
+    </script>
+</body>
+</html>

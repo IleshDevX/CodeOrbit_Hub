@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameQuest - RAWG Database Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1A1A1A;
+            --text-primary: #E0E0E0;
+            --text-secondary: #B3B3B3;
+            --accent-primary: #9333ea; /* Purple */
+            --accent-secondary: #a855f7;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* --- Navbar --- */
+        nav {
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: var(--accent-primary);
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-primary);
+            transition: width 0.3s;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            background-color: var(--accent-primary);
+            color: white;
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn:hover {
+            background-color: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+        }
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        .btn-outline:hover {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        /* --- Game Cards --- */
+        .game-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: scale(1.05);
+            border-color: var(--accent-primary);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        .game-card .game-card-img {
+            transition: transform 0.3s ease;
+        }
+        .game-card:hover .game-card-img {
+            transform: scale(1.1);
+        }
+
+        /* --- Sections & Animations --- */
+        .section-title {
+            border-left: 4px solid var(--accent-primary);
+            padding-left: 1rem;
+        }
+        .reveal-section {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .reveal-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- Modals --- */
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--accent-primary);
+            border-radius: 5px;
+            border: 2px solid var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--accent-secondary);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-30 transition-all duration-300">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a href="#" class="text-2xl font-bold text-white">Game<span class="text-purple-500">Quest</span></a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#hero" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-300">Home</a>
+                        <a href="#trending" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-300">Popular</a>
+                        <a href="#genres" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-300">Genres</a>
+                        <a href="#upcoming" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-300">Upcoming</a>
+                    </div>
+                </div>
+                 <div class="hidden md:block">
+                    <div class="relative">
+                        <input type="text" id="searchInputNav" placeholder="Search games..." class="bg-gray-800 text-white rounded-full py-2 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full">
+                        <svg id="searchButtonNav" class="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile menu, show/hide based on menu state. -->
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                 <a href="#hero" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-300">Home</a>
+                 <a href="#trending" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-300">Popular</a>
+                 <a href="#genres" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-300">Genres</a>
+                 <a href="#upcoming" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-300">Upcoming</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- API Key Modal (hidden by default unless needed) -->
+    <div id="apiKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+        <div class="bg-gray-900 border border-purple-500 p-8 rounded-lg shadow-2xl w-full max-w-md text-center">
+            <h2 class="text-2xl font-bold mb-4 text-purple-400">API Key Required</h2>
+            <p class="mb-6 text-gray-400">Please enter your RAWG.io API key. Get one from <a href="https://rawg.io/apikey" target="_blank" class="text-purple-400 hover:underline">RAWG API docs</a>.</p>
+            <input type="text" id="apiKeyInput" placeholder="Enter your API key" class="w-full bg-gray-800 border border-gray-600 rounded-md px-4 py-2 mb-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <button id="saveApiKey" class="btn w-full">Save and Explore</button>
+            <p id="apiKeyError" class="text-red-500 mt-2 text-sm h-4"></p>
+        </div>
+    </div>
+    
+    <!-- Game Details Modal -->
+    <div id="gameDetailModal" class="fixed inset-0 z-40 hidden items-center justify-center modal-backdrop p-4">
+        <div id="modalContent" class="modal-content w-full max-w-4xl max-h-[90vh] rounded-lg overflow-y-auto relative reveal-section">
+            <!-- Content will be injected by JS -->
+        </div>
+    </div>
+
+    <!-- Header & Hero Section -->
+    <header id="hero" class="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center text-center" style="background-image: linear-gradient(rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 1)), url('https://placehold.co/1920x1080/121212/9333ea?text=Dynamic+Game+Art');">
+        <div class="z-10 relative p-4 reveal-section">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">Your Portal to the Gaming Universe</h1>
+            <p class="text-lg md:text-xl text-text-secondary max-w-3xl mx-auto mb-8">
+                Explore, discover, and organize your gaming journey with the world's largest video game database.
+            </p>
+            <div class="flex gap-4 justify-center">
+                <a href="#trending" class="btn">Browse Collection</a>
+                <a href="#genres" class="btn btn-outline">Filter by Genre</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-16 space-y-24">
+        <!-- Popular Games Section -->
+        <section id="trending" class="reveal-section">
+            <h2 class="text-3xl font-bold mb-8 section-title">Popular Right Now</h2>
+            <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Game cards will be injected here -->
+            </div>
+            <div id="loader" class="text-center hidden my-8">
+                 <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+            <div class="text-center mt-12">
+                <button id="loadMoreButton" class="btn btn-outline">Load More</button>
+            </div>
+        </section>
+
+        <!-- Genres Section -->
+        <section id="genres" class="reveal-section">
+            <h2 class="text-3xl font-bold mb-8 section-title">Explore by Genre</h2>
+            <div id="genresContainer" class="flex flex-wrap gap-3 justify-center">
+                <!-- Genre buttons will be injected here -->
+            </div>
+        </section>
+
+        <!-- Upcoming Games Section -->
+        <section id="upcoming" class="reveal-section">
+            <h2 class="text-3xl font-bold mb-8 section-title">Coming Soon</h2>
+            <div id="upcomingGames" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Upcoming game cards will be injected here -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-bg-secondary py-8 mt-24 border-t border-border-color">
+        <div class="container mx-auto text-center text-text-secondary">
+            <p>Powered by the <a href="https://rawg.io/" target="_blank" class="text-purple-400 hover:underline">RAWG.io API</a></p>
+            <p class="mt-2 text-sm">GameQuest &copy; 2025. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_BASE_URL = 'https://api.rawg.io/api/';
+            let apiKey = sessionStorage.getItem('rawgApiKey') || '392727993bdd45999b2cd2a9636f246c';
+            let currentPage = 1;
+            let currentSearchQuery = '';
+            let currentGenre = '';
+
+            // DOM Elements
+            const navbar = document.getElementById('navbar');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            const apiKeyModal = document.getElementById('apiKeyModal');
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const saveApiKeyBtn = document.getElementById('saveApiKey');
+            const apiKeyError = document.getElementById('apiKeyError');
+
+            const gamesGrid = document.getElementById('gamesGrid');
+            const genresContainer = document.getElementById('genresContainer');
+            const upcomingGames = document.getElementById('upcomingGames');
+            const loader = document.getElementById('loader');
+            
+            const searchInput = document.getElementById('searchInputNav');
+            const searchButton = document.getElementById('searchButtonNav');
+            const loadMoreButton = document.getElementById('loadMoreButton');
+            
+            const gameDetailModal = document.getElementById('gameDetailModal');
+            const modalContent = document.getElementById('modalContent');
+            const hero = document.getElementById('hero');
+            
+            // --- UI/UX Enhancements ---
+            // Navbar scroll effect
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-opacity-100', 'shadow-lg');
+                } else {
+                    navbar.classList.remove('bg-opacity-100', 'shadow-lg');
+                }
+            });
+
+            // Mobile menu toggle
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+
+            // --- API Key Management ---
+            const checkApiKey = async () => {
+                 try {
+                    const response = await fetch(`${API_BASE_URL}games?key=${apiKey}&page_size=1`);
+                    if(!response.ok) throw new Error('Invalid or expired key');
+                    apiKeyModal.style.display = 'none';
+                    initializeApp();
+                } catch (error) {
+                    apiKeyModal.style.display = 'flex';
+                }
+            };
+
+            saveApiKeyBtn.addEventListener('click', async () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    try {
+                        const response = await fetch(`${API_BASE_URL}games?key=${key}&page_size=1`);
+                        if(response.ok) {
+                            apiKey = key;
+                            sessionStorage.setItem('rawgApiKey', key);
+                            apiKeyModal.style.display = 'none';
+                            initializeApp();
+                        } else {
+                            throw new Error('Invalid API Key');
+                        }
+                    } catch (error) {
+                        apiKeyError.textContent = 'Invalid API key. Please try again.';
+                    }
+                } else {
+                    apiKeyError.textContent = 'Please enter a valid API key.';
+                }
+            });
+
+            // --- API Fetch Functions ---
+            const fetchData = async (endpoint, params = {}) => {
+                if (!apiKey) return null;
+                const urlParams = new URLSearchParams({ key: apiKey, ...params });
+                const url = `${API_BASE_URL}${endpoint}?${urlParams}`;
+                
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    return null;
+                }
+            };
+            
+            const getGames = (page = 1, search = '', genre = '') => {
+                loader.classList.remove('hidden');
+                loadMoreButton.disabled = true;
+                let params = { page, page_size: 20 };
+                if (search) {
+                     params.search = search;
+                } else {
+                    params.ordering = '-added';
+                }
+                if (genre) params.genres = genre;
+
+                fetchData('games', params).then(data => {
+                    if (data && data.results) {
+                        // Set hero background to the first popular game
+                        if (page === 1 && !search && !genre && data.results.length > 0) {
+                             hero.style.backgroundImage = `linear-gradient(rgba(18, 18, 18, 0.8), rgba(18, 18, 18, 1)), url('${data.results[0].background_image}')`;
+                        }
+                        renderGameCards(data.results, page === 1);
+                        loadMoreButton.style.display = data.next ? 'inline-block' : 'none';
+                    }
+                    loader.classList.add('hidden');
+                    loadMoreButton.disabled = false;
+                });
+            };
+            
+            const getGameDetails = async (id) => {
+                loader.classList.remove('hidden');
+                const [details, screenshots] = await Promise.all([
+                    fetchData(`games/${id}`),
+                    fetchData(`games/${id}/screenshots`)
+                ]);
+                loader.classList.add('hidden');
+                if(details) {
+                    renderGameDetails(details, screenshots?.results || []);
+                }
+            };
+
+            const getGenres = () => {
+                fetchData('genres', { page_size: 16, ordering: '-games_count' }).then(data => {
+                    if (data && data.results) {
+                        renderGenreButtons(data.results);
+                    }
+                });
+            };
+
+            const getUpcomingGames = () => {
+                const today = new Date();
+                const nextYear = new Date(new Date().setFullYear(today.getFullYear() + 1));
+                const formatDate = (d) => d.toISOString().split('T')[0];
+
+                const params = {
+                    dates: `${formatDate(today)},${formatDate(nextYear)}`,
+                    ordering: 'released',
+                    page_size: 4
+                };
+                fetchData('games', params).then(data => {
+                    if (data && data.results) {
+                        renderUpcomingGames(data.results);
+                    }
+                });
+            };
+
+            // --- Rendering Functions ---
+            const createGameCard = (game) => `
+                <div class="game-card rounded-lg cursor-pointer flex flex-col" data-id="${game.id}">
+                    <div class="h-40 overflow-hidden"><img src="${game.background_image || 'https://placehold.co/400x225/1A1A1A/9333ea?text=No+Image'}" alt="${game.name}" class="w-full h-full object-cover game-card-img"></div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="text-lg font-bold truncate flex-grow">${game.name}</h3>
+                        <div class="flex justify-between items-center mt-2 text-sm text-text-secondary">
+                            <span>⭐ ${game.rating}</span>
+                            <span>${game.released ? game.released.substring(0, 4) : 'TBA'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const renderGameCards = (games, clear = false) => {
+                if (clear) gamesGrid.innerHTML = '';
+                gamesGrid.insertAdjacentHTML('beforeend', games.map(createGameCard).join(''));
+            };
+            
+            const renderGameDetails = (game, screenshots) => {
+                const platforms = game.platforms.map(p => p.platform.name).join(', ');
+                const genres = game.genres.map(g => g.name).join(', ');
+                const screenshotHtml = screenshots.map(s => `<img src="${s.image}" alt="Screenshot" class="w-full rounded-md object-cover snap-center">`).join('');
+
+                modalContent.innerHTML = `
+                    <button id="closeModal" class="absolute top-3 right-4 text-gray-400 hover:text-white text-4xl z-10">&times;</button>
+                    <div class="w-full h-64 md:h-80 bg-cover bg-center" style="background-image: linear-gradient(to top, var(--bg-secondary), transparent), url('${game.background_image}')"></div>
+                    <div class="p-6">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-2">${game.name}</h2>
+                        <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm mb-4 text-text-secondary">
+                           <span><strong>Released:</strong> ${game.released || 'TBA'}</span>
+                           <span><strong>Rating:</strong> ${game.rating} / 5 (${game.ratings_count} votes)</span>
+                        </div>
+                        <p class="text-text-secondary mb-6">${game.description_raw.split('. ').slice(0, 4).join('. ')}.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div><h4 class="font-bold text-lg mb-2">Platforms</h4><p class="text-text-secondary">${platforms}</p></div>
+                            <div><h4 class="font-bold text-lg mb-2">Genres</h4><p class="text-text-secondary">${genres}</p></div>
+                        </div>
+                        ${screenshotHtml ? `<h4 class="font-bold text-lg mb-2">Screenshots</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto">${screenshotHtml}</div>` : ''}
+                         <a href="${game.website}" target="_blank" class="btn inline-block mt-6">Visit Website</a>
+                    </div>
+                `;
+                gameDetailModal.style.display = 'flex';
+                setTimeout(() => modalContent.classList.add('visible'), 10);
+                document.body.style.overflow = 'hidden';
+                document.getElementById('closeModal').addEventListener('click', closeGameDetailModal);
+            };
+
+            const renderGenreButtons = (genres) => {
+                genresContainer.innerHTML = genres.map(genre =>
+                    `<button class="btn btn-outline text-sm" data-genre-slug="${genre.slug}">${genre.name}</button>`
+                ).join('');
+            };
+            
+            const renderUpcomingGames = (games) => {
+                upcomingGames.innerHTML = games.map(game => `
+                    <div class="bg-bg-secondary rounded-lg p-4 flex items-center gap-4 border border-border-color">
+                        <img src="${game.background_image || 'https://placehold.co/200x100/1A1A1A/9333ea?text=Game'}" class="w-28 h-16 object-cover rounded-md hidden sm:block">
+                        <div class="flex-1">
+                            <h4 class="text-lg font-bold">${game.name}</h4>
+                            <p class="text-sm text-text-secondary">Releasing: ${new Date(game.released).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            // --- Event Handlers & Logic ---
+            const closeGameDetailModal = () => {
+                modalContent.classList.remove('visible');
+                setTimeout(() => {
+                    gameDetailModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            };
+            
+            const handleSearch = () => {
+                const query = searchInput.value.trim();
+                currentSearchQuery = query;
+                currentGenre = '';
+                currentPage = 1;
+                getGames(currentPage, currentSearchQuery, currentGenre);
+                document.getElementById('trending').scrollIntoView();
+            };
+
+            const handleGenreClick = (e) => {
+                 if(e.target.matches('[data-genre-slug]')) {
+                    const genreSlug = e.target.dataset.genreSlug;
+                    currentGenre = genreSlug;
+                    currentSearchQuery = '';
+                    searchInput.value = '';
+                    currentPage = 1;
+                    getGames(currentPage, currentSearchQuery, currentGenre);
+                    document.getElementById('trending').scrollIntoView();
+                 }
+            };
+            
+            // --- Initial Setup ---
+            const initializeApp = () => {
+                getGames(currentPage);
+                getGenres();
+                getUpcomingGames();
+            };
+
+            // --- Event Listeners ---
+            loadMoreButton.addEventListener('click', () => {
+                currentPage++;
+                getGames(currentPage, currentSearchQuery, currentGenre);
+            });
+            searchButton.addEventListener('click', handleSearch);
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+            genresContainer.addEventListener('click', handleGenreClick);
+            gamesGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.game-card');
+                if (card) getGameDetails(card.dataset.id);
+            });
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && gameDetailModal.style.display === 'flex') {
+                    closeGameDetailModal();
+                }
+            });
+            gameDetailModal.addEventListener('click', (e) => {
+                if (e.target === gameDetailModal) closeGameDetailModal();
+            });
+
+            // Scroll animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal-section').forEach(section => observer.observe(section));
+
+            checkApiKey();
+        });
+    </script>
+</body>
+
+</html>
+

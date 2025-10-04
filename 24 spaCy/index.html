@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>spaCy: Industrial-Strength NLP</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS for animations, gradients, and theme -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #11101a;
+            color: #A1A2AB;
+        }
+ 
+        /* Gradient Spotlight Effect */
+        .spotlight-effect {
+            position: relative;
+        }
+
+        .spotlight-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: radial-gradient(circle at 25% 30%, #59516830 0%, #25233000 35%),
+                              radial-gradient(circle at 75% 70%, #3B3A4A30 0%, #25233000 35%);
+            animation: moveSpotlight 20s linear infinite alternate;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes moveSpotlight {
+            from {
+                transform: translate(0, 0);
+            }
+            to {
+                transform: translate(5%, 10%);
+            }
+        }
+        
+        /* Glowing CTA Buttons */
+        .cta-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px #595168, 0 0 10px #595168;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 0 15px #A1A2AB, 0 0 30px #A1A2AB;
+        }
+        
+        /* Feature Card Hover Effect */
+        .feature-card, .use-case-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            border: 1px solid #3B3A4A;
+        }
+        .feature-card:hover, .use-case-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px #25233099;
+            background-color: #252330;
+            border-color: #575669;
+        }
+
+        /* Scroll-triggered animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* NLP Demo styles */
+        .token {
+            display: inline-block;
+            margin: 2px 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background-color: #3B3A4A;
+            color: #F5F9F8;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        .ner {
+            position: relative;
+            padding: 4px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        .ner::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #F5F9F8;
+            color: #252330;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .ner:hover::after {
+            opacity: 1;
+        }
+        
+        .ner-PERSON { background-color: rgba(130, 224, 170, 0.3); border-bottom: 2px solid #82E0AA; }
+        .ner-ORG { background-color: rgba(133, 193, 233, 0.3); border-bottom: 2px solid #85C1E9; }
+        .ner-GPE { background-color: rgba(247, 220, 111, 0.3); border-bottom: 2px solid #F7DC6F; }
+        .ner-DATE { background-color: rgba(241, 148, 138, 0.3); border-bottom: 2px solid #F1948A; }
+        .ner-PRODUCT { background-color: rgba(187, 143, 206, 0.3); border-bottom: 2px solid #BB8FCE; }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="spotlight-effect">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 bg-[#11101a]/80 backdrop-blur-sm z-50 border-b border-gray-800/50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <svg width="32" height="32" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" class="text-[#F5F9F8]">
+                    <path fill="currentColor" d="M208 40H48a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16m0 160H48V56h160zM184 88a12 12 0 1 1-12-12a12 12 0 0 1 12 12"/>
+                </svg>
+                <h1 class="text-2xl font-bold text-white">spaCy</h1>
+            </div>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#features" class="hover:text-white transition-colors duration-200">Features</a>
+                <a href="#demo" class="hover:text-white transition-colors duration-200">Demo</a>
+                <a href="#learn" class="hover:text-white transition-colors duration-200">Learn</a>
+                <a href="#use-cases" class="hover:text-white transition-colors duration-200">Use Cases</a>
+            </nav>
+            <a href="https://spacy.io/usage" target="_blank" rel="noopener" class="hidden md:inline-block bg-white/10 text-white py-2 px-4 rounded-lg hover:bg-white/20 transition-colors duration-200">View Docs</a>
+        </div>
+    </header>
+
+    <main class="relative z-10">
+
+        <!-- Hero Section -->
+        <section id="home" class="h-screen flex items-center justify-center text-center relative overflow-hidden pt-16">
+            <div class="absolute inset-0 bg-grid-pattern opacity-10"></div>
+            <div class="container mx-auto px-6 relative">
+                <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-4 animate-fade-in-down">
+                    spaCy: Industrial-Strength NLP
+                </h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8 animate-fade-in-up">
+                    Production-ready pipelines, incredible speed, and a powerful, developer-friendly API for all your Natural Language Processing tasks.
+                </p>
+                <div class="flex justify-center items-center space-x-4">
+                    <a href="#features" class="cta-button bg-gradient-to-r from-[#595168] to-[#3B3A4A] text-white font-semibold py-3 px-8 rounded-full">Explore Features</a>
+                    <a href="#demo" class="cta-button bg-transparent border-2 border-[#575669] text-white font-semibold py-3 px-8 rounded-full hover:bg-[#575669] hover:border-[#575669]">Try Demo</a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- About Section -->
+        <section id="about" class="py-20 md:py-32">
+            <div class="container mx-auto px-6 text-center">
+                <div class="max-w-3xl mx-auto">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 scroll-animate">What is spaCy?</h2>
+                    <p class="text-lg mb-8 scroll-animate" style="transition-delay: 100ms;">
+                        spaCy is an open-source software library for advanced Natural Language Processing, written in Python and Cython. It's designed to be fast, streamlined, and ready for real-world applications. From research to production, spaCy helps you build systems that understand language.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Highlights Section -->
+        <section id="features" class="py-20 md:py-32 bg-[#1a1923] rounded-t-3xl">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 scroll-animate">Powerful Features Out-of-the-Box</h2>
+                    <p class="text-lg max-w-2xl mx-auto scroll-animate" style="transition-delay: 100ms;">
+                        spaCy is packed with features to handle any NLP challenge.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Feature Card 1 -->
+                    <div class="feature-card p-8 rounded-2xl scroll-animate">
+                         <h3 class="text-xl font-bold text-white mb-3">Tokenization</h3>
+                         <p>Segmenting text into words, punctuation, and other meaningful units. spaCy's tokenizer is fast, accurate, and language-specific.</p>
+                    </div>
+                     <!-- Feature Card 2 -->
+                    <div class="feature-card p-8 rounded-2xl scroll-animate" style="transition-delay: 100ms;">
+                         <h3 class="text-xl font-bold text-white mb-3">Named Entity Recognition (NER)</h3>
+                         <p>Identify and classify real-world objects like people, organizations, locations, and dates in your text.</p>
+                    </div>
+                     <!-- Feature Card 3 -->
+                    <div class="feature-card p-8 rounded-2xl scroll-animate" style="transition-delay: 200ms;">
+                         <h3 class="text-xl font-bold text-white mb-3">Part-of-Speech Tagging</h3>
+                         <p>Assign grammatical labels like noun, verb, and adjective to each token, providing deep linguistic insight.</p>
+                    </div>
+                     <!-- Feature Card 4 -->
+                    <div class="feature-card p-8 rounded-2xl scroll-animate" style="transition-delay: 300ms;">
+                         <h3 class="text-xl font-bold text-white mb-3">Dependency Parsing</h3>
+                         <p>Analyze the grammatical structure of a sentence to understand relationships between words.</p>
+                    </div>
+                     <!-- Feature Card 5 -->
+                    <div class="feature-card p-8 rounded-2xl scroll-animate" style="transition-delay: 400ms;">
+                         <h3 class="text-xl font-bold text-white mb-3">Pre-trained Pipelines</h3>
+                         <p>Get started instantly with statistical models for over 20 languages, supporting a variety of NLP tasks.</p>
+                    </div>
+                     <!-- Feature Card 6 -->
+                    <div class="feature-card p-8 rounded-2xl scroll-animate" style="transition-delay: 500ms;">
+                         <h3 class="text-xl font-bold text-white mb-3">Speed & Efficiency</h3>
+                         <p>Written from the ground up in Cython, spaCy is one of the fastest NLP libraries in the world.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive NLP Demo Section -->
+        <section id="demo" class="py-20 md:py-32">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 scroll-animate">Interactive NLP Demo</h2>
+                    <p class="text-lg max-w-2xl mx-auto scroll-animate" style="transition-delay: 100ms;">
+                        Type or paste text below to see a simplified NLP analysis in action.
+                    </p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="bg-[#1a1923] p-4 rounded-xl border border-[#3B3A4A] scroll-animate">
+                        <textarea id="nlp-input" class="w-full h-32 bg-transparent text-white p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#595168] resize-none" placeholder="Apple is looking at buying a U.K. startup for $1 billion. Tim Cook will visit London next week."></textarea>
+                        <div class="flex justify-end mt-4">
+                            <button id="process-btn" class="cta-button bg-gradient-to-r from-[#595168] to-[#3B3A4A] text-white font-semibold py-2 px-6 rounded-lg">Process Text</button>
+                        </div>
+                    </div>
+                    
+                    <div id="nlp-output" class="mt-8 min-h-[100px] p-6 bg-[#1a1923] rounded-xl border border-[#3B3A4A] scroll-animate" style="transition-delay: 200ms;">
+                         <p class="text-gray-500">Results will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning & Documentation Section -->
+        <section id="learn" class="py-20 md:py-32 bg-[#1a1923]">
+             <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 scroll-animate">Learn and Grow with spaCy</h2>
+                    <p class="text-lg max-w-2xl mx-auto scroll-animate" style="transition-delay: 100ms;">
+                        Resources to help you master spaCy, from beginner to expert.
+                    </p>
+                </div>
+                <div class="max-w-4xl mx-auto scroll-animate">
+                     <div class="grid md:grid-cols-3 gap-8 text-center">
+                        <a href="https://spacy.io/usage/spacy-101" target="_blank" rel="noopener" class="feature-card p-8 rounded-2xl block">
+                            <h3 class="text-xl font-bold text-white mb-3">Getting Started</h3>
+                            <p>Learn the basics of spaCy and start building your first NLP application.</p>
+                        </a>
+                        <a href="https://course.spacy.io/en/" target="_blank" rel="noopener" class="feature-card p-8 rounded-2xl block">
+                            <h3 class="text-xl font-bold text-white mb-3">Advanced Course</h3>
+                            <p>Dive deep into spaCy's features with a free, interactive online course.</p>
+                        </a>
+                        <a href="https://github.com/explosion/spaCy" target="_blank" rel="noopener" class="feature-card p-8 rounded-2xl block">
+                            <h3 class="text-xl font-bold text-white mb-3">GitHub Repository</h3>
+                            <p>Explore the source code, contribute, and join the open-source community.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Use Cases & Industry Applications Section -->
+        <section id="use-cases" class="py-20 md:py-32">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 scroll-animate">Trusted by Industries</h2>
+                    <p class="text-lg max-w-2xl mx-auto scroll-animate" style="transition-delay: 100ms;">
+                        spaCy powers a wide range of applications across various sectors.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Use Case Card 1 -->
+                    <div class="use-case-card p-8 rounded-2xl text-center scroll-animate">
+                        <h3 class="text-xl font-bold text-white mb-3">AI Research</h3>
+                        <p>Accelerate research with fast and accurate linguistic annotations.</p>
+                    </div>
+                     <!-- Use Case Card 2 -->
+                    <div class="use-case-card p-8 rounded-2xl text-center scroll-animate" style="transition-delay: 100ms;">
+                        <h3 class="text-xl font-bold text-white mb-3">Fintech</h3>
+                        <p>Analyze financial reports, news, and documents for insights.</p>
+                    </div>
+                     <!-- Use Case Card 3 -->
+                    <div class="use-case-card p-8 rounded-2xl text-center scroll-animate" style="transition-delay: 200ms;">
+                        <h3 class="text-xl font-bold text-white mb-3">Healthcare</h3>
+                        <p>Extract information from clinical records and medical texts.</p>
+                    </div>
+                     <!-- Use Case Card 4 -->
+                    <div class="use-case-card p-8 rounded-2xl text-center scroll-animate" style="transition-delay: 300ms;">
+                        <h3 class="text-xl font-bold text-white mb-3">Chatbots</h3>
+                        <p>Build more intelligent and responsive conversational agents.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-[#1a1923] border-t border-[#3B3A4A]/50">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>&copy; 2024 spaCy Showcase. Built with ❤️ for the open-source community.</p>
+            <p class="text-sm mt-2">This is an unofficial fan-made project to demonstrate web technologies.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Scroll-triggered animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            document.querySelectorAll('.scroll-animate').forEach(el => {
+                observer.observe(el);
+            });
+
+            // NLP Demo Logic
+            const processBtn = document.getElementById('process-btn');
+            const nlpInput = document.getElementById('nlp-input');
+            const nlpOutput = document.getElementById('nlp-output');
+
+            const simpleNER = {
+                "apple": "ORG",
+                "u.k.": "GPE",
+                "london": "GPE",
+                "tim cook": "PERSON",
+                "$1 billion": "MONEY",
+                "next week": "DATE",
+            };
+
+            processBtn.addEventListener('click', () => {
+                const text = nlpInput.value.trim();
+                if (!text) {
+                    nlpOutput.innerHTML = '<p class="text-gray-500">Please enter some text to analyze.</p>';
+                    return;
+                }
+                
+                nlpOutput.innerHTML = '';
+                
+                // Simple NER highlighting
+                let processedText = text;
+                Object.keys(simpleNER).forEach(entity => {
+                    const label = simpleNER[entity];
+                    const regex = new RegExp(`\\b(${entity})\\b`, 'gi');
+                    processedText = processedText.replace(regex, `<span class="ner ner-${label}" data-label="${label}">$1</span>`);
+                });
+
+                // Simple Tokenization
+                const tokens = processedText.split(/(\s+)/); // Split by space, keeping spaces
+                
+                tokens.forEach((token, index) => {
+                    if (token.trim() === '') {
+                        // It's a space, so just add it
+                        nlpOutput.insertAdjacentHTML('beforeend', ' ');
+                    } else if (token.startsWith('<span')) {
+                        // It's an NER entity, add it directly
+                        const span = document.createElement('span');
+                        span.innerHTML = token;
+                        span.style.animationDelay = `${index * 50}ms`;
+                        // The inner content is what we want to animate
+                        const innerSpan = span.querySelector('.ner');
+                        if(innerSpan) {
+                           const tokenWords = innerSpan.textContent.split(' ');
+                           innerSpan.innerHTML = '';
+                           tokenWords.forEach((word, wordIndex) => {
+                               const wordSpan = document.createElement('span');
+                               wordSpan.className = 'token';
+                               wordSpan.textContent = word;
+                               wordSpan.style.animationDelay = `${(index + wordIndex) * 50}ms`;
+                               innerSpan.appendChild(wordSpan);
+                               if (wordIndex < tokenWords.length - 1) {
+                                   innerSpan.append(' ');
+                               }
+                           });
+                        }
+                        nlpOutput.appendChild(span.firstChild);
+
+                    } else {
+                        // It's a regular token
+                        const span = document.createElement('span');
+                        span.className = 'token';
+                        span.textContent = token;
+                        span.style.animationDelay = `${index * 50}ms`;
+                        nlpOutput.appendChild(span);
+                    }
+                });
+            });
+            
+             // Set default text and trigger processing on load
+            if (nlpInput.value) {
+                processBtn.click();
+            }
+
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Economic Data Visualizer | FRED API</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="container">
+            <a href="#" class="logo">EcoViz</a>
+            <nav>
+                <ul>
+                    <li><a href="../index.html" class="back-to-hub">
+                        <i class="fas fa-arrow-left"></i>
+                        Back to Hub
+                    </a></li>
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#search-section">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container hero-content animate-on-load">
+                <h1>Visualize the Economy</h1>
+                <p>Access thousands of economic data series from the FRED API</p>
+                <a href="#search-section" class="cta-button">Explore Data</a>
+            </div>
+        </section>
+
+        <section id="search-section" class="search-container animate-on-scroll">
+            <div class="container">
+                <h2>Search for Economic Data</h2>
+                <form id="search-form">
+                    <input type="text" id="search-input" placeholder="e.g., 'GDP', 'CPI', 'Unemployment Rate'" required>
+                    <button type="submit">Search</button>
+                </form>
+                <div class="sample-buttons" style="margin-top: 1rem; text-align: center;">
+                    <button type="button" onclick="testSampleData('GDP')" style="margin: 0 0.5rem; padding: 0.5rem 1rem; background: #F6B17A; border: none; border-radius: 4px; color: #333; cursor: pointer;">GDP</button>
+                    <button type="button" onclick="testSampleData('Unemployment')" style="margin: 0 0.5rem; padding: 0.5rem 1rem; background: #F6B17A; border: none; border-radius: 4px; color: #333; cursor: pointer;">Unemployment</button>
+                    <button type="button" onclick="testSampleData('Inflation')" style="margin: 0 0.5rem; padding: 0.5rem 1rem; background: #F6B17A; border: none; border-radius: 4px; color: #333; cursor: pointer;">Inflation</button>
+                </div>
+                <div style="margin-top: 1rem; text-align: center;">
+                    <p style="color: #888; font-size: 0.9rem;">Or try real FRED API searches: "Federal Funds Rate", "CPI", "Housing Starts"</p>
+                </div>
+                <div id="loader" class="loader" style="display: none;"></div>
+                <div id="error-message" class="error-message" style="display: none;"></div>
+                <div id="search-results" class="search-results">
+                    <!-- Search results will be rendered here as a grid -->
+                </div>
+                <button id="load-more-btn" class="load-more-btn" style="display:none;">Load More</button>
+            </div>
+        </section>
+
+        <section id="dashboard-section" class="dashboard-container animate-on-scroll" style="display: none;">
+            <div class="container">
+                <h2 id="chart-title">Data Visualization</h2>
+                <div class="dashboard-content">
+                    <div class="chart-wrapper">
+                        <canvas id="data-chart"></canvas>
+                    </div>
+                    <div id="info-panel" class="info-panel">
+                        <h3>Series Information</h3>
+                        <p><strong>ID:</strong> <span id="info-id"></span></p>
+                        <p><strong>Units:</strong> <span id="info-units"></span></p>
+                        <p><strong>Frequency:</strong> <span id="info-frequency"></span></p>
+                        <p><strong>Last Updated:</strong> <span id="info-updated"></span></p>
+                        <p><strong>Description:</strong></p>
+                        <p id="info-notes"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <section id="about-section" class="about-section animate-on-scroll">
+        <div class="container">
+            <h2>About Economic Data Visualizer</h2>
+            <p>
+                <strong>EcoViz</strong> is a modern web application that lets you explore, search, and visualize thousands of economic data series from the <a href="https://fred.stlouisfed.org/" target="_blank">FRED API</a> (Federal Reserve Economic Data).<br>
+                Built for students, researchers, and anyone interested in economic trends, EcoViz provides interactive charts, rich metadata, and a beautiful user experience.<br>
+                All data is sourced live from the St. Louis Fed and updated regularly.
+            </p>
+            <ul>
+                <li>🔍 Search for any economic indicator (GDP, CPI, Unemployment, etc.)</li>
+                <li>📈 Visualize time series data with interactive charts</li>
+                <li>📝 View detailed metadata and descriptions for each series</li>
+                <li>⚡ Fast, responsive, and mobile-friendly design</li>
+            </ul>
+        </div>
+    </section>
+
+    <footer class="footer animate-on-scroll">
+        <div class="container">
+            <p class="footer-brand"><strong>EcoViz</strong> &mdash; Your Economic Data Dashboard</p>
+            <p>Powered by <a href="https://fred.stlouisfed.org/" target="_blank">FRED, St. Louis Fed</a></p>
+            <p>Contact: <a href="mailto:info@ecoviz.com">info@ecoviz.com</a></p>
+            <p class="footer-copyright">&copy; 2025 EcoViz. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

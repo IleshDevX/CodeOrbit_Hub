@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Test - API Hub</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .test-container {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid #475569;
+        }
+        .btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0.5rem;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+        .status.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        .status.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        pre {
+            background: #0c1120;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>EmailJS Configuration Test</h1>
+        <p>Use this page to test your EmailJS setup before deploying.</p>
+        
+        <div id="configStatus">
+            <h3>Configuration Status:</h3>
+            <div id="configCheck"></div>
+        </div>
+        
+        <div style="margin: 2rem 0;">
+            <button class="btn" onclick="testConfiguration()">Test Configuration</button>
+            <button class="btn" onclick="sendTestEmail()">Send Test Email</button>
+        </div>
+        
+        <div id="testStatus" class="status"></div>
+        
+        <h3>Setup Instructions:</h3>
+        <ol>
+            <li>Sign up at <a href="https://www.emailjs.com/" target="_blank" style="color: #6366f1;">EmailJS.com</a></li>
+            <li>Create a Gmail service connected to ileshpatel666@gmail.com</li>
+            <li>Create an email template with the required variables</li>
+            <li>Update emailjs-config.js with your credentials</li>
+            <li>Test using the buttons above</li>
+        </ol>
+        
+        <h3>Required Template Variables:</h3>
+        <pre>
+{{from_name}}     - Sender's name
+{{from_email}}    - Sender's email
+{{subject}}       - Email subject
+{{message}}       - Email message
+{{to_email}}      - Recipient (ileshpatel666@gmail.com)
+{{reply_to}}      - Reply-to address
+{{timestamp}}     - Submission timestamp
+{{user_agent}}    - Browser information
+{{page_url}}      - Page URL
+        </pre>
+    </div>
+
+    <!-- Include EmailJS and configuration -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="emailjs-config.js"></script>
+    
+    <script>
+        function testConfiguration() {
+            const statusDiv = document.getElementById('testStatus');
+            const configDiv = document.getElementById('configCheck');
+            
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status';
+            
+            // Check if EmailJS is loaded
+            if (typeof emailjs === 'undefined') {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ EmailJS library not loaded. Check your internet connection.';
+                return;
+            }
+            
+            // Check if configuration is loaded
+            if (typeof EMAIL_CONFIG === 'undefined') {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Configuration not loaded. Check emailjs-config.js file.';
+                return;
+            }
+            
+            // Check configuration values
+            const config = EMAIL_CONFIG || EMAILJS_CONFIG;
+            if (!config.publicKey || config.publicKey === 'YOUR_PUBLIC_KEY_HERE') {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Public key not configured. Update emailjs-config.js with your actual public key.';
+                return;
+            }
+            
+            if (!config.serviceID || config.serviceID === 'YOUR_SERVICE_ID_HERE') {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Service ID not configured. Update emailjs-config.js with your actual service ID.';
+                return;
+            }
+            
+            if (!config.templateID || config.templateID === 'YOUR_TEMPLATE_ID_HERE') {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ Template ID not configured. Update emailjs-config.js with your actual template ID.';
+                return;
+            }
+            
+            // Initialize EmailJS
+            try {
+                emailjs.init(config.publicKey);
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '✅ Configuration looks good! Ready to send test email.';
+                
+                configDiv.innerHTML = `
+                    <strong>✅ EmailJS loaded:</strong> Yes<br>
+                    <strong>✅ Configuration loaded:</strong> Yes<br>
+                    <strong>✅ Public Key:</strong> ${config.publicKey.substring(0, 10)}...<br>
+                    <strong>✅ Service ID:</strong> ${config.serviceID}<br>
+                    <strong>✅ Template ID:</strong> ${config.templateID}
+                `;
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `❌ EmailJS initialization failed: ${error.message}`;
+            }
+        }
+        
+        function sendTestEmail() {
+            const statusDiv = document.getElementById('testStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status';
+            statusDiv.innerHTML = '📧 Sending test email...';
+            
+            const config = EMAIL_CONFIG || EMAILJS_CONFIG;
+            const templateParams = {
+                from_name: 'Test User',
+                from_email: 'test@example.com',
+                subject: 'Test Email',
+                message: 'This is a test email sent from the EmailJS configuration test page. If you receive this, your setup is working correctly!',
+                to_email: 'ileshpatel666@gmail.com',
+                reply_to: 'test@example.com',
+                timestamp: new Date().toLocaleString(),
+                user_agent: navigator.userAgent,
+                page_url: window.location.href
+            };
+            
+            emailjs.send(config.serviceID, config.templateID, templateParams)
+                .then((response) => {
+                    console.log('Test email sent successfully:', response);
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '✅ Test email sent successfully! Check ileshpatel666@gmail.com for the test message.';
+                })
+                .catch((error) => {
+                    console.error('Test email failed:', error);
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = `❌ Test email failed: ${error.text || error.message}. Check the console for more details.`;
+                });
+        }
+        
+        // Auto-run configuration test on page load
+        window.addEventListener('load', () => {
+            setTimeout(testConfiguration, 500);
+        });
+    </script>
+</body>
+</html>

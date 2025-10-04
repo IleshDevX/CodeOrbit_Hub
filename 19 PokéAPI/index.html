@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poké-Verse: A Pokémon Discovery Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- All styling is contained within this single <style> block -->
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #CCC7B9;
+            --teal: #009698;
+            --blue: #00AAEE;
+            --red: #D9381E;
+            --gold: #F4C430;
+            --transition-speed: 0.3s;
+            --section-padding: 5rem 2rem;
+        }
+
+        /* General Body & Reset Styles */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Subtle Spotlight Effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.025), transparent 40%);
+            z-index: 1000;
+            transition: background 0.2s ease-out;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 999;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--blue);
+        }
+
+        /* Hero Header Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Animated Background for Hero */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(var(--blue), transparent),
+                linear-gradient(90deg, var(--teal), transparent),
+                linear-gradient(-90deg, var(--red), transparent);
+            background-size: 400% 400%;
+            opacity: 0.1;
+            z-index: -1;
+            animation: gradient-flow 20s ease infinite;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+            transition: all var(--transition-speed) ease;
+        }
+
+        #search-input:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 15px 5px rgba(0, 170, 238, 0.2);
+            border-color: var(--blue);
+        }
+        
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            filter: blur(5px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out;
+        }
+
+        .fade-in-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #fff;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            max-width: 600px;
+            margin: -2rem auto 3rem;
+            color: var(--text-color);
+        }
+
+        /* Features Section */
+        #features {
+            padding: var(--section-padding);
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .feature-card svg {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 1rem;
+            color: var(--blue);
+        }
+        .feature-card h3 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Top Pokémon & Search Results Section */
+        #top-pokemon, #pokemon-display {
+            padding: var(--section-padding);
+        }
+
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .pokemon-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .pokemon-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 1rem;
+            border: 2px solid transparent;
+            background: linear-gradient(45deg, var(--teal), var(--blue)) border-box;
+            -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+        
+        .pokemon-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .pokemon-card:hover::before { opacity: 1; }
+        .pokemon-card img {
+            width: 150px;
+            height: 150px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: transform var(--transition-speed) ease;
+        }
+        .pokemon-card:hover img { transform: scale(1.1); }
+        .pokemon-card h3 {
+            margin-top: 1rem;
+            text-transform: capitalize;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .pokemon-types {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        /* About Section */
+        #about {
+            padding: var(--section-padding);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        /* Footer */
+        .site-footer {
+            padding: 4rem 2rem 2rem;
+            background: #050505;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+        }
+        .footer-column h4 {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+        .footer-column p, .footer-column a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .footer-column a:hover { color: var(--blue); }
+        .footer-socials a {
+            display: inline-block;
+            margin-right: 1rem;
+        }
+        .footer-socials svg {
+            width: 24px;
+            height: 24px;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            font-size: 0.9rem;
+        }
+        
+        /* Loading Indicator */
+        .loader-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity var(--transition-speed) ease; }
+        .loader-container.visible { opacity: 1; pointer-events: auto; }
+        .pokeball-loader { width: 60px; height: 60px; border-radius: 50%; background: #fff; position: relative; border: 3px solid #000; animation: spin 1s linear infinite; }
+        .pokeball-loader::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 50%; background: var(--red); border-bottom: 3px solid #000; border-radius: 30px 30px 0 0; }
+        .pokeball-loader::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 18px; height: 18px; background: #fff; border-radius: 50%; border: 3px solid #000; z-index: 1; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* Pokémon Detail Modal */
+        .modal-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity var(--transition-speed) ease; }
+        .modal-container.visible { opacity: 1; pointer-events: auto; }
+        .modal-content { background: #111; border-radius: 1rem; padding: 2rem; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; transform: scale(0.95); transition: transform var(--transition-speed) ease; }
+        .modal-container.visible .modal-content { transform: scale(1); }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--text-color); font-size: 1.5rem; cursor: pointer; }
+        .modal-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: center; }
+        @media (min-width: 768px) { .modal-grid { grid-template-columns: 1fr 1.5fr; } }
+        .modal-image-container { text-align: center; }
+        .modal-image { width: 100%; max-width: 250px; filter: drop-shadow(0 0 15px var(--gold)); }
+        .modal-info h2 { font-size: 2.5rem; text-transform: capitalize; margin-bottom: 0.5rem; color: #fff; }
+        .modal-info .pokedex-id { font-size: 1.2rem; font-weight: 600; color: var(--gold); }
+        .modal-info .pokemon-types { justify-content: flex-start; margin-top: 1rem; }
+        .modal-details { display: flex; justify-content: space-around; text-align: center; margin: 1.5rem 0; padding: 1rem 0; background: rgba(0,0,0,0.2); border-radius: 0.5rem; }
+        .modal-details div h4 { font-size: 0.9rem; color: var(--text-color); margin-bottom: 0.5rem; }
+        .modal-details div p { font-size: 1.2rem; font-weight: 700; color: #fff; }
+        .stats-container h3 { margin-bottom: 1rem; font-size: 1.2rem; }
+        .stat-row { display: flex; align-items: center; margin-bottom: 0.75rem; }
+        .stat-name { width: 120px; text-transform: capitalize; }
+        .stat-bar { flex-grow: 1; height: 10px; background-color: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
+        .stat-bar-inner { height: 100%; background-image: linear-gradient(90deg, var(--teal), var(--blue)); border-radius: 5px; width: 0; transition: width 1s ease-out; }
+    </style>
+</head>
+<body>
+    
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar">
+        <a href="#" class="nav-logo">Poké-Verse</a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#top-pokemon">Top Pokémon</a>
+            <a href="#about">About</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <h1>The Universe of Pokémon, Reimagined.</h1>
+        <p style="margin-bottom: 2rem; max-width: 600px; color: var(--text-color);">The ultimate platform for Pokémon discovery. Instantly search, analyze, and explore detailed data for any Pokémon.</p>
+        <div class="search-container">
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="e.g., Pikachu or 25" autocomplete="off">
+            </form>
+        </div>
+    </header>
+
+    <main>
+        <!-- Top Pokémon Section -->
+        <section id="top-pokemon" class="fade-in-section">
+            <h2 class="section-title">Fan Favorites</h2>
+            <p class="section-subtitle">A curated collection of some of the most iconic and beloved Pokémon. Click on any card to see their full details.</p>
+            <div class="pokemon-grid" id="top-pokemon-grid">
+                <!-- Top Pokémon cards will be injected here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Search Results Display Section -->
+        <section id="pokemon-display" class="fade-in-section">
+             <h2 class="section-title">Discover Them All</h2>
+             <p class="section-subtitle">The initial set of Pokémon is loaded below. Use the search bar above to find a specific one instantly.</p>
+            <div class="pokemon-grid" id="pokemon-grid">
+                <!-- Pokémon search results will be injected here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="fade-in-section">
+            <div class="about-content">
+                <h2 class="section-title">About Our Mission</h2>
+                <p>Poké-Verse was born from a passion for the Pokémon world and a desire to create the most beautiful and functional Pokédex on the web. We believe that accessing and exploring data should be an engaging and delightful experience. Our mission is to provide fans and enthusiasts with a powerful tool that feels less like a database and more like an adventure.</p>
+                <br>
+                <p>This entire experience is made possible by the incredible <a href="https://pokeapi.co/" target="_blank" style="color: var(--blue);">PokéAPI</a>, a free and open resource for Pokémon data. We are immensely grateful for their work in making this project a reality.</p>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="fade-in-section">
+            <h2 class="section-title">Why Poké-Verse?</h2>
+            <p class="section-subtitle">We provide a seamless and powerful interface for exploring the rich world of Pokémon, backed by cutting-edge design and instant data access.</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <h3>Blazing-Fast Search</h3>
+                    <p>Our optimized engine delivers instant results for any Pokémon by name or Pokédex number. No waiting, just discovery.</p>
+                </div>
+                <div class="feature-card">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    <h3>In-Depth Analytics</h3>
+                    <p>Go beyond the basics with detailed stats, abilities, and physical attributes presented in a clear, visual format.</p>
+                </div>
+                <div class="feature-card">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    <h3>Sleek & Responsive</h3>
+                    <p>Enjoy a seamless experience on any device. Our platform is fully responsive, looking stunning on desktop, tablet, and mobile.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h4>Poké-Verse</h4>
+                <p>The ultimate platform for Pokémon discovery and analysis.</p>
+            </div>
+            <div class="footer-column">
+                <h4>Explore</h4>
+                <a href="#features">Features</a>
+                <a href="#top-pokemon">Top Pokémon</a>
+                <a href="#pokemon-display">Full Pokédex</a>
+            </div>
+            <div class="footer-column">
+                <h4>About</h4>
+                <a href="#about">Our Mission</a>
+                <a href="https://pokeapi.co/" target="_blank">The PokéAPI</a>
+            </div>
+            <div class="footer-column">
+                <h4>Connect</h4>
+                <div class="footer-socials">
+                    <a href="#" aria-label="Github"><svg fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2024 Poké-Verse. All Rights Reserved. This is a fan project and is not affiliated with Nintendo or The Pokémon Company.
+        </div>
+    </footer>
+    
+    <!-- Loader -->
+    <div class="loader-container" id="loader">
+        <div class="pokeball-loader"></div>
+    </div>
+    
+    <!-- Pokémon Detail Modal -->
+    <div class="modal-container" id="modal-container">
+        <div class="modal-content" id="modal-content">
+            <!-- Modal content will be injected here -->
+        </div>
+    </div>
+
+
+    <!-- All JavaScript logic is contained within this single <script> block -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const POKE_API_BASE = 'https://pokeapi.co/api/v2/pokemon/';
+            const INITIAL_POKEMON_COUNT = 151; // Gen 1
+            const TOP_POKEMON_IDS = [6, 94, 131, 149]; // Charizard, Gengar, Lapras, Dragonite
+
+            const pokemonGrid = document.getElementById('pokemon-grid');
+            const topPokemonGrid = document.getElementById('top-pokemon-grid');
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const loader = document.getElementById('loader');
+            const modalContainer = document.getElementById('modal-container');
+            const modalContent = document.getElementById('modal-content');
+            const navbar = document.getElementById('navbar');
+
+            const typeColors = { normal: '#A8A77A', fire: '#EE8130', water: '#6390F0', electric: '#F7D02C', grass: '#7AC74C', ice: '#96D9D6', fighting: '#C22E28', poison: '#A33EA1', ground: '#E2BF65', flying: '#A98FF3', psychic: '#F95587', bug: '#A6B91A', rock: '#B6A136', ghost: '#735797', dragon: '#6F35FC', dark: '#705746', steel: '#B7B7CE', fairy: '#D685AD' };
+
+            const showLoader = () => loader.classList.add('visible');
+            const hideLoader = () => loader.classList.remove('visible');
+            const showModal = () => modalContainer.classList.add('visible');
+            const hideModal = () => modalContainer.classList.remove('visible');
+
+            const fetchPokemonDetails = async (nameOrId) => {
+                try {
+                    const response = await fetch(`${POKE_API_BASE}${String(nameOrId).toLowerCase()}`);
+                    if (!response.ok) throw new Error("Pokémon not found");
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Failed to fetch Pokémon '${nameOrId}':`, error);
+                    return null;
+                }
+            };
+
+            const fetchAndDisplayPokemon = async (ids, containerElement) => {
+                const promises = ids.map(id => fetchPokemonDetails(id));
+                const allPokemon = await Promise.all(promises);
+                const validPokemon = allPokemon.filter(p => p !== null);
+                displayPokemonGrid(validPokemon, containerElement);
+            };
+
+            const displayPokemonGrid = (pokemonList, containerElement) => {
+                containerElement.innerHTML = '';
+                pokemonList.forEach(pokemon => {
+                    const card = createPokemonCard(pokemon);
+                    containerElement.appendChild(card);
+                });
+            };
+
+            const createPokemonCard = (pokemon) => {
+                const card = document.createElement('div');
+                card.classList.add('pokemon-card');
+                card.dataset.pokemonId = pokemon.id;
+                const types = pokemon.types.map(t => `<span class="type-badge" style="background-color: ${typeColors[t.type.name] || '#777'}">${t.type.name}</span>`).join('');
+                const artwork = pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default;
+                card.innerHTML = `<img src="${artwork}" alt="${pokemon.name}"><h3>${pokemon.name}</h3><div class="pokemon-types">${types}</div>`;
+                return card;
+            };
+
+            const displayPokemonModal = (pokemon) => {
+                const types = pokemon.types.map(t => `<span class="type-badge" style="background-color: ${typeColors[t.type.name] || '#777'}">${t.type.name}</span>`).join('');
+                const stats = pokemon.stats.map(s => `<div class="stat-row"><span class="stat-name">${s.stat.name.replace('special-attack', 'Sp. Atk').replace('special-defense', 'Sp. Def')}</span><div class="stat-bar"><div class="stat-bar-inner" style="width:${s.base_stat/2.55}%"></div></div></div>`).join('');
+                const artwork = pokemon.sprites.other['official-artwork'].front_default;
+                modalContent.innerHTML = `
+                    <button class="modal-close">&times;</button>
+                    <div class="modal-grid">
+                        <div class="modal-image-container"><img class="modal-image" src="${artwork}" alt="${pokemon.name}"></div>
+                        <div class="modal-info">
+                            <h2>${pokemon.name}</h2>
+                            <p class="pokedex-id">#${String(pokemon.id).padStart(3, '0')}</p>
+                            <div class="pokemon-types">${types}</div>
+                            <div class="modal-details">
+                                <div><h4>Weight</h4><p>${pokemon.weight / 10} kg</p></div>
+                                <div><h4>Height</h4><p>${pokemon.height / 10} m</p></div>
+                            </div>
+                            <div class="stats-container"><h3>Base Stats</h3>${stats}</div>
+                        </div>
+                    </div>`;
+                showModal();
+            };
+            
+            searchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const searchTerm = searchInput.value.trim();
+                document.getElementById('pokemon-display').scrollIntoView();
+                if (!searchTerm) {
+                    const initialIds = Array.from({length: INITIAL_POKEMON_COUNT}, (_, i) => i + 1);
+                    showLoader();
+                    await fetchAndDisplayPokemon(initialIds, pokemonGrid);
+                    hideLoader();
+                    return;
+                }
+                showLoader();
+                const pokemon = await fetchPokemonDetails(searchTerm);
+                if (pokemon) {
+                    displayPokemonGrid([pokemon], pokemonGrid);
+                } else {
+                    pokemonGrid.innerHTML = `<p style="color: var(--red); text-align: center; grid-column: 1 / -1;">Pokémon not found. Try another name or number.</p>`;
+                }
+                hideLoader();
+            });
+            
+            document.querySelector('main').addEventListener('click', async (e) => {
+                const card = e.target.closest('.pokemon-card');
+                if (card) {
+                    showLoader();
+                    const pokemonId = card.dataset.pokemonId;
+                    const pokemon = await fetchPokemonDetails(pokemonId);
+                    if (pokemon) displayPokemonModal(pokemon);
+                    hideLoader();
+                }
+            });
+
+            modalContainer.addEventListener('click', (e) => {
+                if (e.target === modalContainer || e.target.closest('.modal-close')) hideModal();
+            });
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            const faders = document.querySelectorAll('.fade-in-section');
+            const appearOnScroll = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                });
+            }, { threshold: 0.15 });
+
+            faders.forEach(fader => appearOnScroll.observe(fader));
+
+            document.body.addEventListener('mousemove', (e) => {
+                document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+                document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+            });
+
+            // --- INITIALIZATION ---
+            const initialize = async () => {
+                showLoader();
+                const initialIds = Array.from({length: INITIAL_POKEMON_COUNT}, (_, i) => i + 1);
+                await Promise.all([
+                    fetchAndDisplayPokemon(TOP_POKEMON_IDS, topPokemonGrid),
+                    fetchAndDisplayPokemon(initialIds, pokemonGrid)
+                ]);
+                hideLoader();
+            };
+
+            initialize();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsplash Image Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000000;
+            color: #f0f0f0;
+            overflow-x: hidden;
+        }
+
+        /* Gradient Spotlight Effect */
+        .spotlight-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spotlight-effect::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 0%), rgba(45, 212, 191, 0.1), transparent 60%);
+            pointer-events: none;
+            transition: transform 0.3s ease-out;
+            z-index: 0;
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(to right, #10b981, #a7f3d0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Gradient Button */
+        .gradient-btn {
+            background-image: linear-gradient(to right, #10b981, #34d399, #6ee7b7);
+            background-size: 200% auto;
+            transition: background-position 0.5s;
+        }
+
+        .gradient-btn:hover {
+            background-position: right center;
+        }
+        
+        /* Scroll Trigger Animations */
+        .fade-in-blur {
+            opacity: 0;
+            filter: blur(10px);
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, filter 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .fade-in-blur.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        /* Glassmorphism effect for image overlay */
+        .glass-overlay {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-black">
+
+    <!-- Hero Header -->
+    <header id="home" class="h-screen min-h-[600px] flex items-center justify-center relative spotlight-effect fade-in-blur visible">
+        <div class="container mx-auto px-6 text-center z-10">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-4">Explore Unlimited <span class="gradient-text">Free Photos</span></h1>
+            <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8">High-resolution images powered by the Unsplash API. Open-source, unlimited, and absolutely free.</p>
+            <div class="max-w-xl mx-auto mb-8">
+                <form id="search-form" class="flex flex-col sm:flex-row gap-4">
+                    <input type="text" id="search-input" placeholder="Search for photos (e.g., 'nature')" class="w-full px-5 py-3 rounded-lg bg-gray-900 border border-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300">
+                    <button type="submit" class="gradient-btn text-black font-bold px-8 py-3 rounded-lg">Search</button>
+                </form>
+            </div>
+            <div class="flex justify-center gap-4">
+                <a href="#gallery" class="bg-gray-800 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg transition duration-300">Explore Gallery</a>
+                <a href="#about" class="border border-green-500 text-green-400 hover:bg-green-500 hover:text-black font-bold px-6 py-3 rounded-lg transition duration-300">About Project</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- About Section -->
+        <section id="about" class="py-20 lg:py-32 relative spotlight-effect">
+            <div class="container mx-auto px-6 z-10">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="fade-in-blur">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">About This <span class="gradient-text">Project</span></h2>
+                        <p class="text-gray-300 mb-4 leading-relaxed">This website is an open-source project designed to showcase the power and simplicity of the Unsplash API. It's built with plain HTML, CSS (via Tailwind), and vanilla JavaScript to be lightweight and fast.</p>
+                        <p class="text-gray-300 leading-relaxed">The goal is to provide a beautiful, modern interface for browsing a vast library of high-quality, royalty-free photos. All images are provided by the generous community of photographers on Unsplash.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 fade-in-blur" style="transition-delay: 200ms;">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjA3fDB8MXxjb2xsZWN0aW9ufDF8MzE3MDk5fHx8fHwyfHwxNjE4MDI1NjA2&ixlib=rb-4.0.3&q=80&w=400" alt="Abstract Art 1" class="rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                        <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjA3fDB8MXxjb2xsZWN0aW9ufDF8MzE3MDk5fHx8fHwyfHwxNjE4MDI1NjA2&ixlib=rb-4.0.3&q=80&w=400" alt="Landscape" class="rounded-lg shadow-lg mt-8 transform hover:scale-105 transition-transform duration-300">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Image Gallery Section -->
+        <section id="gallery" class="py-20 lg:py-32 bg-black">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 fade-in-blur">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Image <span class="gradient-text">Gallery</span></h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto" id="gallery-description">Explore trending photos. Use the search bar to find something specific.</p>
+                </div>
+
+                <!-- Categories -->
+                <div id="categories" class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-12 fade-in-blur" style="transition-delay: 200ms;">
+                    <button class="category-btn active" data-category="Trending">Trending</button>
+                    <button class="category-btn" data-category="Nature">Nature</button>
+                    <button class="category-btn" data-category="Technology">Technology</button>
+                    <button class="category-btn" data-category="People">People</button>
+                    <button class="category-btn" data-category="Travel">Travel</button>
+                    <button class="category-btn" data-category="Animals">Animals</button>
+                </div>
+                
+                <div id="image-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- Images will be injected here by JavaScript -->
+                </div>
+
+                <div id="gallery-message" class="text-center text-gray-500 py-8"></div>
+                
+                <div class="text-center mt-12 fade-in-blur">
+                    <button id="load-more-btn" class="gradient-btn text-black font-bold px-8 py-3 rounded-lg hidden">Load More</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-gray-900/50 border-t border-gray-800 spotlight-effect">
+        <div class="container mx-auto px-6 text-center text-gray-400">
+            <p class="mb-2">Built with ❤️ using the <a href="https://unsplash.com/developers" target="_blank" class="text-green-400 hover:underline">Unsplash API</a>.</p>
+            <p>This is an open-source project. Feel free to explore the code.</p>
+            <div class="flex justify-center gap-6 mt-4">
+                 <a href="#" class="hover:text-green-400 transition-colors">GitHub</a>
+                 <a href="#" class="hover:text-green-400 transition-colors">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- CONFIGURATION ---
+            // IMPORTANT: Replace with your Unsplash Access Key
+            const UNSPLASH_ACCESS_KEY = '8bQ7lSD8mCC6UEhup544h3G_QnOhJBMQ-R2sTz3oEB4';
+            const API_BASE_URL = 'https://api.unsplash.com';
+
+            // --- DOM ELEMENTS ---
+            const searchForm = document.getElementById('search-form');
+            const searchInput = document.getElementById('search-input');
+            const imageGrid = document.getElementById('image-grid');
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            const galleryMessage = document.getElementById('gallery-message');
+            const galleryDescription = document.getElementById('gallery-description');
+            
+            // --- STATE ---
+            let currentPage = 1;
+            let currentQuery = 'Trending';
+            let isFetching = false;
+
+            // --- API FETCHER ---
+            async function fetchPhotos(query, page) {
+                if (isFetching) return;
+                isFetching = true;
+                galleryMessage.textContent = 'Loading images...';
+                loadMoreBtn.classList.add('hidden');
+
+                let url;
+                if (query === 'Trending') {
+                    url = `${API_BASE_URL}/photos?client_id=${UNSPLASH_ACCESS_KEY}&page=${page}&per_page=12`;
+                } else {
+                    url = `${API_BASE_URL}/search/photos?client_id=${UNSPLASH_ACCESS_KEY}&query=${query}&page=${page}&per_page=12`;
+                }
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        let errorMessage = 'An error occurred.';
+                        if (response.status === 401) {
+                            errorMessage = 'Invalid API Key. Please check your Unsplash Access Key in the script.';
+                        } else if (response.status === 403) {
+                             errorMessage = 'API rate limit exceeded. Please wait a bit before trying again.';
+                        }
+                        throw new Error(errorMessage);
+                    }
+                    const data = await response.json();
+                    return query === 'Trending' ? data : data.results;
+                } catch (error) {
+                    console.error('Error fetching photos:', error);
+                    galleryMessage.textContent = error.message;
+                    return [];
+                } finally {
+                    isFetching = false;
+                     if (galleryMessage.textContent === 'Loading images...') {
+                        galleryMessage.textContent = '';
+                    }
+                }
+            }
+            
+            // --- RENDER IMAGES ---
+            function renderImages(photos, append = false) {
+                if (!append) {
+                    imageGrid.innerHTML = '';
+                }
+
+                if (photos.length === 0 && !append) {
+                    galleryMessage.textContent = 'No images found. Try a different search term.';
+                    loadMoreBtn.classList.add('hidden');
+                    return;
+                }
+
+                photos.forEach((photo, index) => {
+                    const imageCard = document.createElement('div');
+                    imageCard.className = 'group relative overflow-hidden rounded-lg fade-in-blur';
+                    imageCard.style.transitionDelay = `${index * 50}ms`;
+
+                    const img = document.createElement('img');
+                    img.src = photo.urls.regular;
+                    img.alt = photo.alt_description || 'Unsplash Photo';
+                    img.className = 'w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-in-out';
+                    
+                    const overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-all duration-500 flex flex-col justify-end p-4 opacity-0 group-hover:opacity-100';
+                    
+                    const userInfo = `
+                        <div class="glass-overlay p-3 rounded-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                             <p class="text-white font-semibold text-sm">${photo.user.name}</p>
+                            <a href="${photo.links.html}" target="_blank" class="text-green-300 text-xs hover:underline">View on Unsplash &rarr;</a>
+                        </div>
+                    `;
+                    overlay.innerHTML = userInfo;
+                    
+                    imageCard.appendChild(img);
+                    imageCard.appendChild(overlay);
+                    imageGrid.appendChild(imageCard);
+                });
+                
+                // Add fade-in-blur class for the observer to pick up
+                observeElements(document.querySelectorAll('#image-grid .fade-in-blur'));
+
+                if (photos.length > 0) {
+                    loadMoreBtn.classList.remove('hidden');
+                } else {
+                    loadMoreBtn.classList.add('hidden');
+                }
+            }
+            
+            // --- EVENT HANDLERS ---
+            async function handleSearch(e) {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (query) {
+                    currentPage = 1;
+                    currentQuery = query;
+                    const photos = await fetchPhotos(currentQuery, currentPage);
+                    renderImages(photos);
+                    galleryDescription.textContent = `Showing results for "${currentQuery}"`;
+                    updateActiveCategory();
+                }
+            }
+
+            async function handleLoadMore() {
+                currentPage++;
+                const photos = await fetchPhotos(currentQuery, currentPage);
+                renderImages(photos, true);
+            }
+            
+            async function handleCategoryClick(e) {
+                const button = e.target;
+                if (!button.classList.contains('category-btn') || button.classList.contains('active')) return;
+                
+                currentQuery = button.dataset.category;
+                currentPage = 1;
+                searchInput.value = '';
+                galleryDescription.textContent = `Showing ${currentQuery} photos.`;
+                
+                updateActiveCategory(button);
+
+                const photos = await fetchPhotos(currentQuery, currentPage);
+                renderImages(photos);
+            }
+            
+            function updateActiveCategory(activeButton = null) {
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                 if(activeButton) {
+                    activeButton.classList.add('active');
+                } else {
+                     // If no button is passed, try to find one matching the current query
+                    const matchingButton = [...categoryButtons].find(btn => btn.dataset.category.toLowerCase() === currentQuery.toLowerCase());
+                    if (matchingButton) {
+                        matchingButton.classList.add('active');
+                    }
+                }
+
+                // Add styling for active/inactive buttons
+                categoryButtons.forEach(btn => {
+                    if (btn.classList.contains('active')) {
+                        btn.className = 'category-btn active gradient-btn text-black font-semibold px-4 py-2 rounded-lg transition-all duration-300 transform scale-105';
+                    } else {
+                        btn.className = 'category-btn bg-gray-800 text-gray-300 hover:bg-gray-700 font-semibold px-4 py-2 rounded-lg transition-all duration-300';
+                    }
+                });
+            }
+
+            // --- ANIMATIONS ---
+            // Intersection Observer for scroll animations
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            function observeElements(elements) {
+                 elements.forEach(el => observer.observe(el));
+            }
+
+            // Spotlight effect
+            const spotlights = document.querySelectorAll('.spotlight-effect');
+            spotlights.forEach(spotlight => {
+                spotlight.addEventListener('mousemove', (e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    e.currentTarget.style.setProperty('--x', `${x}px`);
+                    e.currentTarget.style.setProperty('--y', `${y}px`);
+                });
+            });
+
+            // --- INITIALIZATION ---
+            function init() {
+                if (UNSPLASH_ACCESS_KEY === 'YOUR_UNSPLASH_ACCESS_KEY') {
+                    galleryMessage.textContent = 'Please add your Unsplash API Access Key in the JavaScript section of this file.';
+                    return;
+                }
+
+                searchForm.addEventListener('submit', handleSearch);
+                loadMoreBtn.addEventListener('click', handleLoadMore);
+                document.getElementById('categories').addEventListener('click', handleCategoryClick);
+
+                // Initial fetch
+                fetchPhotos(currentQuery, currentPage).then(photos => renderImages(photos));
+                updateActiveCategory(document.querySelector('.category-btn[data-category="Trending"]'));
+                
+                // Observe all elements with the fade-in-blur class initially
+                observeElements(document.querySelectorAll('.fade-in-blur'));
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
+
