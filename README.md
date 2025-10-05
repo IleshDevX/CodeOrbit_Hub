@@ -1,9 +1,9 @@
 # 🚀 Technetics IT Services
 
-A comprehensive collection of **39+ web applications** showcasing various APIs and modern web development techniques. This repository serves as a central hub for exploring projects ranging from data visualization to AI implementations, featuring an interactive project hub with advanced search and filtering capabilities.
+A comprehensive collection of **35+ web applications** showcasing various APIs and modern web development techniques. This repository serves as a central hub for exploring projects ranging from data visualization to AI implementations, featuring an interactive project hub with advanced search and filtering capabilities.
 
-![Technetics IT Services](https://img.shields.io/badge/Projects-39+-blue?style=for-the-badge)
-![Categories](https://img.shields.io/badge/Categories-8+-green?style=for-the-badge)
+![Technetics IT Services](https://img.shields.io/badge/Projects-35+-blue?style=for-the-badge)
+![Categories](https://img.shields.io/badge/Categories-7+-green?style=for-the-badge)
 ![Open Source](https://img.shields.io/badge/Open%20Source-100%25-orange?style=for-the-badge)
 ![Interactive Hub](https://img.shields.io/badge/Interactive-Hub-purple?style=for-the-badge)
 
