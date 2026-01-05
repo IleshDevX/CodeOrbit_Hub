@@ -78,34 +78,6 @@ A comprehensive collection of **35+ web applications** showcasing various APIs a
 - **Unsplash Photos** - High-quality stock photos
 - **Giphy GIFs** - Animated GIFs collection
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Local web server (optional, for development)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/IleshDevX/APIs-Use.git
-   cd APIs-Use
-   ```
-
-2. **Open the main hub**
-   - Open `index.html` in your web browser
-   - Or serve with a local web server:
-   ```bash
-   # Using Python
-   python -m http.server 8000
-   
-   # Using Node.js
-   npx serve .
-   ```
-
-3. **Explore individual projects**
-   - Navigate to any project folder (e.g., `01 REST Countries/`)
-   - Open the `index.html` file in that folder
 
 ## 📱 Usage
 
@@ -134,44 +106,6 @@ Each project folder contains:
 - `style.css` - Project-specific styles (if any)
 - `script.js` - Project functionality (if any)
 - Additional assets as needed
-
-## 🎨 Customization
-
-### Adding New Projects
-1. Create a new folder with your project files
-2. Update the `projects` array in `script.js`:
-   ```javascript
-   {
-       id: 40,
-       name: "Your Project Name",
-       folder: "40 Your Project Folder",
-       description: "Project description",
-       category: "appropriate-category",
-       tags: ["tag1", "tag2", "tag3"],
-       icon: "fas fa-icon-name",
-       image: "optional-image-url"
-   }
-   ```
-
-### Styling
-- Main styles are in `styles.css`
-- CSS custom properties for easy theme customization
-- Responsive breakpoints included
-
-### Hub Interface Features
-The main `index.html` serves as an interactive hub with:
-- **Dynamic Project Grid**: 3x3 responsive grid layout with pagination
-- **Category Cards**: Visual category overview with hover effects
-- **Team Profiles**: Developer and mentor information sections
-- **Contact Integration**: Working contact form with EmailJS
-- **Smooth Navigation**: Scroll-based navigation with active states
-- **Loading States**: Professional loading overlays and transitions
-
-### Contact Form
-- Powered by EmailJS
-- Configure your service in `emailjs-config.js`
-- Real-time form validation with visual feedback
-- Success/error notifications
 
 ## 🛠️ Technologies Used
 
@@ -217,35 +151,6 @@ The main `index.html` serves as an interactive hub with:
 - **UI Components**: 50+ custom styled components
 - **Responsive Breakpoints**: 5 device size optimizations
 
-## 🤝 Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/new-project
-   ```
-3. **Add your project**
-   - Create project folder
-   - Update main project list
-   - Test functionality
-4. **Commit your changes**
-   ```bash
-   git commit -m "Add: New project - Project Name"
-   ```
-5. **Push to the branch**
-   ```bash
-   git push origin feature/new-project
-   ```
-6. **Open a Pull Request**
-
-### Contribution Guidelines
-- Follow existing code style and structure
-- Include proper documentation
-- Test your project thoroughly
-- Use meaningful commit messages
-- Update README if adding new categories
 
 ## 📝 License
 
