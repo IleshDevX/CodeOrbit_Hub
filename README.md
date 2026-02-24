@@ -1,4 +1,4 @@
-# 🚀 Technetics IT Services
+# 🚀 CodeOrbit Hub
 
 A comprehensive collection of **35+ web applications** showcasing various APIs and modern web development techniques. This repository serves as a central hub for exploring projects ranging from data visualization to AI implementations, featuring an interactive project hub with advanced search and filtering capabilities.
 
@@ -188,4 +188,4 @@ This project is actively maintained. Check the [releases](https://github.com/Ile
 
 ⭐ **Star this repository if you find it helpful!**
 
-Made with ❤️ by [IleshDevX](https://github.com/IleshDevX) for **Technetics IT Services**
+Made with ❤️ by [IleshDevX](https://github.com/IleshDevX)
